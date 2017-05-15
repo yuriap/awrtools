@@ -1,3 +1,10 @@
+--Create tables
+create table config (
+ckey varchar2(100),
+cvalue varchar2(4000),
+descr varchar2(200)
+);
+
 create table awrdumps (
 dump_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
 loading_date date default sysdate,
@@ -31,64 +38,79 @@ db2_dump_id number references awrdumps(dump_id) on delete cascade,
 db1_snap_list varchar2(1000),
 db2_snap_list varchar2(1000),
 report_sort_ordr number references awrcomp_d_sortordrs(dic_id) on delete set null,
+statlimit number,
+qry_filter varchar2(1000),
+dblink varchar2(30),
 report_content clob
 );
 
+create table awrcomp_scripts (
+script_id varchar(100) primary key,
+script_content clob
+);
+
+--Create source code objects
+@awrtool_pkg_spec
+@awrtool_pkg_body
+
+--Load data
+insert into config values ('WORKDIR','AWRDATA','Oracle directory for loading AWR dumps');
+insert into config values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load package');
+insert into config values ('AWRSTGTBLSPS','AWRTOOLSTBS','Default tablespace for AWR staging user');
+insert into config values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
+
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value) values('sum(ELAPSED_TIME_DELTA)','Sort by Elapsed Time');
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value) values('sum(disk_reads_delta)','Sort by Disk Reads');
+
+set define off
+
+declare
+  l_script clob := 
+q'{
+@@getcomp_iq
+}';
+begin
+  delete from awrcomp_scripts where script_id='GETQUERYLIST';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('GETQUERYLIST',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'{
+@@getplanawr_plancomp_q
+}';
+begin
+  delete from awrcomp_scripts where script_id='GETCOMPREPORT';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('GETCOMPREPORT',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'{
+@@get_comp_non_comparable_q
+}';
+begin
+  delete from awrcomp_scripts where script_id='GETNONCOMPREPORT';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('GETNONCOMPREPORT',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'{
+@@get_sysmetrics_q
+}';
+begin
+  delete from awrcomp_scripts where script_id='GETSYSMETRREPORT';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('GETSYSMETRREPORT',l_script);
+end;
+/
+
+set define on
 commit;
-
-
-create or replace package awrtool_pkg as
-
-  function getconf(p_key varchar2) return varchar2;
-  procedure save_dump(p_blob blob, p_filename varchar2, p_dir varchar2);
-  
-end;
-/
-create or replace package body awrtool_pkg as
-
-  function getconf(p_key varchar2) return varchar2
-  is
-    l_res config.cvalue%type;
-  begin
-    select cvalue into l_res from config where ckey=p_key;
-    return l_res;
-  end;
-  
-    procedure save_dump(p_blob blob, p_filename varchar2, p_dir varchar2)
-    is
-      l_file      UTL_FILE.FILE_TYPE;
-      l_buffer    RAW(32767);
-      l_amount    BINARY_INTEGER := 32767;
-      l_pos       INTEGER := 1;
-      l_blob_len  INTEGER;
-    BEGIN
-      l_blob_len := DBMS_LOB.getlength(p_blob);
-      
-      -- Open the destination file.
-      --l_file := UTL_FILE.fopen('BLOBS','MyImage.gif','w', 32767);
-      l_file := UTL_FILE.fopen(p_dir,p_filename,'wb', 32767);
-    
-      -- Read chunks of the BLOB and write them to the file
-      -- until complete.
-      WHILE l_pos < l_blob_len LOOP
-        DBMS_LOB.read(p_blob, l_amount, l_pos, l_buffer);
-        UTL_FILE.put_raw(l_file, l_buffer, TRUE);
-        l_pos := l_pos + l_amount;
-      END LOOP;
-      
-      -- Close the file.
-      UTL_FILE.fclose(l_file);
-      
-    EXCEPTION
-      WHEN OTHERS THEN
-        -- Close the file if something goes wrong.
-        IF UTL_FILE.is_open(l_file) THEN
-          UTL_FILE.fclose(l_file);
-        END IF;
-        RAISE;
-    END;
-
-end;
-/
