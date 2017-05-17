@@ -121,6 +121,7 @@ create or replace package body awrtool_pkg as
       l_line varchar(32767);
       l_status number;
       l_awrcomp_rpt clob;  
+      l_trg_lob blob;
       
       function replace_subst(p_sql clob) return clob
       is
@@ -189,7 +190,24 @@ create or replace package body awrtool_pkg as
         l_awrcomp_rpt:=l_awrcomp_rpt||l_line||chr(13)||chr(10);
       end loop;
       --dbms_output.put_line(length(l_awrcomp_rpt));
-      update AWRCOMP_REPORTS set REPORT_CONTENT=l_awrcomp_rpt where report_id=p_report_id;
+      --update AWRCOMP_REPORTS set REPORT_CONTENT=l_awrcomp_rpt where report_id=p_report_id;
+      select REPORT_CONTENT into l_trg_lob from AWRCOMP_REPORTS where report_id=p_report_id for update;
+      declare
+        ll_d_off integer := 1;
+        ll_s_off integer := 1;
+        ll_lang_context integer := dbms_lob.DEFAULT_LANG_CTX;
+        ll_warn  integer;
+      begin
+      DBMS_LOB.CONVERTTOBLOB(
+        dest_lob       => l_trg_lob,
+        src_clob       => l_awrcomp_rpt,
+        amount         => DBMS_LOB.LOBMAXSIZE,
+        dest_offset    => ll_d_off,
+        src_offset     => ll_s_off, 
+        blob_csid      => dbms_lob.DEFAULT_CSID,
+        lang_context   => ll_lang_context,
+        warning        => ll_warn);
+      end;
       commit;
       
     end;    
