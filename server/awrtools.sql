@@ -1,3 +1,5 @@
+create database link DBAWR1 connect to remawrtools identified by remawrtools using 'localhost:1521/db12c22.localdomain';
+
 --Create tables
 create table config (
 ckey varchar2(100),
@@ -13,12 +15,11 @@ status varchar2(10) default 'NEW',
 dbid number,
 min_snap_id number,
 max_snap_id number,
-min_snap_dt timestamp,
-max_snap_dt timestamp,
+min_snap_dt timestamp(3),
+max_snap_dt timestamp(3),
+is_remote varchar2(10) default 'NO',
 db_description varchar2(1000)
 );
-alter table awrdumps modify min_snap_dt timestamp(3);
-alter table awrdumps modify max_snap_dt timestamp(3);
 
 create table awrdumps_files (
 dump_id number references awrdumps(dump_id) on delete cascade,
@@ -54,7 +55,9 @@ script_content clob
 
 --Create source code objects
 @awrtool_pkg_spec
+set define off
 @awrtool_pkg_body
+set define on
 
 --Load data
 insert into config values ('WORKDIR','AWRDATA','Oracle directory for loading AWR dumps');

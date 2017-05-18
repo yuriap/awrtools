@@ -2,7 +2,7 @@ drop user awrtools cascade;
 --under sys
 define dirpath="/u01/app/oracle/files/awrdata/"
 
-!mkdir -p &dirpath.
+host mkdir -p &dirpath.
 create or replace directory awrdata as '&dirpath.';
 
 create tablespace awrtoolstbs datafile size 100m autoextend on next 100m maxsize 10000m;
@@ -21,6 +21,7 @@ grant execute on dbms_swrf_internal to awrtools;
 grant create user to awrtools;
 grant drop user to awrtools;
 grant alter user to awrtools;
+grant create database link to awrtools;
 
 grant select on dba_hist_sqlstat to awrtools;
 grant select on dba_hist_database_instance to awrtools;

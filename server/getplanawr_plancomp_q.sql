@@ -29,37 +29,37 @@ declare
   
   cursor stats1 (p_sql_id varchar2,p_plan_hash number) is 
   select 
-        s.sql_id
-      , s.plan_hash_value
-      , s.dbid
-      , sum(s.EXECUTIONS_DELTA) EXECUTIONS_DELTA
-      , (round(sum(s.ELAPSED_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as ela_poe
-      , (round(sum(s.BUFFER_GETS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as LIO_poe
-      , (round(sum(s.CPU_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CPU_poe
-      , (round(sum(s.IOWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as IOWAIT_poe
-      , (round(sum(s.ccwait_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CCWAIT_poe
-      , (round(sum(s.APWAIT_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as APWAIT_poe
-      , (round(sum(s.CLWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CLWAIT_poe
-      , (round(sum(s.DISK_READS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as reads_poe
-      , (round(sum(s.DIRECT_WRITES_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as dwrites_poe
-      , (round(sum(s.ROWS_PROCESSED_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as Rows_poe
-      , ROUND(sum(ELAPSED_TIME_DELTA)/1000000,3) ELA_DELTA_SEC
-      , ROUND(sum(CPU_TIME_DELTA)/1000000,3) CPU_DELTA_SEC
-      , ROUND(sum(IOWAIT_DELTA)/1000000,3) IOWAIT_DELTA_SEC
-      , ROUND(sum(ccwait_delta)/1000000,3) ccwait_delta_SEC
-      , ROUND(sum(APWAIT_delta)/1000000,3) APWAIT_delta_SEC
-      , ROUND(sum(CLWAIT_DELTA)/1000000,3) CLWAIT_DELTA_SEC
-      ,sum(DISK_READS_DELTA)DISK_READS_DELTA
-      ,sum(DIRECT_WRITES_DELTA)DISK_WRITES_DELTA
-      ,sum(BUFFER_GETS_DELTA)BUFFER_GETS_DELTA
-      ,sum(ROWS_PROCESSED_DELTA)ROWS_PROCESSED_DELTA
-      ,sum(PHYSICAL_READ_REQUESTS_DELTA)PHY_READ_REQ_DELTA
-      ,sum(PHYSICAL_WRITE_REQUESTS_DELTA)PHY_WRITE_REQ_DELTA
-      ,round(sum(BUFFER_GETS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) LIO_PER_ROW
-      ,round(sum(DISK_READS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) IO_PER_ROW
-      ,round(sum(s.IOWAIT_DELTA)/decode(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA), null, 1,0,1, sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/1000,3) as awg_IO_tim
-      ,(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))*0.005 as io_wait_5ms
-      ,round((sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))*5) io_wait_pe_5ms
+    s.sql_id
+  , s.plan_hash_value
+  , s.dbid
+  , sum(s.EXECUTIONS_DELTA) EXECUTIONS_DELTA
+  , (round(sum(s.ELAPSED_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as ela_poe
+  , (round(sum(s.BUFFER_GETS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as LIO_poe
+  , (round(sum(s.CPU_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CPU_poe
+  , (round(sum(s.IOWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as IOWAIT_poe
+  , (round(sum(s.ccwait_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CCWAIT_poe
+  , (round(sum(s.APWAIT_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as APWAIT_poe
+  , (round(sum(s.CLWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CLWAIT_poe
+  , (round(sum(s.DISK_READS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as reads_poe
+  , (round(sum(s.DIRECT_WRITES_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as dwrites_poe
+  , (round(sum(s.ROWS_PROCESSED_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as Rows_poe
+  , ROUND(sum(ELAPSED_TIME_DELTA)/1000000,3) ELA_DELTA_SEC
+  , ROUND(sum(CPU_TIME_DELTA)/1000000,3) CPU_DELTA_SEC
+  , ROUND(sum(IOWAIT_DELTA)/1000000,3) IOWAIT_DELTA_SEC
+  , ROUND(sum(ccwait_delta)/1000000,3) ccwait_delta_SEC
+  , ROUND(sum(APWAIT_delta)/1000000,3) APWAIT_delta_SEC
+  , ROUND(sum(CLWAIT_DELTA)/1000000,3) CLWAIT_DELTA_SEC
+  ,sum(DISK_READS_DELTA)DISK_READS_DELTA
+  ,sum(DIRECT_WRITES_DELTA)DISK_WRITES_DELTA
+  ,sum(BUFFER_GETS_DELTA)BUFFER_GETS_DELTA
+  ,sum(ROWS_PROCESSED_DELTA)ROWS_PROCESSED_DELTA
+  ,sum(PHYSICAL_READ_REQUESTS_DELTA)PHY_READ_REQ_DELTA
+  ,sum(PHYSICAL_WRITE_REQUESTS_DELTA)PHY_WRITE_REQ_DELTA
+  ,round(sum(BUFFER_GETS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) LIO_PER_ROW
+  ,round(sum(DISK_READS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) IO_PER_ROW
+  ,round(sum(s.IOWAIT_DELTA)/decode(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA), null, 1,0,1, sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/1000,3) as awg_IO_tim
+  ,(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))*0.005 as io_wait_5ms
+  ,round((sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))*5) io_wait_pe_5ms
 from dba_hist_sqlstat s
 where
     s.sql_id = p_sql_id
@@ -72,37 +72,37 @@ group by s.dbid,s.plan_hash_value,s.sql_id
 
   cursor stats2 (p_sql_id varchar2,p_plan_hash number) is 
   select 
-        s.sql_id
-      , s.plan_hash_value
-      , s.dbid
-      , sum(s.EXECUTIONS_DELTA) EXECUTIONS_DELTA
-      , (round(sum(s.ELAPSED_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as ela_poe
-      , (round(sum(s.BUFFER_GETS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as LIO_poe
-      , (round(sum(s.CPU_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CPU_poe
-      , (round(sum(s.IOWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as IOWAIT_poe
-      , (round(sum(s.ccwait_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CCWAIT_poe
-      , (round(sum(s.APWAIT_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as APWAIT_poe
-      , (round(sum(s.CLWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CLWAIT_poe
-      , (round(sum(s.DISK_READS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as reads_poe
-      , (round(sum(s.DIRECT_WRITES_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as dwrites_poe
-      , (round(sum(s.ROWS_PROCESSED_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as Rows_poe
-      , ROUND(sum(ELAPSED_TIME_DELTA)/1000000,3) ELA_DELTA_SEC
-      , ROUND(sum(CPU_TIME_DELTA)/1000000,3) CPU_DELTA_SEC
-      , ROUND(sum(IOWAIT_DELTA)/1000000,3) IOWAIT_DELTA_SEC
-      , ROUND(sum(ccwait_delta)/1000000,3) ccwait_delta_SEC
-      , ROUND(sum(APWAIT_delta)/1000000,3) APWAIT_delta_SEC
-      , ROUND(sum(CLWAIT_DELTA)/1000000,3) CLWAIT_DELTA_SEC
-      ,sum(DISK_READS_DELTA)DISK_READS_DELTA
-      ,sum(DIRECT_WRITES_DELTA)DISK_WRITES_DELTA
-      ,sum(BUFFER_GETS_DELTA)BUFFER_GETS_DELTA
-      ,sum(ROWS_PROCESSED_DELTA)ROWS_PROCESSED_DELTA
-      ,sum(PHYSICAL_READ_REQUESTS_DELTA)PHY_READ_REQ_DELTA
-      ,sum(PHYSICAL_WRITE_REQUESTS_DELTA)PHY_WRITE_REQ_DELTA
-      ,round(sum(BUFFER_GETS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) LIO_PER_ROW
-      ,round(sum(DISK_READS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) IO_PER_ROW
-      ,round(sum(s.IOWAIT_DELTA)/decode(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA), null, 1,0,1, sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/1000,3) as awg_IO_tim
-      ,(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))*0.005 as io_wait_5ms
-      ,round((sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))*5) io_wait_pe_5ms
+    s.sql_id
+  , s.plan_hash_value
+  , s.dbid
+  , sum(s.EXECUTIONS_DELTA) EXECUTIONS_DELTA
+  , (round(sum(s.ELAPSED_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as ela_poe
+  , (round(sum(s.BUFFER_GETS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as LIO_poe
+  , (round(sum(s.CPU_TIME_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CPU_poe
+  , (round(sum(s.IOWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as IOWAIT_poe
+  , (round(sum(s.ccwait_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CCWAIT_poe
+  , (round(sum(s.APWAIT_delta)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as APWAIT_poe
+  , (round(sum(s.CLWAIT_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))/1000,3)) as CLWAIT_poe
+  , (round(sum(s.DISK_READS_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as reads_poe
+  , (round(sum(s.DIRECT_WRITES_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as dwrites_poe
+  , (round(sum(s.ROWS_PROCESSED_DELTA)/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA)),3)) as Rows_poe
+  , ROUND(sum(ELAPSED_TIME_DELTA)/1000000,3) ELA_DELTA_SEC
+  , ROUND(sum(CPU_TIME_DELTA)/1000000,3) CPU_DELTA_SEC
+  , ROUND(sum(IOWAIT_DELTA)/1000000,3) IOWAIT_DELTA_SEC
+  , ROUND(sum(ccwait_delta)/1000000,3) ccwait_delta_SEC
+  , ROUND(sum(APWAIT_delta)/1000000,3) APWAIT_delta_SEC
+  , ROUND(sum(CLWAIT_DELTA)/1000000,3) CLWAIT_DELTA_SEC
+  ,sum(DISK_READS_DELTA)DISK_READS_DELTA
+  ,sum(DIRECT_WRITES_DELTA)DISK_WRITES_DELTA
+  ,sum(BUFFER_GETS_DELTA)BUFFER_GETS_DELTA
+  ,sum(ROWS_PROCESSED_DELTA)ROWS_PROCESSED_DELTA
+  ,sum(PHYSICAL_READ_REQUESTS_DELTA)PHY_READ_REQ_DELTA
+  ,sum(PHYSICAL_WRITE_REQUESTS_DELTA)PHY_WRITE_REQ_DELTA
+  ,round(sum(BUFFER_GETS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) LIO_PER_ROW
+  ,round(sum(DISK_READS_DELTA)/decode(sum(ROWS_PROCESSED_DELTA),0,null,sum(ROWS_PROCESSED_DELTA)),3) IO_PER_ROW
+  ,round(sum(s.IOWAIT_DELTA)/decode(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA), null, 1,0,1, sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/1000,3) as awg_IO_tim
+  ,(sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))*0.005 as io_wait_5ms
+  ,round((sum(s.PHYSICAL_READ_REQUESTS_DELTA)+sum(s.PHYSICAL_WRITE_REQUESTS_DELTA))/decode(sum(s.EXECUTIONS_DELTA), null, 1,0,1, sum(s.EXECUTIONS_DELTA))*5) io_wait_pe_5ms
 from dba_hist_sqlstat&dblnk. s
 where
     s.sql_id = p_sql_id
@@ -164,24 +164,24 @@ begin
   -- get DB titles
 $IF '&dblnk.' is not null $THEN  
   select unique 'DB1:         '||sn.DBID, 
-                'DB1:         '||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-                ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss') ||
-                ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
-                ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
-                'DB1: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
-                ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
-                ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
-                into l_db1_title_s,l_db1_title_f,l_db1_title_l
+  'DB1:         '||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
+  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss') ||
+  ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
+  ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
+  'DB1: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
+  ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
+  ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
+  into l_db1_title_s,l_db1_title_f,l_db1_title_l
 $ELSE                
   select unique 'DB1:'||sn.DBID, 
-                'DB1:'||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-                ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
-                ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
-                ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
-                'DB1: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
-                ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
-                ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
-                into l_db1_title_s,l_db1_title_f,l_db1_title_l
+  'DB1:'||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
+  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
+  ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
+  ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
+  'DB1: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
+  ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
+  ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
+  into l_db1_title_s,l_db1_title_f,l_db1_title_l
 $END 
     from dba_hist_database_instance i, 
          dba_hist_snapshot sn 
@@ -192,24 +192,24 @@ $END
 
 $IF '&dblnk.' is not null $THEN
   select unique 'DB2(remote): '||sn.DBID,
-                'DB2(remote): '||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-                ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
-                ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
-                ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
-                'DB2(remote): '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
-                ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
-                ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
-                into l_db2_title_s,l_db2_title_f, l_db2_title_l
+  'DB2(remote): '||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
+  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
+  ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
+  ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
+  'DB2(remote): '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
+  ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
+  ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
+  into l_db2_title_s,l_db2_title_f, l_db2_title_l
 $ELSE
   select unique 'DB2:'||sn.DBID,
-                'DB2:'||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-                ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
-                ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
-                ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
-                'DB2: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
-                ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
-                ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
-                into l_db2_title_s,l_db2_title_f, l_db2_title_l
+  'DB2:'||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
+  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
+  ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
+  ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
+  'DB2: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
+  ', B:' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi') ||
+  ', E:' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi')
+  into l_db2_title_s,l_db2_title_f, l_db2_title_l
 $END  
     from dba_hist_database_instance&dblnk. i, 
          dba_hist_snapshot&dblnk. sn 
@@ -226,24 +226,24 @@ $END
   p('DBID, PLAN HASH, PARSING_USER_ID, PARSING SCHEMA, MODULE, ACTION');
   p('----------------------------------------------------------------');
   for i in (select unique dbid,plan_hash_value,PARSING_USER_ID,module,action,
-             --'DBID: '||dbid
-             case 
-               when dbid=&dbid1. and instr('&snaps1.',snap_id)>0 and src='L' then l_db1_title_s
-               when dbid=&dbid2. and instr('&snaps2.',snap_id)>0 and src='R' then l_db2_title_s
-               else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
-             ||'; '||plan_hash_value||'; '||PARSING_USER_ID||'; '||parsing_schema_name||'; '||module||'; '||action a 
-             from 
-               (
-                select 'L' src, x.* from dba_hist_sqlstat x 
-                 where sql_id=l_sql_id --and plan_hash_value <> 0 
-                   and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
-                union all
-                select 'R' src, x.* from dba_hist_sqlstat&dblnk. x
-                 where sql_id=l_sql_id --and plan_hash_value <> 0 
-                   and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
-               )
-             order by 6,dbid,plan_hash_value,PARSING_USER_ID,module,action
-           )
+     --'DBID: '||dbid
+     case 
+       when dbid=&dbid1. and instr('&snaps1.',snap_id)>0 and src='L' then l_db1_title_s
+       when dbid=&dbid2. and instr('&snaps2.',snap_id)>0 and src='R' then l_db2_title_s
+       else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
+     ||'; '||plan_hash_value||'; '||PARSING_USER_ID||'; '||parsing_schema_name||'; '||module||'; '||action a 
+     from 
+       (
+        select 'L' src, x.* from dba_hist_sqlstat x 
+         where sql_id=l_sql_id --and plan_hash_value <> 0 
+           and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
+        union all
+        select 'R' src, x.* from dba_hist_sqlstat&dblnk. x
+         where sql_id=l_sql_id --and plan_hash_value <> 0 
+           and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
+       )
+     order by 6,dbid,plan_hash_value,PARSING_USER_ID,module,action
+    )
   loop
     p(i.a);
   end loop;
@@ -252,25 +252,25 @@ $END
   p('DBID, PLAN HASH, USER_ID, PROGRAM, MODULE, ACTION, CLIENT_ID');
   p('----------------------------------------------------------------');  
   for i in (select unique dbid,sql_plan_hash_value,user_id,module,action,
-             --'DBID: '||dbid
-             case 
-               when dbid=&dbid1. and instr('&snaps1.',snap_id)>0 and src='L' then l_db1_title_s
-               when dbid=&dbid2. and instr('&snaps2.',snap_id)>0 and src='R' then l_db2_title_s
-               else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
-                  ||'; '||sql_plan_hash_value||'; '||user_id||'; '||program||'; '||module||'; '||action||'; '||client_id a,plsql_entry_object_id,plsql_entry_subprogram_id 
-            from 
-              (
-               select 'L' src, x.* from dba_hist_active_sess_history x
-                where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id)--and sql_plan_hash_value <> 0 
-                  and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
-                  and rownum<6
-               union all
-               select 'R' src, x.* from dba_hist_active_sess_history&dblnk. x
-                where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id) --and sql_plan_hash_value <> 0 
-                  and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
-                  and rownum<6
-              )
-            order by 6,dbid,sql_plan_hash_value,user_id,module,action)
+     --'DBID: '||dbid
+     case 
+       when dbid=&dbid1. and instr('&snaps1.',snap_id)>0 and src='L' then l_db1_title_s
+       when dbid=&dbid2. and instr('&snaps2.',snap_id)>0 and src='R' then l_db2_title_s
+       else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
+          ||'; '||sql_plan_hash_value||'; '||user_id||'; '||program||'; '||module||'; '||action||'; '||client_id a,plsql_entry_object_id,plsql_entry_subprogram_id 
+    from 
+      (
+       select 'L' src, x.* from dba_hist_active_sess_history x
+        where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id)--and sql_plan_hash_value <> 0 
+          and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
+          and rownum<6
+       union all
+       select 'R' src, x.* from dba_hist_active_sess_history&dblnk. x
+        where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id) --and sql_plan_hash_value <> 0 
+          and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
+          and rownum<6
+      )
+    order by 6,dbid,sql_plan_hash_value,user_id,module,action)
   loop
     p(i.a);
     for j in (select 'Called from PL/SQL: '||owner||'; '||object_type||'; '||object_name a from dba_procedures where object_id=i.plsql_entry_object_id and subprogram_id=i.plsql_entry_subprogram_id ) loop
@@ -280,27 +280,27 @@ $END
 
   for k in (select rownum rn, y.* from (select x.*
               from (select unique s.dbid,
-                           sql_id,
-                           plan_hash_value,
-                           case 
-                             when s.dbid=&dbid1. and instr('&snaps1.',s.snap_id)>0 and src='L' then l_db1_title_l
-                             when s.dbid=&dbid2. and instr('&snaps2.',s.snap_id)>0 and src='R' then l_db2_title_l
-                             else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
-                           ||'; PH:'||plan_hash_value capture, src
-                      from 
-                        (
-                         select 'L' src, s.* from dba_hist_sqlstat s
-                          where sql_id = l_sql_id
-                            and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
-                            and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
-                            --and plan_hash_value <> 0
-                         union all
-                         select 'R' src, s.* from dba_hist_sqlstat&dblnk. s
-                          where sql_id = l_sql_id
-                            and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
-                            and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
-                            --and plan_hash_value <> 0
-                        ) s
+         sql_id,
+         plan_hash_value,
+         case 
+           when s.dbid=&dbid1. and instr('&snaps1.',s.snap_id)>0 and src='L' then l_db1_title_l
+           when s.dbid=&dbid2. and instr('&snaps2.',s.snap_id)>0 and src='R' then l_db2_title_l
+           else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
+         ||'; PH:'||plan_hash_value capture, src
+    from 
+      (
+       select 'L' src, s.* from dba_hist_sqlstat s
+        where sql_id = l_sql_id
+          and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
+          and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
+          --and plan_hash_value <> 0
+       union all
+       select 'R' src, s.* from dba_hist_sqlstat&dblnk. s
+        where sql_id = l_sql_id
+          and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
+          and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
+          --and plan_hash_value <> 0
+      ) s
                     )
             x order by case when src='L' then 0 else 1 end, capture) y ) loop
     my_rec(k.rn).sql_id := k.sql_id;

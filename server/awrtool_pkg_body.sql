@@ -49,6 +49,24 @@ create or replace package body awrtool_pkg as
        location => p_dir,
        filename => p_filename);
     end;
+    procedure remote_awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2,
+                       p_dbid out number,p_min_snap_id out number,p_max_snap_id out number,p_min_snap_dt out timestamp,p_max_snap_dt out timestamp,p_db_description out varchar2)
+    is
+	begin
+	    delete from awrdumps@dbawr1;
+		commit;
+	    AWRTOOL_PKG.awr_load@dbawr1 (  
+		  P_STG_USER => P_STG_USER,
+		  P_STG_TABLESPACE => P_STG_TABLESPACE,
+		  P_STG_TEMP => P_STG_TEMP,
+		  P_DIR => P_DIR,
+		  P_DMPFILE => P_DMPFILE) ; 
+		select 
+		  DBID,MIN_SNAP_ID,MAX_SNAP_ID,MIN_SNAP_DT,MAX_SNAP_DT,DB_DESCRIPTION
+		  into p_dbid,p_min_snap_id,p_max_snap_id,p_min_snap_dt,p_max_snap_dt,p_db_description
+		from awrdumps@dbawr1;
+	    delete from awrdumps@dbawr1;		  
+	end;
 
     procedure awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2,
                        p_dbid out number,p_min_snap_id out number,p_max_snap_id out number,p_min_snap_dt out timestamp,p_max_snap_dt out timestamp,p_db_description out varchar2)
@@ -164,6 +182,9 @@ create or replace package body awrtool_pkg as
       l_sql:=replace_subst(l_sql);
       l_awrcomp_scr:=replace_subst(l_awrcomp_scr);
       --dbms_output.put_line(l_sql);
+
+	  begin
+
       open qlist for l_sql;
       loop
         fetch qlist into l_cmd, l_capt;
@@ -171,6 +192,8 @@ create or replace package body awrtool_pkg as
         l_script:=l_script||chr(13)||chr(10)||l_cmd;
       end loop;
       close qlist;
+	  
+
       l_occ:=1;
       loop
         dbms_output.put_line('TOP SQL '||substr(l_script,instr(l_script,'prompt TOP SQL #',1,l_occ)+15,4));
@@ -189,6 +212,10 @@ create or replace package body awrtool_pkg as
         exit when l_status=1;
         l_awrcomp_rpt:=l_awrcomp_rpt||l_line||chr(13)||chr(10);
       end loop;
+	  
+	  exception
+	    when others then l_awrcomp_rpt:=sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||l_sql_id||chr(10)||l_awrcomp_scr;
+	  end;
       --dbms_output.put_line(length(l_awrcomp_rpt));
       --update AWRCOMP_REPORTS set REPORT_CONTENT=l_awrcomp_rpt where report_id=p_report_id;
       select REPORT_CONTENT into l_trg_lob from AWRCOMP_REPORTS where report_id=p_report_id for update;
@@ -209,6 +236,8 @@ create or replace package body awrtool_pkg as
         warning        => ll_warn);
       end;
       commit;
-      
+    exception
+	  when others then raise_application_error(-20000, sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
     end;    
 end;
+/
