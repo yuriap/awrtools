@@ -1,4 +1,6 @@
-create database link DBAWR1 connect to remawrtools identified by remawrtools using 'localhost:1521/db12c22.localdomain';
+define DBLINK=DBAWR1
+
+create database link &DBLINK. connect to remawrtools identified by remawrtools using 'localhost:1521/db12c22.localdomain';
 
 --Create tables
 create table config (
@@ -64,6 +66,7 @@ insert into config values ('WORKDIR','AWRDATA','Oracle directory for loading AWR
 insert into config values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load package');
 insert into config values ('AWRSTGTBLSPS','AWRTOOLSTBS','Default tablespace for AWR staging user');
 insert into config values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
+insert into config values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
 
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)','Sort by Elapsed Time','comp_ordr_ela_tot');
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(disk_reads_delta)','Sort by Disk Reads','comp_ordr_reads_tot');
