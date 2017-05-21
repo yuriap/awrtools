@@ -1,0 +1,124 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="AWRCOMP_REPORTS" directorySegmentName="seg_0" id="1C88A438-E547-D105-087C-FB581ACE4108">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>3F2EF11F-B23A-41FB-7922-CB3D04F76D13</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="REPORT_CONTENT" id="1EE9AE16-4776-2A3A-4BEB-995427630670">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="REPORT_SORT_ORDR" id="36C42831-2F4A-17E0-FCDE-47AB29CC0784">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DB1_SNAP_LIST" id="3F40EEB5-B006-8D11-1C98-FDA725D59F51">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="QRY_FILTER" id="565AC2C3-B076-C163-069A-4B1FD0505FAD">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="STATLIMIT" id="81068D0C-BA74-2269-13A9-3A2B5DC37E48">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DB1_DUMP_ID" id="8A264C1A-32A6-BE13-FCF4-01CD6806FEF9">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="FILE_NAME" id="B800F082-EAEF-25C7-2ED6-F103258A70CB">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DBLINK" id="C92850F4-B762-04BB-9776-6CBB44DE44BA">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DB2_DUMP_ID" id="D147B5F5-7613-272D-EA1B-1DFCFF6CB21C">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DB2_SNAP_LIST" id="D1E6DC9A-ECFC-6C12-1C2A-603AAA8177F6">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="FILE_MIMETYPE" id="D59EB2A2-6E4E-0E3D-53DD-C10AC4092B15">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<defaultValue>&apos;text/plain&apos;</defaultValue>
+</ColumnProxy>
+<ColumnProxy name="REPORT_ID" id="F29C53B8-E7E6-D26B-F3E2-9CB12EE4E47E">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<autoIncrementDDL>IDENTITY_CLAUSE</autoIncrementDDL>
+</ColumnProxy>
+</columnProxies>
+<foreignKeys>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="SYS_C0011231" id="5B1573DB-1E71-E895-E4F9-0A1FB40ADC15">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:06 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ForeignKey>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="SYS_C0011230" id="DCD55472-3C8B-4E00-BA24-4A700648A0E7">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:06 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ForeignKey>
+<ForeignKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.FKProxyOraclev10g" name="SYS_C0011229" id="EB002E42-0683-9FB4-D11B-296C610A7F70">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:06 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ForeignKey>
+</foreignKeys>
+<lobStorages>
+<LobStorage class="oracle.dbtools.crest.model.design.storage.oracle.v11g.LobStorageOraclev11g" name="SYS_LOB0000078696C00010$$" id="254F4F99-7D29-E6C3-09BD-EED6DDBC0713">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:06 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<cache>NOCACHE</cache>
+<chunk>8192</chunk>
+<column>REPORT_CONTENT</column>
+<compression>NO</compression>
+<duplication>KEEP_DUPLICATES</duplication>
+<logging>YES</logging>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<lobStorageType>SECUREFILE</lobStorageType>
+</LobStorage>
+</lobStorages>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="AWRCOMP_REPORTS_PK" id="A0A05C05-1A43-3027-BDBD-0BC24DB66FB7">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<segment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<indexSegment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev12c>

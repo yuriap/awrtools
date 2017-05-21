@@ -1,0 +1,59 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="2EA55EF7-6E1C-A46D-2B12-9522DED6606D" schemaObject="E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F" name="CONFIG">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>AWRTOOLS</sourceObjSchema>
+<sourceObjName>CONFIG</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="CKEY" id="45E50F44-BC7E-435D-5626-13D3689202D2">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>CONFIG</sourceObjSchema>
+<sourceObjName>CKEY</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>100 BYTE</dataTypeSize>
+<ownDataTypeParameters>100 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="CVALUE" id="97702052-BFD2-7181-CBBE-665F062BCD29">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>CONFIG</sourceObjSchema>
+<sourceObjName>CVALUE</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>4000 BYTE</dataTypeSize>
+<ownDataTypeParameters>4000 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+<Column name="DESCR" id="4A7240E9-67BE-C0F1-09F0-B5805E870410">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>CONFIG</sourceObjSchema>
+<sourceObjName>DESCR</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT024</logicalDatatype>
+<dataTypeSize>200 BYTE</dataTypeSize>
+<ownDataTypeParameters>200 BYTE,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+</Table>

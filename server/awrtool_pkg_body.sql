@@ -2,9 +2,9 @@ create or replace package body awrtool_pkg as
 
     function getconf(p_key varchar2) return varchar2
     is
-      l_res config.cvalue%type;
+      l_res awrconfig.cvalue%type;
     begin
-      select cvalue into l_res from config where ckey=p_key;
+      select cvalue into l_res from awrconfig where ckey=p_key;
       return l_res;
     end;
 
@@ -238,6 +238,58 @@ create or replace package body awrtool_pkg as
       commit;
     exception
 	  when others then raise_application_error(-20000, sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
-    end;    
+    end;  
+    
+procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2) is
+  l_dbid number;
+  l_min_snap_id number;
+  l_max_snap_id number;
+  l_min_snap_dt timestamp(3);
+  l_max_snap_dt timestamp(3);
+  l_db_description awrdumps.db_description%type;
+begin
+    for i in (select filebody,filename 
+                from awrdumps a,awrdumps_files b 
+               where a.dump_id=b.dump_id and a.dump_id=V('P12_DUMP_ID')
+                 and status<>'LOADED') loop
+      awrtool_pkg.save_dump(i.filebody,i.filename,awrtool_pkg.getconf('WORKDIR'));
+      if p_dest='REM' then
+        awrtool_pkg.remote_awr_load(p_stg_user => awrtool_pkg.getconf('AWRSTGUSER'),
+          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'), 
+          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'), 
+          p_dir => awrtool_pkg.getconf('WORKDIR'), 
+          p_dmpfile => substr(i.filename,1,instr(i.filename,'.',-1)-1),
+          p_dbid=>l_dbid,
+          p_min_snap_id=>l_min_snap_id,
+          p_max_snap_id=>l_max_snap_id,
+          p_min_snap_dt=>l_min_snap_dt,
+          p_max_snap_dt=>l_max_snap_dt,
+          p_db_description=>l_db_description);
+      else
+        awrtool_pkg.awr_load(p_stg_user => awrtool_pkg.getconf('AWRSTGUSER'),
+          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'), 
+          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'), 
+          p_dir => awrtool_pkg.getconf('WORKDIR'), 
+          p_dmpfile => substr(i.filename,1,instr(i.filename,'.',-1)-1),
+          p_dbid=>l_dbid,
+          p_min_snap_id=>l_min_snap_id,
+          p_max_snap_id=>l_max_snap_id,
+          p_min_snap_dt=>l_min_snap_dt,
+          p_max_snap_dt=>l_max_snap_dt,
+          p_db_description=>l_db_description);
+      end if;
+      update awrdumps set status='LOADED',
+        dbid=l_dbid,
+        min_snap_id=l_min_snap_id,
+        max_snap_id=l_max_snap_id,
+        min_snap_dt=l_min_snap_dt,
+        max_snap_dt=l_max_snap_dt,
+        db_description=l_db_description,
+        is_remote=decode(p_dest,'REM','YES','NO')
+      where dump_id=p_dump_id;
+      commit;
+      awrtool_pkg.remove_dump(i.filename,awrtool_pkg.getconf('WORKDIR'));
+    end loop;
+end;
 end;
 /

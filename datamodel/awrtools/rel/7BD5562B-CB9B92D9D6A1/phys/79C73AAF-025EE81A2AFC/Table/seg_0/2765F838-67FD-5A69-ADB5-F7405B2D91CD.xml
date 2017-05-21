@@ -1,0 +1,51 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="AWRCOMP_D_SORTORDRS" directorySegmentName="seg_0" id="2765F838-67FD-5A69-ADB5-F7405B2D91CD">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>3F2EF11F-B23A-41FB-7922-CB3D04F76D13</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="DIC_ID" id="6ECE6139-58DA-EED1-38ED-B314D7EC310F">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<autoIncrementDDL>IDENTITY_CLAUSE</autoIncrementDDL>
+</ColumnProxy>
+<ColumnProxy name="DIC_DISPLAY_VALUE" id="8F74A8D4-D6A7-EDC4-4FDB-A718B63F4B53">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DIC_VALUE" id="98A4D405-998E-0F9C-8C89-331A7F6A230D">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DIC_FILENAME_PREF" id="B8325EB4-66CC-E570-5CDA-A3AAF4C868D9">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="AWRCOMP_D_SORTORDRS_PK" id="F36B318C-9A9A-E79A-33E7-6B04B992BC55">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<segment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<indexSegment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev12c>

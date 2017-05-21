@@ -22,6 +22,7 @@ grant create user to awrtools;
 grant drop user to awrtools;
 grant alter user to awrtools;
 grant create database link to awrtools;
+grant create view to awrtools;
 
 grant select on dba_hist_sqlstat to awrtools;
 grant select on dba_hist_database_instance to awrtools;

@@ -1,9 +1,28 @@
+drop table awrcomp_scripts;
+drop table awrconfig;
+drop table awrcomp_reports;
+drop table awrdumps_files;
+drop table awrdumps;
+drop table awrtoolproject;
+drop table awrcomp_d_sortordrs;
+
+
 define DBLINK=DBAWR1
 
 create database link &DBLINK. connect to remawrtools identified by remawrtools using 'localhost:1521/db12c22.localdomain';
 
 --Create tables
-create table config (
+
+CREATE TABLE awrtoolproject (
+    proj_id            NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+    proj_name          VARCHAR2(100),
+    proj_date          DATE default sysdate,
+    proj_description   VARCHAR2(4000),
+    proj_status        varchar2(10) default 'ACTIVE' not null check (proj_status in ('ACTIVE','ARCHIVED'))
+);
+
+
+create table awrconfig (
 ckey varchar2(100),
 cvalue varchar2(4000),
 descr varchar2(200)
@@ -11,44 +30,54 @@ descr varchar2(200)
 
 create table awrdumps (
 dump_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+proj_id NUMBER NOT NULL REFERENCES awrtoolproject ( proj_id ) on delete cascade,
 loading_date date default sysdate,
 filename varchar2(512),
-status varchar2(10) default 'NEW',
+status varchar2(10) default 'NEW' check (status in ('NEW','LOADED','UNLOADED')),
 dbid number,
 min_snap_id number,
 max_snap_id number,
 min_snap_dt timestamp(3),
 max_snap_dt timestamp(3),
-is_remote varchar2(10) default 'NO',
-db_description varchar2(1000)
+is_remote varchar2(10) default 'NO' NOT NULL check (is_remote in ('YES','NO')),
+db_description varchar2(1000),
+dump_description varchar2(4000)
 );
 
+create index awrdumps_proj on awrdumps(proj_id);
+
 create table awrdumps_files (
-dump_id number references awrdumps(dump_id) on delete cascade,
+dump_id number NOT NULL unique references awrdumps(dump_id) on delete cascade,
 filebody blob
 );
 
+
 create table awrcomp_d_sortordrs (
 dic_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-dic_value varchar2(1000),
+dic_value varchar2(1000) NOT NULL,
 dic_display_value varchar2(100),
-dic_filename_pref varchar2(100)
+dic_filename_pref varchar2(100) NOT NULL
 );
 
 create table awrcomp_reports(
 report_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-db1_dump_id number references awrdumps(dump_id) on delete cascade,
-db2_dump_id number references awrdumps(dump_id) on delete cascade,
+db1_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
+db2_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
 db1_snap_list varchar2(1000),
 db2_snap_list varchar2(1000),
-report_sort_ordr number references awrcomp_d_sortordrs(dic_id) on delete set null,
+report_sort_ordr number references awrcomp_d_sortordrs(dic_id),
 statlimit number,
 qry_filter varchar2(1000),
 dblink varchar2(30),
 report_content blob,
+nocomp_report blob,
+metric_report blob,
 file_mimetype varchar2(30) default 'text/plain',
 file_name varchar2(100)
 );
+
+create index awrdumpsrep1_dump_id on awrcomp_reports(db1_dump_id);
+create index awrdumpsrep2_dump_id on awrcomp_reports(db2_dump_id);
 
 create table awrcomp_scripts (
 script_id varchar(100) primary key,
@@ -60,13 +89,15 @@ script_content clob
 set define off
 @awrtool_pkg_body
 set define on
+@awrtool_api_spec
+@awrtool_api_body
 
 --Load data
-insert into config values ('WORKDIR','AWRDATA','Oracle directory for loading AWR dumps');
-insert into config values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load package');
-insert into config values ('AWRSTGTBLSPS','AWRTOOLSTBS','Default tablespace for AWR staging user');
-insert into config values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
-insert into config values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
+insert into awrconfig values ('WORKDIR','AWRDATA','Oracle directory for loading AWR dumps');
+insert into awrconfig values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load package');
+insert into awrconfig values ('AWRSTGTBLSPS','AWRTOOLSTBS','Default tablespace for AWR staging user');
+insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
+insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
 
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)','Sort by Elapsed Time','comp_ordr_ela_tot');
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(disk_reads_delta)','Sort by Disk Reads','comp_ordr_reads_tot');

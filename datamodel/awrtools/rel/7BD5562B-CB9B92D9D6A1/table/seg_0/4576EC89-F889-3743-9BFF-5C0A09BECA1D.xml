@@ -1,0 +1,58 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<Table class="oracle.dbtools.crest.model.design.relational.Table" directorySegmentName="seg_0" id="4576EC89-F889-3743-9BFF-5C0A09BECA1D" schemaObject="E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F" name="AWRDUMPS_FILES">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>AWRTOOLS</sourceObjSchema>
+<sourceObjName>AWRDUMPS_FILES</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<allowColumnReorder>false</allowColumnReorder>
+<existDependencyGenerateInDDl>true</existDependencyGenerateInDDl>
+<parsed>true</parsed>
+<columns itemClass="oracle.dbtools.crest.model.design.relational.Column">
+<Column name="DUMP_ID" id="5206BD54-06F6-ABE1-6236-441BC54CCEDD">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>AWRDUMPS_FILES</sourceObjSchema>
+<sourceObjName>DUMP_ID</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT019</logicalDatatype>
+<ownDataTypeParameters>,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+<associations>
+<colAssociation fkAssociation="E2167C7C-4790-CC7D-120F-C8DFA0A7BA0F" referredColumn="219EC512-A7F8-3DE5-AF74-33191FE8A4DF"/>
+</associations>
+</Column>
+<Column name="FILEBODY" id="36CBADE0-9D0F-BB94-4B82-978BFEE76914">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>AWRDUMPS_FILES</sourceObjSchema>
+<sourceObjName>FILEBODY</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<nullsAllowed>true</nullsAllowed>
+<useDomainConstraints>false</useDomainConstraints>
+<use>1</use>
+<logicalDatatype>LOGDT029</logicalDatatype>
+<dataTypeSize>4000</dataTypeSize>
+<ownDataTypeParameters>4000,,</ownDataTypeParameters>
+<autoIncrementCycle>false</autoIncrementCycle>
+</Column>
+</columns>
+<indexes itemClass="oracle.dbtools.crest.model.design.relational.Index">
+<ind_PK_UK id="843D1988-9B66-9CA5-86A8-8E4AFB7374B7" name="SYS_C0011224">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:06 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<indexState>Foreign Key</indexState>
+<isSurrogateKey>false</isSurrogateKey>
+<indexColumnUsage>
+<colUsage columnID="5206BD54-06F6-ABE1-6236-441BC54CCEDD"/>
+</indexColumnUsage>
+</ind_PK_UK>
+</indexes>
+</Table>

@@ -1,0 +1,55 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="AWRCOMP_SCRIPTS" directorySegmentName="seg_0" id="DD2303C0-9705-A5FF-FFB3-DE6D74826357">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>3F2EF11F-B23A-41FB-7922-CB3D04F76D13</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="SCRIPT_CONTENT" id="37215B99-612E-D44C-4B79-461A0A413F93">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="SCRIPT_ID" id="901F1CBB-6F69-54A9-0F89-E6CD9B23060D">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+</columnProxies>
+<lobStorages>
+<LobStorage class="oracle.dbtools.crest.model.design.storage.oracle.v11g.LobStorageOraclev11g" name="SYS_LOB0000078701C00002$$" id="A765B5A8-21CA-8F16-FFAF-1AF8E8661A86">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:06 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<cache>NOCACHE</cache>
+<chunk>8192</chunk>
+<column>SCRIPT_CONTENT</column>
+<compression>NO</compression>
+<duplication>KEEP_DUPLICATES</duplication>
+<logging>YES</logging>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<lobStorageType>SECUREFILE</lobStorageType>
+</LobStorage>
+</lobStorages>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="AWRCOMP_SCRIPTS_PK" id="C4CB5619-BE44-5D29-127F-2B6D210EF4F1">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<segment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<indexSegment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev12c>

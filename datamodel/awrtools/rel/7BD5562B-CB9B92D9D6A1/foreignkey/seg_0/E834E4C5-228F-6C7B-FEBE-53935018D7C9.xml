@@ -1,0 +1,19 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<FKIndexAssociation class="oracle.dbtools.crest.model.design.relational.FKIndexAssociation" directorySegmentName="seg_0" id="E834E4C5-228F-6C7B-FEBE-53935018D7C9" containerWithKeyObject="1C88A438-E547-D105-087C-FB581ACE4108" localFKIndex="DCD55472-3C8B-4E00-BA24-4A700648A0E7" name="SYS_C0011230">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>AWRTOOLS</sourceObjSchema>
+<sourceObjName>SYS_C0011230</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:06 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<referredTableLongName>AWRTOOLS.AWRDUMPS</referredTableLongName>
+<deleteRule>CASCADE</deleteRule>
+<referredTableID>CE51680B-2CBB-DF10-FD91-B685069831E3</referredTableID>
+<keyObject>B1744701-60D3-AD68-39B6-3011B2E9D0CD</keyObject>
+<referredKeyID>B1744701-60D3-AD68-39B6-3011B2E9D0CD</referredKeyID>
+<mandatory>false</mandatory>
+<refColNames>DUMP_ID</refColNames>
+<transferable>true</transferable>
+<rely>false</rely>
+<columnDependencyConstraintGenerateInDDL>true</columnDependencyConstraintGenerateInDDL>
+</FKIndexAssociation>

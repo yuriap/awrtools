@@ -1,0 +1,89 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableProxyOraclev12c class="oracle.dbtools.crest.model.design.storage.oracle.v12c.TableProxyOraclev12c" name="AWRDUMPS" directorySegmentName="seg_0" id="CE51680B-2CBB-DF10-FD91-B685069831E3">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<logging>YES</logging>
+<partitionedRowMovement>DISABLE</partitionedRowMovement>
+<segment>3F2EF11F-B23A-41FB-7922-CB3D04F76D13</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<temporaryChanged>false</temporaryChanged>
+<accessDriverType>oracle_loader</accessDriverType>
+<rejectLimit></rejectLimit>
+<inMemory>NO</inMemory>
+<columnProxies itemClass="oracle.dbtools.crest.model.design.storage.oracle.v12c.ColumnProxyOraclev12c">
+<ColumnProxy name="DUMP_ID" id="219EC512-A7F8-3DE5-AF74-33191FE8A4DF">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<autoIncrementDDL>IDENTITY_CLAUSE</autoIncrementDDL>
+</ColumnProxy>
+<ColumnProxy name="DB_DESCRIPTION" id="22A0DA69-5498-77CB-F358-0074F2286D47">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="MAX_SNAP_ID" id="2EE7AFE9-9BBE-86BF-D414-AA9B4B7A698E">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="MAX_SNAP_DT" id="4288FAAC-E212-711D-04A8-1581FC7DF0E1">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="STATUS" id="5414FBBD-D4E2-B556-24AE-0E72ECEBD6B8">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<defaultValue>&apos;NEW&apos;</defaultValue>
+</ColumnProxy>
+<ColumnProxy name="IS_REMOTE" id="714AB3AD-61A7-41CD-2B00-2D437AB9D047">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<defaultValue>&apos;NO&apos;</defaultValue>
+</ColumnProxy>
+<ColumnProxy name="MIN_SNAP_ID" id="A9087B74-D5C1-9717-A787-05B5A6915845">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="MIN_SNAP_DT" id="BCF6DF53-41D9-D3CE-4B2E-6AD8272E78A6">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="DBID" id="C22954C4-0591-973A-9881-EDDE9F69291B">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="FILENAME" id="E91FBC83-2348-28EF-A2A8-A280C765CD76">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+</ColumnProxy>
+<ColumnProxy name="LOADING_DATE" id="EE45A9D4-126C-6D4A-1A12-A8B66D5BBB66">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<defaultValue>sysdate</defaultValue>
+</ColumnProxy>
+</columnProxies>
+<primaryKeys>
+<PrimaryKey class="oracle.dbtools.crest.model.design.storage.oracle.v10g.PKProxyOraclev10g" name="AWRDUMPS_PK" id="B1744701-60D3-AD68-39B6-3011B2E9D0CD">
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<schemaObject>E7797FFB-4909-73F1-78E9-0D7AA2DCBB6F</schemaObject>
+<segment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</segment>
+<tableSpace>2C163E22-ECB1-8A15-C654-AADCFBE462FB</tableSpace>
+<indexSegment>0B1A53A5-FD5B-6760-E412-8D3D535C1E56</indexSegment>
+<indexSort>SORTED</indexSort>
+<usingIndex>BY INDEX NAME</usingIndex>
+</PrimaryKey>
+</primaryKeys>
+</TableProxyOraclev12c>

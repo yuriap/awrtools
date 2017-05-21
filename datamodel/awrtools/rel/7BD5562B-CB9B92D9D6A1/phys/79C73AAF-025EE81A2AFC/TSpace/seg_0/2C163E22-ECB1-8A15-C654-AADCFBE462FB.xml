@@ -1,0 +1,11 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<TableSpaceOraclev10g class="oracle.dbtools.crest.model.design.storage.oracle.v10g.TableSpaceOraclev10g" name="AWRTOOLSTBS" directorySegmentName="seg_0" id="2C163E22-ECB1-8A15-C654-AADCFBE462FB">
+<sourceConnName>awrtools</sourceConnName>
+<sourceObjSchema>AWRTOOLS</sourceObjSchema>
+<sourceObjName>AWRTOOLSTBS</sourceObjName>
+<createdBy>yuri</createdBy>
+<createdTime>2017-05-19 07:20:05 UTC</createdTime>
+<ownerDesignName>awrtools</ownerDesignName>
+<emUniformSize>0</emUniformSize>
+<extentManagement>LOCAL</extentManagement>
+</TableSpaceOraclev10g>

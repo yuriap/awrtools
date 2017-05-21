@@ -9,5 +9,6 @@ create or replace package awrtool_pkg as
   procedure remote_awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2,
                        p_dbid out number,p_min_snap_id out number,p_max_snap_id out number,p_min_snap_dt out timestamp,p_max_snap_dt out timestamp,p_db_description out varchar2);
   procedure create_awrcomp_report(p_report_id AWRCOMP_REPORTS.REPORT_ID%type);
+  procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2);
 end;
 /
