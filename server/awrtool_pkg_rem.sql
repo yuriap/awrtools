@@ -69,7 +69,11 @@ end;'
                        p_dbid out number,p_min_snap_id out number,p_max_snap_id out number,p_min_snap_dt out timestamp,p_max_snap_dt out timestamp,p_db_description out varchar2)
     is
     --awr staging
+	  l_user number;
     begin
+	  select count(1) into l_user from dba_users where username=upper(p_stg_user);
+	  if l_user=1 then execute immediate 'drop user '||p_stg_user||' cascade'; end if;
+
       execute immediate
         'create user '||p_stg_user||'
           identified by '||p_stg_user||'

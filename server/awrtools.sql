@@ -59,19 +59,25 @@ dic_display_value varchar2(100),
 dic_filename_pref varchar2(100) NOT NULL
 );
 
+create table awrcomp_d_report_types (
+dic_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+dic_value varchar2(1000) NOT NULL,
+dic_display_value varchar2(100),
+dic_filename_pref varchar2(100) NOT NULL
+);
+
 create table awrcomp_reports(
 report_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
 db1_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
 db2_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
 db1_snap_list varchar2(1000),
 db2_snap_list varchar2(1000),
-report_sort_ordr number references awrcomp_d_sortordrs(dic_id),
+report_type number references awrcomp_d_sortordrs(dic_id),
+report_sort_ordr number references awrcomp_d_report_types(dic_id),
 statlimit number,
 qry_filter varchar2(1000),
 dblink varchar2(30),
 report_content blob,
-nocomp_report blob,
-metric_report blob,
 file_mimetype varchar2(30) default 'text/plain',
 file_name varchar2(100)
 );
@@ -98,14 +104,19 @@ insert into awrconfig values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load p
 insert into awrconfig values ('AWRSTGTBLSPS','AWRTOOLSTBS','Default tablespace for AWR staging user');
 insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
 insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
+insert into awrconfig values ('TOOLVERSION','1.2','AWR tool version');
 
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)','Sort by Elapsed Time','comp_ordr_ela_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(disk_reads_delta)','Sort by Disk Reads','comp_ordr_reads_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(CPU_TIME_DELTA)','Sort by CPU time','comp_ordr_cpu_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(BUFFER_GETS_DELTA)','Sort by LIO','comp_ordr_lio_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by Ela/exec','comp_ordr_ela_exec');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(CPU_TIME_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by CPU/exec','comp_ordr_cpu_exec');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(BUFFER_GETS_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by LIO/exec','comp_ordr_lio_exec');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)','Sort by Elapsed Time','ela_tot');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(disk_reads_delta)','Sort by Disk Reads','reads_tot');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(CPU_TIME_DELTA)','Sort by CPU time','cpu_tot');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(BUFFER_GETS_DELTA)','Sort by LIO','lio_tot');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by Ela/exec','ela_exec');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(CPU_TIME_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by CPU/exec','cpu_exec');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(BUFFER_GETS_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by LIO/exec','lio_exec');
+
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRCOMP','AWR query plan compare report','comp_ordr_');
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRMETRICS','AWR metrics report','sysmetrics_');
+
 
 set define off
 

@@ -18,3 +18,5 @@ grant alter user to remawrtools;
 grant select any table to remawrtools;
 grant create job to remawrtools;
 grant execute on dbms_workload_repository to remawrtools;
+grant select on dba_users to remawrtools;
+grant select on dba_hist_sysmetric_history to remawrtools;

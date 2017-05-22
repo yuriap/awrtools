@@ -36,5 +36,7 @@ grant select on DBA_HIST_SQLBIND to awrtools;
 grant select on V_$DATABASE to awrtools;
 grant select on AWR_ROOT_SQL_PLAN to awrtools;
 grant select on AWR_ROOT_SQLTEXT to awrtools;
+grant select on dba_users to awrtools;
+grant select on dba_hist_sysmetric_history to awrtools;
 
 grant execute on dbms_xplan to awrtools;

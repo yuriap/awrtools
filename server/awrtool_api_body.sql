@@ -45,6 +45,11 @@ create or replace package body awrtools_api as
     update awrtoolproject set proj_status='ARCHIVED' where proj_id=p_proj_id;
 
   end archive_project;
-
+  
+  procedure del_report(p_report_id awrcomp_reports.report_id%type)
+  is
+  begin
+    delete from awrcomp_reports where report_id=p_report_id;
+  end;
 end awrtools_api;
 /
