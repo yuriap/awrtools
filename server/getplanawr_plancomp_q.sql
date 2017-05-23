@@ -123,7 +123,7 @@ begin
   if p_src='L' then 
     select replace(replace(plan_table_output,chr(13)),chr(10)) bulk collect
       into p_data
-      from table(dbms_xplan.display_awr(p_sql_id, p_plan_hash, p_dbid, 'ADVANCED -ALIAS', con_id => 0));
+      from table(dbms_xplan.display_awr(p_sql_id, p_plan_hash, p_dbid, 'ADVANCED -ALIAS'));--, con_id => 0));
   end if;
   if p_src='R' then  
 $IF '&dblnk.' is not null $THEN
@@ -134,7 +134,7 @@ $IF '&dblnk.' is not null $THEN
 $ELSE
     select replace(replace(plan_table_output,chr(13)),chr(10)) bulk collect
       into p_data
-      from table(dbms_xplan.display_awr(p_sql_id, p_plan_hash, p_dbid, 'ADVANCED -ALIAS', con_id => 0));
+      from table(dbms_xplan.display_awr(p_sql_id, p_plan_hash, p_dbid, 'ADVANCED -ALIAS'));--, con_id => 0));
 $END
   end if;
 end;
@@ -165,7 +165,7 @@ begin
 $IF '&dblnk.' is not null $THEN  
   select unique 'DB1:         '||sn.DBID, 
   'DB1:         '||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss') ||
+  ', Started: ' || to_char(max(i.STARTUP_TIME)over(),'YYYY/MM/DD HH24:mi:ss') ||
   ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
   ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
   'DB1: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
@@ -175,7 +175,7 @@ $IF '&dblnk.' is not null $THEN
 $ELSE                
   select unique 'DB1:'||sn.DBID, 
   'DB1:'||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
+  ', Started: ' || to_char(max(i.STARTUP_TIME)over(),'YYYY/MM/DD HH24:mi:ss')  ||
   ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
   ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
   'DB1: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
@@ -193,7 +193,7 @@ $END
 $IF '&dblnk.' is not null $THEN
   select unique 'DB2(remote): '||sn.DBID,
   'DB2(remote): '||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
+  ', Started: ' || to_char(max(i.STARTUP_TIME)over(),'YYYY/MM/DD HH24:mi:ss')  ||
   ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
   ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
   'DB2(remote): '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
@@ -203,7 +203,7 @@ $IF '&dblnk.' is not null $THEN
 $ELSE
   select unique 'DB2:'||sn.DBID,
   'DB2:'||sn.DBID||', '||version || ', ' || host_name || ', ' || platform_name || 
-  ', Started: ' || to_char(i.STARTUP_TIME,'YYYY/MM/DD HH24:mi:ss')  ||
+  ', Started: ' || to_char(max(i.STARTUP_TIME)over(),'YYYY/MM/DD HH24:mi:ss')  ||
   ', BEGIN: ' || to_char(min(sn.BEGIN_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss') ||
   ', END: ' || to_char(max(sn.END_INTERVAL_TIME) over (),'YYYY/MM/DD HH24:mi:ss'),
   'DB2: '||sn.DBID||', '||version || ', ' || host_name || --', ' || platform_name || 
@@ -228,19 +228,19 @@ $END
   for i in (select unique dbid,plan_hash_value,PARSING_USER_ID,module,action,
      --'DBID: '||dbid
      case 
-       when dbid=&dbid1. and instr('&snaps1.',snap_id)>0 and src='L' then l_db1_title_s
-       when dbid=&dbid2. and instr('&snaps2.',snap_id)>0 and src='R' then l_db2_title_s
+       when dbid=&dbid1. and snap_id in (&snaps1.) and src='L' then l_db1_title_s
+       when dbid=&dbid2. and snap_id in (&snaps2.) and src='R' then l_db2_title_s
        else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
      ||'; '||plan_hash_value||'; '||PARSING_USER_ID||'; '||parsing_schema_name||'; '||module||'; '||action a 
      from 
        (
         select 'L' src, x.* from dba_hist_sqlstat x 
          where sql_id=l_sql_id --and plan_hash_value <> 0 
-           and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
+           and (dbid='&dbid1.' and snap_id in (&snaps1.))
         union all
         select 'R' src, x.* from dba_hist_sqlstat&dblnk. x
          where sql_id=l_sql_id --and plan_hash_value <> 0 
-           and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
+           and (dbid='&dbid2.' and snap_id in (&snaps2.))
        )
      order by 6,dbid,plan_hash_value,PARSING_USER_ID,module,action
     )
@@ -254,26 +254,30 @@ $END
   for i in (select unique dbid,sql_plan_hash_value,user_id,module,action,
      --'DBID: '||dbid
      case 
-       when dbid=&dbid1. and instr('&snaps1.',snap_id)>0 and src='L' then l_db1_title_s
-       when dbid=&dbid2. and instr('&snaps2.',snap_id)>0 and src='R' then l_db2_title_s
+       when dbid=&dbid1. and snap_id in (&snaps1.)  and src='L' then l_db1_title_s
+       when dbid=&dbid2. and snap_id in (&snaps2.)  and src='R' then l_db2_title_s
        else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
-          ||'; '||sql_plan_hash_value||'; '||user_id||'; '||program||'; '||module||'; '||action||'; '||client_id a,plsql_entry_object_id,plsql_entry_subprogram_id 
+          ||'; '||sql_plan_hash_value||'; '||user_id||'; '||program||'; '||module||'; '||action||'; '||client_id a,plsql_entry_object_id,plsql_entry_subprogram_id ,PLSQL_OBJECT_ID,PLSQL_SUBPROGRAM_ID
     from 
       (
        select 'L' src, x.* from dba_hist_active_sess_history x
         where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id)--and sql_plan_hash_value <> 0 
-          and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
+          and (dbid='&dbid1.' and snap_id in (&snaps1.))
           and rownum<6
        union all
        select 'R' src, x.* from dba_hist_active_sess_history&dblnk. x
         where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id) --and sql_plan_hash_value <> 0 
-          and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
+          and (dbid='&dbid2.' and snap_id in (&snaps2.))
           and rownum<6
       )
     order by 6,dbid,sql_plan_hash_value,user_id,module,action)
   loop
     p(i.a);
-    for j in (select 'Called from PL/SQL: '||owner||'; '||object_type||'; '||object_name a from dba_procedures where object_id=i.plsql_entry_object_id and subprogram_id=i.plsql_entry_subprogram_id ) loop
+    for j in (select case when object_id=i.plsql_entry_object_id and subprogram_id=i.plsql_entry_subprogram_id then '..TOP' else '...END' end||': '||owner||'; '||object_type||'; '||object_name||decode(PROCEDURE_NAME,null,null,'.'||PROCEDURE_NAME) a
+               from dba_procedures 
+			  where (object_id=i.plsql_entry_object_id and subprogram_id=i.plsql_entry_subprogram_id) or
+	                (object_id=i.PLSQL_OBJECT_ID and subprogram_id=i.PLSQL_SUBPROGRAM_ID)
+	) loop
       p(j.a);
     end loop;
   end loop;
@@ -283,8 +287,8 @@ $END
          sql_id,
          plan_hash_value,
          case 
-           when s.dbid=&dbid1. and instr('&snaps1.',s.snap_id)>0 and src='L' then l_db1_title_l
-           when s.dbid=&dbid2. and instr('&snaps2.',s.snap_id)>0 and src='R' then l_db2_title_l
+           when s.dbid=&dbid1. and snap_id in (&snaps1.)  and src='L' then l_db1_title_l
+           when s.dbid=&dbid2. and snap_id in (&snaps2.)  and src='R' then l_db2_title_l
            else 'DB: N/A '||dbid||','||snap_id||' "&dbid1." "&snaps1." "&dbid2." "&snaps2."' end
          ||'; PH:'||plan_hash_value capture, src
     from 
@@ -292,13 +296,13 @@ $END
        select 'L' src, s.* from dba_hist_sqlstat s
         where sql_id = l_sql_id
           and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
-          and (dbid='&dbid1.' and instr('&snaps1.',snap_id)>0)
+          and (dbid='&dbid1.' and snap_id in (&snaps1.))
           --and plan_hash_value <> 0
        union all
        select 'R' src, s.* from dba_hist_sqlstat&dblnk. s
         where sql_id = l_sql_id
           and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
-          and (dbid='&dbid2.' and instr('&snaps2.',snap_id)>0)
+          and (dbid='&dbid2.' and snap_id in (&snaps2.))
           --and plan_hash_value <> 0
       ) s
                     )

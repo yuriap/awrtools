@@ -46,6 +46,14 @@ create or replace package body awrtools_api as
 
   end archive_project;
   
+  procedure compress_project(p_proj_id awrtoolproject.proj_id%type) as
+  begin
+    archive_project(p_proj_id);
+	update AWRDUMPS_FILES set filebody=null where dump_id in (select dump_id from AWRDUMPS where proj_id=p_proj_id);
+	update AWRDUMPS set status='COMPRESSED' where dump_id in (select dump_id from AWRDUMPS where proj_id=p_proj_id);
+	update awrtoolproject set proj_status='COMPRESSED' where proj_id=p_proj_id;
+  end;
+  
   procedure del_report(p_report_id awrcomp_reports.report_id%type)
   is
   begin

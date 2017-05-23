@@ -18,7 +18,7 @@ CREATE TABLE awrtoolproject (
     proj_name          VARCHAR2(100),
     proj_date          DATE default sysdate,
     proj_description   VARCHAR2(4000),
-    proj_status        varchar2(10) default 'ACTIVE' not null check (proj_status in ('ACTIVE','ARCHIVED'))
+    proj_status        varchar2(10) default 'ACTIVE' not null check (proj_status in ('ACTIVE','ARCHIVED','COMPRESSED'))
 );
 
 
@@ -33,7 +33,7 @@ dump_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
 proj_id NUMBER NOT NULL REFERENCES awrtoolproject ( proj_id ) on delete cascade,
 loading_date date default sysdate,
 filename varchar2(512),
-status varchar2(10) default 'NEW' check (status in ('NEW','LOADED','UNLOADED')),
+status varchar2(10) default 'NEW' check (status in ('NEW','LOADED','UNLOADED','COMPRESSED')),
 dbid number,
 min_snap_id number,
 max_snap_id number,
@@ -68,6 +68,7 @@ dic_filename_pref varchar2(100) NOT NULL
 
 create table awrcomp_reports(
 report_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+created date default sysdate,
 db1_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
 db2_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
 db1_snap_list varchar2(1000),
@@ -115,7 +116,7 @@ insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) v
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(BUFFER_GETS_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by LIO/exec','lio_exec');
 
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRCOMP','AWR query plan compare report','comp_ordr_');
-insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRMETRICS','AWR metrics report','sysmetrics_');
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRMETRICS','AWR metrics report','sysmetrics');
 
 
 set define off

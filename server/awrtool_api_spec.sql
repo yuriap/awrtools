@@ -10,6 +10,7 @@ create or replace package awrtools_api as
                           p_proj_descr AWRTOOLPROJECT.PROJ_DESCRIPTION%type);
    procedure del_project(p_proj_id AWRTOOLPROJECT.PROJ_ID%type);
    procedure archive_project(p_proj_id AWRTOOLPROJECT.PROJ_ID%type);
+   procedure compress_project(p_proj_id awrtoolproject.proj_id%type);
    
    procedure del_report(p_report_id awrcomp_reports.report_id%type);
 end awrtools_api;

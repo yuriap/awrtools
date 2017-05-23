@@ -27,7 +27,7 @@ prompt APPLICATION 100 - awrcomp
 -- Application Export:
 --   Application:     100
 --   Name:            awrcomp
---   Date and Time:   17:37 Monday May 22, 2017
+--   Date and Time:   20:22 Tuesday May 23, 2017
 --   Exported By:     AWRTOOLADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -39,7 +39,7 @@ prompt APPLICATION 100 - awrcomp
 --   Pages:                     11
 --     Items:                   39
 --     Computations:             1
---     Processes:               20
+--     Processes:               22
 --     Regions:                 24
 --     Buttons:                 20
 --   Shared Components:
@@ -115,7 +115,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170522173607'
+,p_last_upd_yyyymmddhh24miss=>'20170523123348'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -10658,7 +10658,7 @@ wwv_flow_api.create_page(
 ,p_protection_level=>'C'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170522152957'
+,p_last_upd_yyyymmddhh24miss=>'20170523123348'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(2103900121081445)
@@ -11367,6 +11367,23 @@ wwv_flow_api.create_page_process(
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when_button_id=>wwv_flow_api.id(5215308956848853)
 );
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(8421201687326941)
+,p_process_sequence=>1010
+,p_process_point=>'AFTER_SUBMIT'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'CompressProject'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  awrtools_api.compress_project(:P11_PROJ_ID);',
+'  commit;',
+'end;'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when_button_id=>wwv_flow_api.id(5275126105976215)
+,p_process_when=>'P11_PROJ_STATUS'
+,p_process_when_type=>'VAL_OF_ITEM_IN_COND_NOT_EQ_COND2'
+,p_process_when2=>'COMPRESSED'
+);
 end;
 /
 prompt --application/pages/page_00012
@@ -11850,7 +11867,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170522173607'
+,p_last_upd_yyyymmddhh24miss=>'20170523120556'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5322644224295133)
@@ -11902,7 +11919,7 @@ wwv_flow_api.create_page_plug(
 '          sys.dbms_lob.getlength(report_content) download,',
 '          ''Delete'' action',
 'from AWRCOMP_REPORTS, AWRDUMPS d1, AWRDUMPS d2, AWRCOMP_D_SORTORDRS s, AWRCOMP_D_REPORT_TYPES tp',
-'where  DB1_DUMP_ID=d1.dump_id and DB2_DUMP_ID=d2.dump_id and s.DIC_ID=REPORT_SORT_ORDR and tp.DIC_ID=report_type',
+'where  DB1_DUMP_ID=d1.dump_id and DB2_DUMP_ID=d2.dump_id and s.DIC_ID(+)=REPORT_SORT_ORDR and tp.DIC_ID=report_type',
 'order by created desc;'))
 ,p_plug_source_type=>'NATIVE_IR'
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
@@ -12269,6 +12286,22 @@ wwv_flow_api.create_page_item(
 ,p_lov_display_extra=>'YES'
 ,p_attribute_01=>'SUBMIT'
 ,p_attribute_03=>'Y'
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(8421155729326940)
+,p_process_sequence=>10
+,p_process_point=>'AFTER_HEADER'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'CleanItems'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'if :P15_REPORT_TYPE<>''AWRCOMP'' then',
+'  :P15_SORT:=null;',
+'  :P15_LIMIT:=null;',
+'  :P15_FILTER:=null;',
+'end if;',
+'end;'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 );
 wwv_flow_api.create_page_process(
  p_id=>wwv_flow_api.id(5339492088373540)
