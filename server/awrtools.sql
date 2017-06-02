@@ -5,6 +5,7 @@ drop table awrdumps_files;
 drop table awrdumps;
 drop table awrtoolproject;
 drop table awrcomp_d_sortordrs;
+drop table awrcomp_d_report_types;
 
 
 define DBLINK=DBAWR1

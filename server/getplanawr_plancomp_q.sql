@@ -69,7 +69,6 @@ and s.snap_id in (&snaps1.)
 and s.plan_hash_value=p_plan_hash
 group by s.dbid,s.plan_hash_value,s.sql_id
 ;
-
   cursor stats2 (p_sql_id varchar2,p_plan_hash number) is 
   select 
     s.sql_id
@@ -116,6 +115,58 @@ r_stats1 stats1%rowtype;
 r_stats2 stats2%rowtype;
 l_stat_ln number := 40;
 l_single_plan boolean;
+
+type col_lngth_t is table of number index by pls_integer;
+type col_data_t is table of varchar2(4000) index by pls_integer;
+type col_data_arr_t is table of col_data_t index by pls_integer;
+
+l_qash col_data_arr_t;
+l_colnm col_data_t;
+l_rown number;
+procedure print_incolumn(col_data_arr col_data_arr_t, col_nm col_data_t, l_colCnt number default 2) is
+  col_l        col_lngth_t;
+  l_rn         number := 0;
+  l_cnt        number;
+  l_lngth      number;
+begin
+      if col_data_arr.count=0 then return; end if;
+      l_rn:=col_data_arr(1).count;
+      if l_rn=0 then return; end if;
+      
+      --get max col data length
+      for i in 1 .. l_colCnt loop
+        l_lngth:=0;
+        l_cnt:=0;
+        for j in 1 .. col_data_arr(i).count loop
+          l_lngth := greatest(length(col_nm(i))+1, l_lngth, nvl(length(col_data_arr(i) (j)),0)+1);
+          l_cnt:=l_cnt+1;
+        end loop;
+        col_l(i):=l_lngth;
+        l_rn:=greatest(l_cnt,l_rn);
+      end loop;
+
+      -- print col names
+      for i in 1 .. l_colCnt loop
+        dbms_output.put(rpad(col_nm(i), col_l(i), ' '));
+      end loop;
+      dbms_output.put_line(' ');
+      --print line
+      for i in 1 .. l_colCnt loop
+        dbms_output.put(rpad('-', col_l(i) - 1, '-') || ' ');
+      end loop;
+      dbms_output.put_line(' ');
+      --print data
+      for j in 1 .. l_rn loop
+         for i in 1 .. l_colCnt loop
+          if col_data_arr(i).exists(j) then
+            dbms_output.put(rpad(nvl(col_data_arr(i) (j),' '), col_l(i), ' '));
+          else
+            dbms_output.put(rpad('.', col_l(i), '.'));
+          end if;
+        end loop;
+        dbms_output.put_line(' ');
+      end loop;
+end;
 
 procedure get_plan(p_sql_id varchar2, p_plan_hash varchar2, p_dbid number, p_src varchar2, p_data in out my_arrayofstrings)
 is
@@ -236,11 +287,11 @@ $END
        (
         select 'L' src, x.* from dba_hist_sqlstat x 
          where sql_id=l_sql_id --and plan_hash_value <> 0 
-           and (dbid='&dbid1.' and snap_id in (&snaps1.))
+           and (dbid=&dbid1. and snap_id in (&snaps1.))
         union all
         select 'R' src, x.* from dba_hist_sqlstat&dblnk. x
          where sql_id=l_sql_id --and plan_hash_value <> 0 
-           and (dbid='&dbid2.' and snap_id in (&snaps2.))
+           and (dbid=&dbid2. and snap_id in (&snaps2.))
        )
      order by 6,dbid,plan_hash_value,PARSING_USER_ID,module,action
     )
@@ -262,12 +313,12 @@ $END
       (
        select 'L' src, x.* from dba_hist_active_sess_history x
         where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id)--and sql_plan_hash_value <> 0 
-          and (dbid='&dbid1.' and snap_id in (&snaps1.))
+          and (dbid=&dbid1. and snap_id in (&snaps1.))
           and rownum<6
        union all
        select 'R' src, x.* from dba_hist_active_sess_history&dblnk. x
         where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id) --and sql_plan_hash_value <> 0 
-          and (dbid='&dbid2.' and snap_id in (&snaps2.))
+          and (dbid=&dbid2. and snap_id in (&snaps2.))
           and rownum<6
       )
     order by 6,dbid,sql_plan_hash_value,user_id,module,action)
@@ -275,13 +326,15 @@ $END
     p(i.a);
     for j in (select case when object_id=i.plsql_entry_object_id and subprogram_id=i.plsql_entry_subprogram_id then '..TOP' else '...END' end||': '||owner||'; '||object_type||'; '||object_name||decode(PROCEDURE_NAME,null,null,'.'||PROCEDURE_NAME) a
                from dba_procedures 
-			  where (object_id=i.plsql_entry_object_id and subprogram_id=i.plsql_entry_subprogram_id) or
-	                (object_id=i.PLSQL_OBJECT_ID and subprogram_id=i.PLSQL_SUBPROGRAM_ID)
-	) loop
+              where (object_id=i.plsql_entry_object_id and subprogram_id=i.plsql_entry_subprogram_id) or
+                    (object_id=i.PLSQL_OBJECT_ID and subprogram_id=i.PLSQL_SUBPROGRAM_ID)
+    ) loop
       p(j.a);
     end loop;
   end loop;
-
+----
+--}'||q'{  
+----
   for k in (select rownum rn, y.* from (select x.*
               from (select unique s.dbid,
          sql_id,
@@ -434,7 +487,104 @@ $END
                  order by 1 nulls first,2)
       loop
         pr(max_l,70,rpad(ww.wait_class,20,' ')||rpad(ww.event,35,' ')||ww.cntl, rpad(ww.wait_class,20,' ')||rpad(ww.event,35,' ')||ww.cntr, ww.delta||'%','*');      
-      end loop;      
+      end loop; 
+  
+  p(rpad('-',max_l*2+1,'-'));
+---------------------------------------------------------------------------------  
+  l_colnm.delete;
+  l_qash.delete;
+  
+  l_colnm(1):='DB1 ASH plan stat: plan hash, line_id, operatoion, options, event, time';
+  l_colnm(2):='DB2 ASH plan stat: plan hash, line_id, operatoion, options, event, time';
+  l_rown:=1;
+  for i in (select sql_plan_hash_value||' '||lpad(nvl(to_char(sql_plan_line_id),' '),3,' ')||' '||lpad(nvl(sql_plan_operation,' '),30,' ')|| ' '|| lpad(nvl(sql_plan_options,' '),20,' ')||' '||
+                   lpad(nvl(event, 'CPU'),35, ' ')||' '||
+                   count(1) * 10 line
+              from dba_hist_active_sess_history
+             where sql_id = l_sql_id and dbid=&dbid1.
+               and instance_number = 1
+               and session_type='FOREGROUND'
+               and snap_id in (&snaps1.)
+             group by sql_plan_hash_value,
+                      sql_plan_line_id,
+                      sql_plan_operation,
+                      sql_plan_options,
+                      nvl(event, 'CPU')
+             order by sql_plan_hash_value, sql_plan_line_id, sql_plan_operation, sql_plan_options, nvl(event, 'CPU'))
+   loop
+    l_qash(1)(l_rown):=i.line;
+    l_rown:=l_rown+1;
+   end loop;
+
+  l_rown:=1;
+  for i in (select sql_plan_hash_value||' '||lpad(nvl(to_char(sql_plan_line_id),' '),3,' ')||' '||lpad(nvl(sql_plan_operation,' '),30,' ')|| ' '|| lpad(nvl(sql_plan_options,' '),20,' ')||' '||
+                   lpad(nvl(event, 'CPU'),35, ' ')||' '||
+                   count(1) * 10 line
+              from dba_hist_active_sess_history
+             where sql_id = l_sql_id and dbid=&dbid2.
+               and instance_number = 1
+               and session_type='FOREGROUND'
+               and snap_id in (&snaps2.)
+             group by sql_plan_hash_value,
+                      sql_plan_line_id,
+                      sql_plan_operation,
+                      sql_plan_options,
+                      nvl(event, 'CPU')
+             order by sql_plan_hash_value, sql_plan_line_id, sql_plan_operation, sql_plan_options, nvl(event, 'CPU'))
+   loop
+    l_qash(2)(l_rown):=i.line;
+    l_rown:=l_rown+1;
+   end loop;
+   
+  print_incolumn(l_qash, l_colnm, 2);
+---------------------------------------------------------------------------------      
+  p(rpad('-',max_l*2+1,'-'));
+  
+  p('Query time span from dba_hist_active_sess_history');
+  
+  l_colnm.delete;
+  l_qash.delete;
+  
+  l_colnm(1):='DB1 Source, Hour, average number of sessions, max number of sessions';
+  l_colnm(2):='DB2 Source, Hour, average number of sessions, max number of sessions';
+  l_rown:=1;  
+  for i in (select  'DB1:' src, trunc(sample_time, 'hh') sample_time, round(avg(c)) avg_cnt, max(c)max_cnt
+              from (select sample_time,sql_id, count(1) c
+                      from dba_hist_active_sess_history
+                     where dbid = &dbid1.
+                       and instance_number = 1
+                       and session_type='FOREGROUND'
+                       and sql_id=l_sql_id
+                       and snap_id in (&snaps1.)
+                     group by sample_time,sql_id)
+             group by trunc(sample_time, 'hh')
+             order by 1,2
+             )
+  loop
+    l_qash(1)(l_rown):=i.src||' '||to_char(i.sample_time,'yyyy/mm/dd hh24:mi')||' '||i.avg_cnt||' '||i.max_cnt;
+    l_rown:=l_rown+1;    
+  end loop;
+  
+  l_rown:=1; 
+  for i in (select  'DB2:' src, trunc(sample_time, 'hh') sample_time, round(avg(c)) avg_cnt, max(c)max_cnt
+              from (select sample_time,sql_id, count(1) c
+                      from dba_hist_active_sess_history
+                     where dbid = &dbid2.
+                       and instance_number = 1
+                       and session_type='FOREGROUND'
+                       and sql_id=l_sql_id
+                       and snap_id in (&snaps2.)
+                     group by sample_time,sql_id)
+             group by trunc(sample_time, 'hh')
+             order by 1,2
+             )
+  loop
+    l_qash(2)(l_rown):=i.src||' '||to_char(i.sample_time,'yyyy/mm/dd hh24:mi')||' '||i.avg_cnt||' '||i.max_cnt;
+    l_rown:=l_rown+1;    
+  end loop;  
+  print_incolumn(l_qash, l_colnm, 2);
+---------------------------------------------------------------------------------
+
       p(rpad('-',max_l*2+1,'-'));
       --plans
       if l_single_plan then
