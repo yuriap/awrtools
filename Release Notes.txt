@@ -2,7 +2,7 @@ Web AWR Tools Version 1.0
 
 AWR dump warehouse with web-based UI.
 
-The main aim is:
+The main aims are:
 1) to have some user-friendly interface to manipulate with AWR dumps (load, store, comment, unload).
 2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are "SQL queries compare report" and "Sysmetric report".
 3) to share scripts with command-line AWR Tools. Exact the same main scripts are used in both tools.

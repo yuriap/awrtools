@@ -9097,7 +9097,7 @@ wwv_flow_api.create_page_plug(
 '<br>',
 'AWR dump warehouse with web-based UI.<br>',
 '<br>',
-'The main aim is:<br>',
+'The main aims are:<br>',
 '1) to have some user-friendly interface to manipulate with AWR dumps (load, store, comment, unload).<br>',
 '2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are "SQL queries compare report" and "Sysmetric report".<br>',
 '3) to share scripts with command-line AWR Tools. Exact the same main scripts are used in both tools.<br>',
