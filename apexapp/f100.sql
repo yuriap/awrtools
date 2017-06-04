@@ -14,7 +14,7 @@ begin
 wwv_flow_api.import_begin (
  p_version_yyyy_mm_dd=>'2016.08.24'
 ,p_release=>'5.1.1.00.08'
-,p_default_workspace_id=>1816593908735423
+,p_default_workspace_id=>1815180833496563
 ,p_default_application_id=>100
 ,p_default_owner=>'AWRTOOLS'
 );
@@ -27,12 +27,12 @@ prompt APPLICATION 100 - awrcomp
 -- Application Export:
 --   Application:     100
 --   Name:            awrcomp
---   Date and Time:   20:22 Tuesday May 23, 2017
+--   Date and Time:   20:05 Sunday June 4, 2017
 --   Exported By:     AWRTOOLADM
 --   Flashback:       0
 --   Export Type:     Application Export
 --   Version:         5.1.1.00.08
---   Instance ID:     218223986453927
+--   Instance ID:     218260978313860
 --
 
 -- Application Statistics:
@@ -115,7 +115,7 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170523123348'
+,p_last_upd_yyyymmddhh24miss=>'20170604200502'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9082,7 +9082,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170522143207'
+,p_last_upd_yyyymmddhh24miss=>'20170604195753'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(1851754488133646)
@@ -9092,7 +9092,37 @@ wwv_flow_api.create_page_plug(
 ,p_plug_display_sequence=>10
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
-,p_plug_source=>'Go to Projects page'
+,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Web AWR Tools Version 1.0<br>',
+'<br>',
+'AWR dump warehouse with web-based UI.<br>',
+'<br>',
+'The main aim is:<br>',
+'1) to have some user-friendly interface to manipulate with AWR dumps (load, store, comment, unload).<br>',
+'2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are "SQL queries compare report" and "Sysmetric report".<br>',
+'3) to share scripts with command-line AWR Tools. Exact the same main scripts are used in both tools.<br>',
+'4) to be able to analyze AWR dumps which contain overlapping snapshot ranges (relevant to a situation when FLASHBACK DATABASE is in use for testing different scenarios).<br>',
+'<br>',
+'Setup',
+'<br>',
+'1. Prepare two database instances on the same host. First one must have APEX 5 installed.<br>',
+'2. Edit file server/awrtools.sql put connect string of the second database instance to dblink create statement.<br>',
+'3. Both instances must have access to a directory (/u01/app/oracle/files/awrdata/ by default). Edit files setup/sys_setup.sql and setup/remote_setup.sql to change it.<br>',
+'4. Connect to the first database as sysdba, execute script setup/sys_setup.sql.<br>',
+'5. Connect to the second database as sysdba, execute script setup/remote_setup.sql.<br>',
+'6. Change dir to server, connect to the first database as awrtools user (password is the same by default) and execute awrtools.sql.<br>',
+'7. Connect to the second database with remawrtools user (password is the same by default) and execute remawrtools.sql.<br>',
+'<br>',
+'Use-cases:<br>',
+'1. Create a project.<br>',
+'2. Load two or more raw AWR dumps.<br>',
+'3. Load dumps into AWR repository, if snapshot ranges are overlapping, load the second dump into the second (remote) database.<br>',
+'4. Create reports (the are stored automatically).<br>',
+'5. Archive project: unload AWR data from AWR repository for dumps. Can be loaded in the future.<br>',
+'6. Compress project: unload AWR data from AWR repository for dumps. Delete AWR dumps from database storage. Only created reports will remain available.<br>',
+'<br>',
+'To start <a href="f?p=&APP_ID.:10:&SESSION.">go to Projects page</a>.'))
+,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'HTML'
@@ -10473,7 +10503,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170522164520'
+,p_last_upd_yyyymmddhh24miss=>'20170604183127'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5221916138848909)
@@ -10658,7 +10688,7 @@ wwv_flow_api.create_page(
 ,p_protection_level=>'C'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170523123348'
+,p_last_upd_yyyymmddhh24miss=>'20170604200502'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(2103900121081445)
@@ -10861,6 +10891,9 @@ wwv_flow_api.create_worksheet_column(
 ,p_allow_group_by=>'N'
 ,p_allow_hide=>'N'
 ,p_column_type=>'STRING'
+,p_display_condition_type=>'VAL_OF_ITEM_IN_COND_NOT_EQ_COND2'
+,p_display_condition=>'P11_PROJ_STATUS'
+,p_display_condition2=>'COMPRESSED'
 );
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(5274403950976208)
@@ -10961,7 +10994,8 @@ wwv_flow_api.create_page_button(
 ,p_button_template_id=>wwv_flow_api.id(1859647855541067)
 ,p_button_image_alt=>'Load'
 ,p_button_position=>'BODY'
-,p_grid_new_grid=>false
+,p_button_condition=>'awrtools_contr.lcc_project_load(:P11_PROJ_ID)'
+,p_button_condition_type=>'PLSQL_EXPRESSION'
 ,p_grid_new_row=>'Y'
 );
 wwv_flow_api.create_page_button(
@@ -11004,8 +11038,8 @@ wwv_flow_api.create_page_button(
 ,p_button_image_alt=>'Reports'
 ,p_button_position=>'REGION_TEMPLATE_CLOSE'
 ,p_button_redirect_url=>'f?p=&APP_ID.:15:&SESSION.::&DEBUG.:RP:P15_PROJ_ID:&P11_PROJ_ID.'
-,p_button_condition=>'P11_PROJ_ID'
-,p_button_condition_type=>'ITEM_IS_NOT_NULL'
+,p_button_condition=>'awrtools_contr.lcc_project_report(:P11_PROJ_ID)'
+,p_button_condition_type=>'PLSQL_EXPRESSION'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(5215194326848853)
@@ -11033,8 +11067,8 @@ wwv_flow_api.create_page_button(
 ,p_button_template_id=>wwv_flow_api.id(1859647855541067)
 ,p_button_image_alt=>'Compress'
 ,p_button_position=>'REGION_TEMPLATE_DELETE'
-,p_button_condition=>'P11_PROJ_ID'
-,p_button_condition_type=>'ITEM_IS_NOT_NULL'
+,p_button_condition=>'awrtools_contr.lcc_project_compress(:P11_PROJ_ID)'
+,p_button_condition_type=>'PLSQL_EXPRESSION'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(2103795266081443)
@@ -11046,9 +11080,8 @@ wwv_flow_api.create_page_button(
 ,p_button_template_id=>wwv_flow_api.id(1859647855541067)
 ,p_button_image_alt=>'Archive'
 ,p_button_position=>'REGION_TEMPLATE_DELETE'
-,p_button_condition=>'P11_PROJ_ID'
-,p_button_condition_type=>'ITEM_IS_NOT_NULL'
-,p_grid_new_grid=>false
+,p_button_condition=>'awrtools_contr.lcc_project_archive(:P11_PROJ_ID)'
+,p_button_condition_type=>'PLSQL_EXPRESSION'
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(5215308956848853)
@@ -11351,6 +11384,8 @@ wwv_flow_api.create_page_process(
 '                );',
 '			end loop; -- for i in select',
 '	end if; -- l_select_count = 1',
+'else',
+'  raise_application_error(-20000,''File name is empty'');',
 'end if; -- file browse not null',
 'end;'))
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
@@ -11721,6 +11756,7 @@ wwv_flow_api.create_page_button(
 ,p_button_condition=>'P12_STATUS'
 ,p_button_condition2=>'LOADED'
 ,p_button_condition_type=>'VAL_OF_ITEM_IN_COND_EQ_COND2'
+,p_grid_new_grid=>false
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(5274013088976204)
@@ -11867,7 +11903,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170523120556'
+,p_last_upd_yyyymmddhh24miss=>'20170604172515'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5322644224295133)
@@ -11922,6 +11958,7 @@ wwv_flow_api.create_page_plug(
 'where  DB1_DUMP_ID=d1.dump_id and DB2_DUMP_ID=d2.dump_id and s.DIC_ID(+)=REPORT_SORT_ORDR and tp.DIC_ID=report_type',
 'order by created desc;'))
 ,p_plug_source_type=>'NATIVE_IR'
+,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_prn_content_disposition=>'ATTACHMENT'
 ,p_prn_document_header=>'APEX'
@@ -12090,10 +12127,9 @@ wwv_flow_api.create_page_button(
 ,p_button_action=>'SUBMIT'
 ,p_button_template_options=>'#DEFAULT#'
 ,p_button_template_id=>wwv_flow_api.id(1859647855541067)
-,p_button_image_alt=>'Create AWR plan comparison report'
+,p_button_image_alt=>'Create report'
 ,p_button_position=>'BELOW_BOX'
 ,p_button_alignment=>'LEFT'
-,p_grid_new_grid=>false
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(5275068065976214)
@@ -12368,6 +12404,7 @@ wwv_flow_api.create_page_plug(
 ,p_plug_display_sequence=>10
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
+,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'HTML'
@@ -12382,6 +12419,7 @@ wwv_flow_api.create_page_button(
 ,p_button_template_id=>wwv_flow_api.id(1859647855541067)
 ,p_button_image_alt=>'Delete'
 ,p_button_position=>'BELOW_BOX'
+,p_grid_new_grid=>false
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(8420600416326935)
@@ -12394,6 +12432,7 @@ wwv_flow_api.create_page_button(
 ,p_button_image_alt=>'Cancel'
 ,p_button_position=>'BELOW_BOX'
 ,p_button_redirect_url=>'f?p=&APP_ID.:15:&SESSION.::&DEBUG.:RP::'
+,p_grid_new_grid=>false
 );
 wwv_flow_api.create_page_branch(
  p_id=>wwv_flow_api.id(8420735492326936)

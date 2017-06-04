@@ -55,17 +55,17 @@ create or replace package body awrtool_pkg as
     begin
         delete from awrdumps@dbawr1;
         commit;
-        AWRTOOL_PKG.awr_load@dbawr1 (  
+        AWRTOOL_PKG.awr_load@dbawr1 (
           P_STG_USER => P_STG_USER,
           P_STG_TABLESPACE => P_STG_TABLESPACE,
           P_STG_TEMP => P_STG_TEMP,
           P_DIR => P_DIR,
-          P_DMPFILE => P_DMPFILE) ; 
-        select 
+          P_DMPFILE => P_DMPFILE) ;
+        select
           DBID,MIN_SNAP_ID,MAX_SNAP_ID,MIN_SNAP_DT,MAX_SNAP_DT,DB_DESCRIPTION
           into p_dbid,p_min_snap_id,p_max_snap_id,p_min_snap_dt,p_max_snap_dt,p_db_description
         from awrdumps@dbawr1;
-        delete from awrdumps@dbawr1;          
+        delete from awrdumps@dbawr1;
     end;
 
     procedure awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2,
@@ -76,7 +76,7 @@ create or replace package body awrtool_pkg as
     begin
       select count(1) into l_user from dba_users where username=upper(p_stg_user);
       if l_user=1 then execute immediate 'drop user '||p_stg_user||' cascade'; end if;
-      
+
       execute immediate
         'create user '||p_stg_user||'
           identified by '||p_stg_user||'
@@ -109,7 +109,7 @@ create or replace package body awrtool_pkg as
 
       execute immediate 'drop user '||p_stg_user||' cascade';
     end;
-    
+
     function getscript(p_script_id varchar2) return clob
     is
       l_res clob;
@@ -119,7 +119,7 @@ create or replace package body awrtool_pkg as
     exception
       when no_data_found then raise_application_error(-20000,'Script "'||p_script_id||'" not found.');
     end;
-    
+
     procedure print_table(p_query in varchar2) is
       l_theCursor   integer default dbms_sql.open_cursor;
       l_columnValue varchar2(4000);
@@ -192,12 +192,12 @@ create or replace package body awrtool_pkg as
         end if;
         raise_application_error(-20000, sqlerrm || chr(10) || DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
     end;
-    
+
     procedure create_awrcomp_report(p_report_id AWRCOMP_REPORTS.REPORT_ID%type)
     is
       qlist sys_refcursor;
       l_sql clob := awrtool_pkg.getscript('GETQUERYLIST');
-    
+
       dbid1 AWRDUMPS.DBID%type;
       dbid2 AWRDUMPS.DBID%type;
       snap1 AWRCOMP_REPORTS.DB1_SNAP_LIST%type;
@@ -207,40 +207,40 @@ create or replace package body awrtool_pkg as
       qfilter AWRCOMP_REPORTS.qry_filter%type;
       dblink AWRCOMP_REPORTS.dblink%type;
       report_type awrcomp_d_report_types.DIC_VALUE%type;
-      
+
       l_cmd varchar2(1000);
       l_capt varchar2(1000);
-    
+
       l_script clob;
-    
+
       l_awrcomp_scr clob := awrtool_pkg.getscript('GETCOMPREPORT');
       l_noncomp_scr clob := awrtool_pkg.getscript('GETNONCOMPREPORT');
       l_sysmetr_scr_o clob := awrtool_pkg.getscript('GETSYSMETRREPORT');
       l_sysmetr_scr clob;
-      
+
       l_occ    number;
       l_sql_id    varchar2(20);
-    
+
       l_line varchar(32767);
       l_status number;
-      l_awrcomp_rpt clob;  
+      l_awrcomp_rpt clob;
       l_trg_lob blob;
       l_toexec clob;
-      
+
       function replace_subst(p_sql clob) return clob
       is
         l_sql clob;
       begin
-        l_sql := replace(p_sql,'&dbid1.',dbid1);
-        l_sql := replace(l_sql,'&dbid2.',dbid2);
+        l_sql := replace(p_sql,'&dbid1.',to_char(dbid1));
+        l_sql := replace(l_sql,'&dbid2.',to_char(dbid2));
         l_sql := replace(l_sql,'&snaps1.',snap1);
         l_sql := replace(l_sql,'&snaps2.',snap2);
         l_sql := replace(l_sql,'&dblnk.',dblink);
         l_sql := replace(l_sql,'&ordcol_expr.',sortordr);
         l_sql := replace(l_sql,'&filter.',qfilter);
-        l_sql := replace(l_sql,'&statlimit.',statlim); 
+        l_sql := replace(l_sql,'&statlimit.',to_char(statlim));
         l_sql := replace(l_sql,'&fcol.','15');
-        l_sql := replace(l_sql,'&ordrcol.','elapsed_time_delta');    
+        l_sql := replace(l_sql,'&ordrcol.','elapsed_time_delta');
         return l_sql;
       end;
       function replace_subst(p_sql clob, p_db number) return clob
@@ -248,33 +248,33 @@ create or replace package body awrtool_pkg as
         l_sql clob;
       begin
         if p_db=1 then
-          l_sql := replace(p_sql,'&p_dbid.',dbid1);
+          l_sql := replace(p_sql,'&p_dbid.',to_char(dbid1));
           l_sql := replace(l_sql,'&p_snapshots.',snap1);
-          l_sql := replace(l_sql,'&p_dblnk.','');        
+          l_sql := replace(l_sql,'&p_dblnk.','');
         elsif p_db=2 then
-          l_sql := replace(p_sql,'&p_dbid.',dbid2);
+          l_sql := replace(p_sql,'&p_dbid.',to_char(dbid2));
           l_sql := replace(l_sql,'&p_snapshots.',snap2);
-          l_sql := replace(l_sql,'&p_dblnk.',dblink);        
+          l_sql := replace(l_sql,'&p_dblnk.',dblink);
         end if;
         return l_sql;
-      end;      
+      end;
     begin
-      
-      select 
+
+      select
           d1.dbid,d2.dbid,DB1_SNAP_LIST,DB2_SNAP_LIST,s.DIC_VALUE,statlimit,qry_filter,decode(d2.is_remote,'YES',dblink,null),tp.DIC_VALUE
-        into 
+        into
           dbid1,dbid2,snap1,snap2,sortordr,statlim,qfilter,dblink,report_type
         from AWRCOMP_REPORTS, AWRDUMPS d1, AWRDUMPS d2, AWRCOMP_D_SORTORDRS s, awrcomp_d_report_types tp where report_id=p_report_id
           and DB1_DUMP_ID=d1.dump_id and DB2_DUMP_ID=d2.dump_id and s.DIC_ID(+)=REPORT_SORT_ORDR and tp.DIC_ID=report_type;
-        
-      l_sql:=replace_subst(l_sql);
-      l_awrcomp_scr:=replace_subst(l_awrcomp_scr);
-      l_noncomp_scr:=replace_subst(l_noncomp_scr);
-	  
-      dbms_output.enable(null);
-      begin      
-        if report_type='AWRCOMP' then
 
+      dbms_output.enable(null);
+      begin
+        if report_type='AWRCOMP' then
+        
+            l_sql:=replace_subst(l_sql);
+            l_awrcomp_scr:=replace_subst(l_awrcomp_scr);
+            l_noncomp_scr:=replace_subst(l_noncomp_scr);
+            
             --get query list for compare
             l_toexec:=l_sql;
             open qlist for l_sql;
@@ -284,10 +284,10 @@ create or replace package body awrtool_pkg as
               l_script:=l_script||chr(13)||chr(10)||l_cmd;
             end loop;
             close qlist;
-          
-            --start compare report      
+
+            --start compare report
             dbms_output.put_line('AWR Plan Comparator version '||awrtool_pkg.getconf('TOOLVERSION'));
-          
+
             l_occ:=1;
             loop
               dbms_output.put_line('TOP SQL '||substr(l_script,instr(l_script,'prompt TOP SQL #',1,l_occ)+15,4));
@@ -297,30 +297,30 @@ create or replace package body awrtool_pkg as
               l_occ:=l_occ+1;
               exit when instr(l_script,'define SQLID=',1,l_occ)=0 or l_occ>20;
             end loop;
-          
+
             dbms_output.put_line('AWR Plan Comparator: non-comparable queries.');
             l_toexec:=l_noncomp_scr;
             print_table(l_noncomp_scr);
-            
+
         elsif report_type='AWRMETRICS' then
             dbms_output.put_line('SYSMETRICS report.');
             l_sysmetr_scr:=replace_subst(l_sysmetr_scr_o,1);
             l_toexec:=l_sysmetr_scr;
 			dbms_output.put_line('DB1: ');
-            print_table(l_sysmetr_scr);      
+            print_table(l_sysmetr_scr);
             l_sysmetr_scr:=replace_subst(l_sysmetr_scr_o,2);
             l_toexec:=l_sysmetr_scr;
 			dbms_output.put_line('DB2: ');
-            print_table(l_sysmetr_scr);  
+            print_table(l_sysmetr_scr);
         else
             raise_application_error(-20000, 'Unknown report type: '||report_type);
         end if;
       exception
-        when others then l_awrcomp_rpt:=sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||l_sql_id||chr(10)||l_toexec; 
-      end;      
+        when others then l_awrcomp_rpt:=sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||l_sql_id||chr(10)||l_toexec;
+      end;
       --dbms_output.put_line(length(l_awrcomp_rpt));
       --update AWRCOMP_REPORTS set REPORT_CONTENT=l_awrcomp_rpt where report_id=p_report_id;
-      
+
       --save report
       --get report from buffer
       loop
@@ -329,10 +329,10 @@ create or replace package body awrtool_pkg as
           status => l_status);
         exit when l_status=1;
         l_awrcomp_rpt:=l_awrcomp_rpt||l_line||chr(13)||chr(10);
-      end loop; 
-      
+      end loop;
+
       if l_awrcomp_rpt is null then l_awrcomp_rpt:='No fata found for '||report_type; end if;
-      
+
       select REPORT_CONTENT into l_trg_lob from AWRCOMP_REPORTS where report_id=p_report_id for update;
       declare
         ll_d_off integer := 1;
@@ -345,16 +345,16 @@ create or replace package body awrtool_pkg as
         src_clob       => l_awrcomp_rpt,
         amount         => DBMS_LOB.LOBMAXSIZE,
         dest_offset    => ll_d_off,
-        src_offset     => ll_s_off, 
+        src_offset     => ll_s_off,
         blob_csid      => dbms_lob.DEFAULT_CSID,
         lang_context   => ll_lang_context,
         warning        => ll_warn);
       end;
       commit;
     exception
-      when others then raise_application_error(-20000, sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||l_awrcomp_rpt);
-    end;  
-    
+      when others then raise_application_error(-20000, sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||substr(l_awrcomp_rpt,1,100));
+    end;
+
 procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2) is
   l_dbid number;
   l_min_snap_id number;
@@ -363,16 +363,16 @@ procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2) 
   l_max_snap_dt timestamp(3);
   l_db_description awrdumps.db_description%type;
 begin
-    for i in (select filebody,filename 
-                from awrdumps a,awrdumps_files b 
+    for i in (select proj_id,filebody,filename
+                from awrdumps a,awrdumps_files b
                where a.dump_id=b.dump_id and a.dump_id=V('P12_DUMP_ID')
                  and status<>'LOADED') loop
       awrtool_pkg.save_dump(i.filebody,i.filename,awrtool_pkg.getconf('WORKDIR'));
       if p_dest='REM' then
         awrtool_pkg.remote_awr_load(p_stg_user => awrtool_pkg.getconf('AWRSTGUSER'),
-          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'), 
-          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'), 
-          p_dir => awrtool_pkg.getconf('WORKDIR'), 
+          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'),
+          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'),
+          p_dir => awrtool_pkg.getconf('WORKDIR'),
           p_dmpfile => substr(i.filename,1,instr(i.filename,'.',-1)-1),
           p_dbid=>l_dbid,
           p_min_snap_id=>l_min_snap_id,
@@ -382,9 +382,9 @@ begin
           p_db_description=>l_db_description);
       else
         awrtool_pkg.awr_load(p_stg_user => awrtool_pkg.getconf('AWRSTGUSER'),
-          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'), 
-          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'), 
-          p_dir => awrtool_pkg.getconf('WORKDIR'), 
+          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'),
+          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'),
+          p_dir => awrtool_pkg.getconf('WORKDIR'),
           p_dmpfile => substr(i.filename,1,instr(i.filename,'.',-1)-1),
           p_dbid=>l_dbid,
           p_min_snap_id=>l_min_snap_id,
@@ -393,7 +393,7 @@ begin
           p_max_snap_dt=>l_max_snap_dt,
           p_db_description=>l_db_description);
       end if;
-      update awrdumps set status='LOADED',
+      update awrdumps set
         dbid=l_dbid,
         min_snap_id=l_min_snap_id,
         max_snap_id=l_max_snap_id,
@@ -402,6 +402,8 @@ begin
         db_description=l_db_description,
         is_remote=decode(p_dest,'REM','YES','NO')
       where dump_id=p_dump_id;
+      awrtools_contr.lcc_dump_load(p_dump_id);
+      awrtools_contr.lcc_project_create(i.proj_id);
       commit;
       awrtool_pkg.remove_dump(i.filename,awrtool_pkg.getconf('WORKDIR'));
     end loop;
@@ -413,11 +415,10 @@ begin
   for i in (select * from awrdumps where dump_id=p_dump_id) loop
     if i.is_remote='YES' then
         awrtool_pkg.drop_snapshot_range@DBAWR1(low_snap_id => i.min_snap_id,high_snap_id => i.max_snap_id,dbid => i.dbid);
-      else 
+      else
       dbms_workload_repository.drop_snapshot_range(low_snap_id => i.min_snap_id,high_snap_id => i.max_snap_id,dbid => i.dbid);
     end if;
-    update awrdumps set status='UNLOADED' where dump_id=p_dump_id;
+    awrtools_contr.lcc_dump_unload(p_dump_id);
   end loop;
 end;
 end;
-/

@@ -520,7 +520,7 @@ $END
   for i in (select sql_plan_hash_value||' '||lpad(nvl(to_char(sql_plan_line_id),' '),3,' ')||' '||lpad(nvl(sql_plan_operation,' '),30,' ')|| ' '|| lpad(nvl(sql_plan_options,' '),20,' ')||' '||
                    lpad(nvl(event, 'CPU'),35, ' ')||' '||
                    count(1) * 10 line
-              from dba_hist_active_sess_history
+              from dba_hist_active_sess_history&dblnk.
              where sql_id = l_sql_id and dbid=&dbid2.
                and instance_number = 1
                and session_type='FOREGROUND'
@@ -568,7 +568,7 @@ $END
   l_rown:=1; 
   for i in (select  'DB2:' src, trunc(sample_time, 'hh') sample_time, round(avg(c)) avg_cnt, max(c)max_cnt
               from (select sample_time,sql_id, count(1) c
-                      from dba_hist_active_sess_history
+                      from dba_hist_active_sess_history&dblnk.
                      where dbid = &dbid2.
                        and instance_number = 1
                        and session_type='FOREGROUND'

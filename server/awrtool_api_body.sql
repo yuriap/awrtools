@@ -9,6 +9,7 @@ create or replace package body awrtools_api as
       proj_date,
       proj_description,
       proj_status) VALUES (p_proj_name,default,p_proj_descr,'ACTIVE') returning proj_id into l_proj_id;
+    awrtools_contr.lcc_project_create(l_proj_id);
   end add_project;
 
   procedure edit_project(p_proj_id awrtoolproject.proj_id%type,
@@ -25,7 +26,8 @@ create or replace package body awrtools_api as
 
   procedure del_project(p_proj_id awrtoolproject.proj_id%type) as
   begin
-   delete from awrtoolproject where proj_id=p_proj_id;
+    archive_project(p_proj_id);
+    delete from awrtoolproject where proj_id=p_proj_id;
   end del_project;
 
   procedure archive_project(p_proj_id awrtoolproject.proj_id%type) as
@@ -35,23 +37,24 @@ create or replace package body awrtools_api as
     for i in (select * from AWRDUMPS where proj_id=p_proj_id and status='LOADED') loop
       if i.is_remote='YES' then
         awrtool_pkg.drop_snapshot_range@DBAWR1(low_snap_id => i.min_snap_id,high_snap_id => i.max_snap_id,dbid => i.dbid);
-	  else
+	    else
         dbms_workload_repository.drop_snapshot_range(low_snap_id => i.min_snap_id,high_snap_id => i.max_snap_id,dbid => i.dbid);
       end if;
-      update AWRDUMPS set status='UNLOADED' where dump_id=i.dump_id;
+      awrtools_contr.lcc_dump_unload(i.dump_id);
     end loop;
 
     --3) set status ARCHIVED for project
-    update awrtoolproject set proj_status='ARCHIVED' where proj_id=p_proj_id;
-
+    awrtools_contr.lcc_project_arcive(p_proj_id);
   end archive_project;
   
   procedure compress_project(p_proj_id awrtoolproject.proj_id%type) as
   begin
     archive_project(p_proj_id);
-	update AWRDUMPS_FILES set filebody=null where dump_id in (select dump_id from AWRDUMPS where proj_id=p_proj_id);
-	update AWRDUMPS set status='COMPRESSED' where dump_id in (select dump_id from AWRDUMPS where proj_id=p_proj_id);
-	update awrtoolproject set proj_status='COMPRESSED' where proj_id=p_proj_id;
+	  update AWRDUMPS_FILES set filebody=null where dump_id in (select dump_id from AWRDUMPS where proj_id=p_proj_id);
+    for i in (select * from AWRDUMPS where proj_id=p_proj_id) loop
+      awrtools_contr.lcc_dump_compress(i.dump_id);
+    end loop;
+    awrtools_contr.lcc_project_compress(p_proj_id); 
   end;
   
   procedure del_report(p_report_id awrcomp_reports.report_id%type)

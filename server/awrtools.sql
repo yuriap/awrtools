@@ -1,3 +1,10 @@
+begin
+  for i in (select proj_id from awrtoolproject) loop
+    awrtools_api.archive_project(i.proj_id);
+  end loop;
+end;
+/
+
 drop table awrcomp_scripts;
 drop table awrconfig;
 drop table awrcomp_reports;
@@ -99,6 +106,8 @@ set define off
 set define on
 @awrtool_api_spec
 @awrtool_api_body
+@awrtools_contr_spec 
+@awrtools_contr_body
 
 --Load data
 insert into awrconfig values ('WORKDIR','AWRDATA','Oracle directory for loading AWR dumps');
