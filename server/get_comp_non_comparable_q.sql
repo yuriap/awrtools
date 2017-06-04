@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 with 
 function getstat(p_sql_id varchar2, p_src varchar2) return varchar2 is
   p_disk_reads_delta number;

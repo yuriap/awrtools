@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 drop user awrtools cascade;
 --under sys
 define dirpath="/u01/app/oracle/files/awrdata/"

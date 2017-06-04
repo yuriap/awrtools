@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 set define off verify off feedback off
 whenever sqlerror exit sql.sqlcode rollback
 --------------------------------------------------------------------------------
@@ -9093,7 +9094,7 @@ wwv_flow_api.create_page_plug(
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'Web AWR Tools Version 1.0<br>',
+'rem Web AWR Tools. Ver 1.000<br>',
 '<br>',
 'AWR dump warehouse with web-based UI.<br>',
 '<br>',

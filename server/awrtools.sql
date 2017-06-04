@@ -1,3 +1,5 @@
+rem Web AWR Tools. Ver 1.000
+
 begin
   for i in (select proj_id from awrtoolproject) loop
     awrtools_api.archive_project(i.proj_id);

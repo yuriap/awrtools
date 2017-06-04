@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 create or replace package awrtool_pkg as
 
   procedure awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2);

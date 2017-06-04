@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 with a as (select * from dba_hist_sysmetric_history&p_dblnk. where dbid=&p_dbid. and snap_id in (&p_snapshots.) and instance_number=1)
 select * 
 from

@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 --remote sysdba
 define dirpath="/u01/app/oracle/files/awrdata/"
 create or replace directory awrdata as '&dirpath.';

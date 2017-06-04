@@ -1,4 +1,4 @@
-Web AWR Tools Version 1.0
+Web AWR Tools. Ver 1.000
 
 AWR dump warehouse with web-based UI.
 

@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 --remote schema
 CREATE OR REPLACE CONTEXT remote_awr_xplan_ctx USING remote_awr_xplan_init;
 create or replace procedure remote_awr_xplan_init(p_sql_id varchar2, p_plan_hash varchar2, p_dbid varchar2)

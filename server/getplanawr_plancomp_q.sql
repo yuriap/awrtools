@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 declare
   type t_my_rec is record(
     dbid            number,

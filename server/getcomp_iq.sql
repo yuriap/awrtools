@@ -1,3 +1,4 @@
+rem Web AWR Tools. Ver 1.000
 select 'prompt TOP SQL #' || rownum || chr(13) || chr(10) || cmd cmd, '-- &ordcol.(' || tot || ')' capt
   from (select 'define SQLID=' || sql_id || chr(13) || chr(10) || '@getplanawr_plancomp' cmd, &ordcol_expr. tot --,parsing_schema_name,module,action
           from (select db2.*
