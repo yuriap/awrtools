@@ -16,9 +16,9 @@ drop table awrtoolproject;
 drop table awrcomp_d_sortordrs;
 drop table awrcomp_d_report_types;
 
-
 define DBLINK=DBAWR1
 
+drop database link &DBLINK.;
 create database link &DBLINK. connect to remawrtools identified by remawrtools using 'localhost:1521/db12c22.localdomain';
 
 --Create tables
@@ -102,14 +102,17 @@ script_content clob
 );
 
 --Create source code objects
-@awrtool_pkg_spec
+@@awrtool_pkg_spec
 set define off
-@awrtool_pkg_body
+@@awrtool_pkg_body
 set define on
-@awrtool_api_spec
-@awrtool_api_body
-@awrtools_contr_spec 
-@awrtools_contr_body
+@@awrtool_api_spec
+@@awrtool_api_body
+@@awrtools_contr_spec 
+@@awrtools_contr_body
+
+
+
 
 --Load data
 insert into awrconfig values ('WORKDIR','AWRDATA','Oracle directory for loading AWR dumps');
