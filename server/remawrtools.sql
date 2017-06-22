@@ -24,4 +24,4 @@ max_snap_dt timestamp(3),
 db_description varchar2(1000)
 );
 
-@awrtool_pkg_rem
+@@awrtool_pkg_rem

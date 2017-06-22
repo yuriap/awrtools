@@ -4,6 +4,7 @@ define dirpath="/u01/app/oracle/files/awrdata/"
 create or replace directory awrdata as '&dirpath.';
 create tablespace awrtoolstbs datafile size 100m autoextend on next 100m maxsize 10000m;
 
+drop user remawrtools cascade;
 create user remawrtools identified by remawrtools
 default tablespace awrtoolstbs
 temporary tablespace temp;

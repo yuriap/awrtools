@@ -1,4 +1,3 @@
-rem Web AWR Tools. Ver 1.000
 declare
   type t_my_rec is record(
     dbid            number,
@@ -473,6 +472,7 @@ $END
                    from dba_hist_active_sess_history
                   where dbid = &dbid1.
                     and snap_id in (&snaps1.)
+					and SQL_PLAN_HASH_VALUE=my_rec(a).plan_hash_value
                     and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)) x
                   group by wait_class, event),
                   remotes as ( 
@@ -481,6 +481,7 @@ $END
                    from dba_hist_active_sess_history&dblnk.
                   where dbid = &dbid2.
                     and snap_id in (&snaps2.)
+					and SQL_PLAN_HASH_VALUE=my_rec(b).plan_hash_value
                     and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)) x
                   group by wait_class, event)
                  select decode(wait_class,'_','.',wait_class) wait_class,event,cntl,cntr,round(100*(cntr-cntl)/decode(cntr,0,1,cntr),2) delta
@@ -502,10 +503,11 @@ $END
                    lpad(nvl(event, 'CPU'),35, ' ')||' '||
                    count(1) * 10 line
               from dba_hist_active_sess_history
-             where sql_id = l_sql_id and dbid=&dbid1.
+             where (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id) and dbid=&dbid1.
                and instance_number = 1
                and session_type='FOREGROUND'
                and snap_id in (&snaps1.)
+			   and SQL_PLAN_HASH_VALUE=my_rec(a).plan_hash_value
              group by sql_plan_hash_value,
                       sql_plan_line_id,
                       sql_plan_operation,
@@ -517,15 +519,18 @@ $END
     l_rown:=l_rown+1;
    end loop;
 
+  if l_rown=1 then l_qash(1)(1):='No data found'; end if;
+   
   l_rown:=1;
   for i in (select sql_plan_hash_value||' '||lpad(nvl(to_char(sql_plan_line_id),' '),3,' ')||' '||lpad(nvl(sql_plan_operation,' '),30,' ')|| ' '|| lpad(nvl(sql_plan_options,' '),20,' ')||' '||
                    lpad(nvl(event, 'CPU'),35, ' ')||' '||
                    count(1) * 10 line
               from dba_hist_active_sess_history&dblnk.
-             where sql_id = l_sql_id and dbid=&dbid2.
+             where (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id) and dbid=&dbid2.
                and instance_number = 1
                and session_type='FOREGROUND'
                and snap_id in (&snaps2.)
+			   and SQL_PLAN_HASH_VALUE=my_rec(b).plan_hash_value
              group by sql_plan_hash_value,
                       sql_plan_line_id,
                       sql_plan_operation,
@@ -536,7 +541,8 @@ $END
     l_qash(2)(l_rown):=i.line;
     l_rown:=l_rown+1;
    end loop;
-   
+  if l_rown=1 then l_qash(2)(1):='No data found'; end if;
+  
   print_incolumn(l_qash, l_colnm, 2);
 ---------------------------------------------------------------------------------      
   p(rpad('-',max_l*2+1,'-'));
@@ -555,8 +561,9 @@ $END
                      where dbid = &dbid1.
                        and instance_number = 1
                        and session_type='FOREGROUND'
-                       and sql_id=l_sql_id
+                       and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)
                        and snap_id in (&snaps1.)
+					   and SQL_PLAN_HASH_VALUE=my_rec(a).plan_hash_value
                      group by sample_time,sql_id)
              group by trunc(sample_time, 'hh')
              order by 1,2
@@ -565,7 +572,7 @@ $END
     l_qash(1)(l_rown):=i.src||' '||to_char(i.sample_time,'yyyy/mm/dd hh24:mi')||' '||i.avg_cnt||' '||i.max_cnt;
     l_rown:=l_rown+1;    
   end loop;
-  
+  if l_rown=1 then l_qash(1)(1):='No data found'; end if;
   l_rown:=1; 
   for i in (select  'DB2:' src, trunc(sample_time, 'hh') sample_time, round(avg(c)) avg_cnt, max(c)max_cnt
               from (select sample_time,sql_id, count(1) c
@@ -573,8 +580,9 @@ $END
                      where dbid = &dbid2.
                        and instance_number = 1
                        and session_type='FOREGROUND'
-                       and sql_id=l_sql_id
+                       and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)
                        and snap_id in (&snaps2.)
+					   and SQL_PLAN_HASH_VALUE=my_rec(b).plan_hash_value
                      group by sample_time,sql_id)
              group by trunc(sample_time, 'hh')
              order by 1,2
@@ -583,6 +591,7 @@ $END
     l_qash(2)(l_rown):=i.src||' '||to_char(i.sample_time,'yyyy/mm/dd hh24:mi')||' '||i.avg_cnt||' '||i.max_cnt;
     l_rown:=l_rown+1;    
   end loop;  
+  if l_rown=1 then l_qash(2)(1):='No data found'; end if;
   print_incolumn(l_qash, l_colnm, 2);
 ---------------------------------------------------------------------------------
 
