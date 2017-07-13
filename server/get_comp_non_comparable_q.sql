@@ -40,12 +40,12 @@ begin
   end if;	
   if p_executions_delta=0 then p_executions_delta:=1; end if;
   l_result:=substr(
-    'ELA (sec):...'||lpad(round(p_elapsed_time_delta/1e6,3),&fcol.,'.')||' / '||lpad(round(p_elapsed_time_delta/p_executions_delta/1e6,3),&fcol.,'.') ||chr(10)||
-	'CPU (sec):...'||lpad(round(p_cpu_time_delta/1e6,3),&fcol.,'.')    ||' / '||lpad(round(p_cpu_time_delta/p_executions_delta/1e6,3),&fcol.,'.') ||chr(10)||
-	'LIO:.........'||lpad(to_char(p_buffer_gets_delta,'fm999g999g999g999'),&fcol.,'.')              ||' / '||lpad(to_char(round(p_buffer_gets_delta/p_executions_delta),'fm999g999g999g999'),&fcol.,'.') ||chr(10)||
-	'PIO:.........'||lpad(to_char(p_disk_reads_delta,'fm999g999g999g999'),&fcol.,'.')               ||' / '||lpad(to_char(round(p_disk_reads_delta/p_executions_delta),'fm999g999g999g999'),&fcol.,'.') ||chr(10)||
-	'IO tim (sec):'||lpad(round(p_iowait_delta/1e6,3),&fcol.,'.')      ||' / '||lpad(round(p_iowait_delta/p_executions_delta/1e6,3),&fcol.,'.') ||chr(10)||
-	'EXEC:........'||lpad(p_executions_delta,&fcol.,'.')               ||' PLAN HASH: '||p_plan_hash
+    'ELA (sec):...'||lpad(round(p_elapsed_time_delta/1e6,3),&fcol.,'.')||' / '||lpad(round(p_elapsed_time_delta/p_executions_delta/1e6,3),&fcol.,'.') ||';'||chr(10)||
+	'CPU (sec):...'||lpad(round(p_cpu_time_delta/1e6,3),&fcol.,'.')    ||' / '||lpad(round(p_cpu_time_delta/p_executions_delta/1e6,3),&fcol.,'.') ||';'||chr(10)||
+	'LIO:.........'||lpad(to_char(p_buffer_gets_delta,'fm999g999g999g999'),&fcol.,'.')              ||' / '||lpad(to_char(round(p_buffer_gets_delta/p_executions_delta),'fm999g999g999g999'),&fcol.,'.') ||';'||chr(10)||
+	'PIO:.........'||lpad(to_char(p_disk_reads_delta,'fm999g999g999g999'),&fcol.,'.')               ||' / '||lpad(to_char(round(p_disk_reads_delta/p_executions_delta),'fm999g999g999g999'),&fcol.,'.') ||';'||chr(10)||
+	'IO tim (sec):'||lpad(round(p_iowait_delta/1e6,3),&fcol.,'.')      ||' / '||lpad(round(p_iowait_delta/p_executions_delta/1e6,3),&fcol.,'.') ||';'||chr(10)||
+	'EXEC:........'||lpad(p_executions_delta,&fcol.,'.')               ||' PLAN: '||p_plan_hash
 	,1,4000);
   return l_result;
 end;

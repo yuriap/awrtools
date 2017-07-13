@@ -1,4 +1,3 @@
-rem Web AWR Tools. Ver 1.000
 create or replace package body awrtools_contr as
 
   procedure lcc_project_create(p_proj_id awrtoolproject.proj_id%type) as

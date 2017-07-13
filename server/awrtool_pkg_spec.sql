@@ -1,4 +1,3 @@
-rem Web AWR Tools. Ver 1.000
 create or replace package awrtool_pkg as
 
   function getconf(p_key varchar2) return varchar2;

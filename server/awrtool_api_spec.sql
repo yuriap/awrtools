@@ -1,4 +1,3 @@
-rem Web AWR Tools. Ver 1.000
 create or replace package awrtools_api as 
 
   /* TODO enter package declarations (types, exceptions, methods etc) here */ 

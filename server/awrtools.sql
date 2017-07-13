@@ -1,4 +1,4 @@
-rem Web AWR Tools. Ver 1.000
+@version
 
 begin
   for i in (select proj_id from awrtoolproject) loop
@@ -120,7 +120,7 @@ insert into awrconfig values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load p
 insert into awrconfig values ('AWRSTGTBLSPS','AWRTOOLSTBS','Default tablespace for AWR staging user');
 insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
 insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
-insert into awrconfig values ('TOOLVERSION','1.2','AWR tool version');
+insert into awrconfig values ('TOOLVERSION','&awrtoolversion.','AWR tool version');
 
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)','Sort by Elapsed Time','ela_tot');
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(disk_reads_delta)','Sort by Disk Reads','reads_tot');

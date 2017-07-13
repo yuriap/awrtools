@@ -25,3 +25,8 @@ Use-cases:
 4. Create reports (the are stored automatically).
 5. Archive project: unload AWR data from AWR repository for dumps. Can be loaded in the future.
 6. Compress project: unload AWR data from AWR repository for dumps. Delete AWR dumps from database storage. Only created reports will remain available.
+
+Version 1.2
+Fixed:
+1) Report query print engine.
+2) Interface
