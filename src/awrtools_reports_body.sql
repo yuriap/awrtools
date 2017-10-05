@@ -1,5 +1,5 @@
-create or replace package body awrtool_pkg as
-
+create or replace package body awrtools_reports as
+  
     type t_column_spec_rec is record (
       header varchar2(50),
       width  number,
@@ -9,127 +9,7 @@ create or replace package body awrtool_pkg as
     type t_column_spec is table of t_column_spec_rec index by varchar2(100);
   
     l_col_spec t_column_spec;
-
-    function getconf(p_key varchar2) return varchar2
-    is
-      l_res awrconfig.cvalue%type;
-    begin
-      select cvalue into l_res from awrconfig where ckey=p_key;
-      return l_res;
-    end;
-
-    procedure save_dump(p_blob blob, p_filename varchar2, p_dir varchar2)
-    is
-      l_file      UTL_FILE.FILE_TYPE;
-      l_buffer    RAW(32767);
-      l_amount    BINARY_INTEGER := 32767;
-      l_pos       INTEGER := 1;
-      l_blob_len  INTEGER;
-    BEGIN
-      l_blob_len := DBMS_LOB.getlength(p_blob);
-
-      -- Open the destination file.
-      --l_file := UTL_FILE.fopen('BLOBS','MyImage.gif','w', 32767);
-      l_file := UTL_FILE.fopen(p_dir,p_filename,'wb', 32767);
-
-      -- Read chunks of the BLOB and write them to the file
-      -- until complete.
-      WHILE l_pos < l_blob_len LOOP
-        DBMS_LOB.read(p_blob, l_amount, l_pos, l_buffer);
-        UTL_FILE.put_raw(l_file, l_buffer, TRUE);
-        l_pos := l_pos + l_amount;
-      END LOOP;
-
-      -- Close the file.
-      UTL_FILE.fclose(l_file);
-
-    EXCEPTION
-      WHEN OTHERS THEN
-        -- Close the file if something goes wrong.
-        IF UTL_FILE.is_open(l_file) THEN
-          UTL_FILE.fclose(l_file);
-        END IF;
-        RAISE;
-    END;
-
-    procedure remove_dump(p_filename varchar2, p_dir varchar2)
-    is
-    begin
-      UTL_FILE.FREMOVE (
-       location => p_dir,
-       filename => p_filename);
-    end;
-    procedure remote_awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2,
-                       p_dbid out number,p_min_snap_id out number,p_max_snap_id out number,p_min_snap_dt out timestamp,p_max_snap_dt out timestamp,p_db_description out varchar2)
-    is
-    begin
-        delete from awrdumps@dbawr1;
-        commit;
-        AWRTOOL_PKG.awr_load@dbawr1 (
-          P_STG_USER => P_STG_USER,
-          P_STG_TABLESPACE => P_STG_TABLESPACE,
-          P_STG_TEMP => P_STG_TEMP,
-          P_DIR => P_DIR,
-          P_DMPFILE => P_DMPFILE) ;
-        select
-          DBID,MIN_SNAP_ID,MAX_SNAP_ID,MIN_SNAP_DT,MAX_SNAP_DT,DB_DESCRIPTION
-          into p_dbid,p_min_snap_id,p_max_snap_id,p_min_snap_dt,p_max_snap_dt,p_db_description
-        from awrdumps@dbawr1;
-        delete from awrdumps@dbawr1;
-    end;
-
-    procedure awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2,
-                       p_dbid out number,p_min_snap_id out number,p_max_snap_id out number,p_min_snap_dt out timestamp,p_max_snap_dt out timestamp,p_db_description out varchar2)
-    is
-    --awr staging
-      l_user number;
-    begin
-      select count(1) into l_user from dba_users where username=upper(p_stg_user);
-      if l_user=1 then execute immediate 'drop user '||p_stg_user||' cascade'; end if;
-
-      execute immediate
-        'create user '||p_stg_user||'
-          identified by '||p_stg_user||'
-          default tablespace '||p_stg_tablespace||'
-          temporary tablespace '||p_stg_temp;
-
-      execute immediate 'alter user '||p_stg_user||' quota unlimited on '||p_stg_tablespace;
-      /* call PL/SQL routine to load the data into the staging schema */
-      sys.dbms_swrf_internal.awr_load(schname  => p_stg_user,
-                                  dmpfile  => p_dmpfile,
-                                  dmpdir   => p_dir);
-      sys.dbms_swrf_internal.move_to_awr(schname => p_stg_user);
-      sys.dbms_swrf_internal.clear_awr_dbid;
-
-      execute immediate 'SELECT
-        min(snap_id),max(snap_id),
-        min(end_interval_time),max(end_interval_time),
-        min(dbid)
-        FROM
-        awrstg.wrm$_snapshot'
-        into
-        p_min_snap_id,p_max_snap_id,
-        p_min_snap_dt,p_max_snap_dt,p_dbid;
-      execute immediate q'[
-      select unique version || ', ' || host_name || ', ' || platform_name
-        from awrstg.WRM$_DATABASE_INSTANCE i,
-             awrstg.wrm$_snapshot sn
-       where i.dbid = sn.dbid]'
-       into p_db_description;
-
-      execute immediate 'drop user '||p_stg_user||' cascade';
-    end;
-
-    function getscript(p_script_id varchar2) return clob
-    is
-      l_res clob;
-    begin
-      select script_content into l_res from AWRCOMP_SCRIPTS where script_id=p_script_id;
-      return l_res;
-    exception
-      when no_data_found then raise_application_error(-20000,'Script "'||p_script_id||'" not found.');
-    end;
-
+    
     procedure print_table(p_query in varchar2) is
       l_theCursor   integer default dbms_sql.open_cursor;
       l_columnValue varchar2(4000);
@@ -354,7 +234,7 @@ create or replace package body awrtool_pkg as
     procedure create_awrcomp_report(p_report_id AWRCOMP_REPORTS.REPORT_ID%type)
     is
       qlist sys_refcursor;
-      l_qrylist clob := awrtool_pkg.getscript('GETQUERYLIST');
+      l_qrylist clob := awrtools_api.getscript('GETQUERYLIST');
 
       dbid1 AWRDUMPS.DBID%type;
       dbid2 AWRDUMPS.DBID%type;
@@ -371,9 +251,9 @@ create or replace package body awrtool_pkg as
 
       l_script clob;
 
-      l_awrcomp_scr clob := awrtool_pkg.getscript('GETCOMPREPORT');
-      l_noncomp_scr clob := awrtool_pkg.getscript('GETNONCOMPREPORT');
-      l_sysmetr_scr_o clob := awrtool_pkg.getscript('GETSYSMETRREPORT');
+      l_awrcomp_scr clob := awrtools_api.getscript('GETCOMPREPORT');
+      l_noncomp_scr clob := awrtools_api.getscript('GETNONCOMPREPORT');
+      l_sysmetr_scr_o clob := awrtools_api.getscript('GETSYSMETRREPORT');
       l_sysmetr_scr clob;
 
       l_occ    number;
@@ -451,7 +331,7 @@ create or replace package body awrtool_pkg as
             close qlist;
 
             --start compare report
-            dbms_output.put_line('AWR Plan Comparator version '||awrtool_pkg.getconf('TOOLVERSION'));
+            dbms_output.put_line('AWR Plan Comparator version '||awrtools_api.getconf('TOOLVERSION'));
 
             if l_sql_cnt>0 then
               l_occ:=1;
@@ -563,71 +443,5 @@ create or replace package body awrtool_pkg as
       when others then raise_application_error(-20000, sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||substr(l_awrcomp_rpt,1,100));
     end;
 
-procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2) is
-  l_dbid number;
-  l_min_snap_id number;
-  l_max_snap_id number;
-  l_min_snap_dt timestamp(3);
-  l_max_snap_dt timestamp(3);
-  l_db_description awrdumps.db_description%type;
-begin
-    for i in (select proj_id,filebody,filename
-                from awrdumps a,awrdumps_files b
-               where a.dump_id=b.dump_id and a.dump_id=V('P12_DUMP_ID')
-                 and status<>'LOADED') loop
-      awrtool_pkg.save_dump(i.filebody,i.filename,awrtool_pkg.getconf('WORKDIR'));
-      if p_dest='REM' then
-        awrtool_pkg.remote_awr_load(p_stg_user => awrtool_pkg.getconf('AWRSTGUSER'),
-          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'),
-          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'),
-          p_dir => awrtool_pkg.getconf('WORKDIR'),
-          p_dmpfile => substr(i.filename,1,instr(i.filename,'.',-1)-1),
-          p_dbid=>l_dbid,
-          p_min_snap_id=>l_min_snap_id,
-          p_max_snap_id=>l_max_snap_id,
-          p_min_snap_dt=>l_min_snap_dt,
-          p_max_snap_dt=>l_max_snap_dt,
-          p_db_description=>l_db_description);
-      else
-        awrtool_pkg.awr_load(p_stg_user => awrtool_pkg.getconf('AWRSTGUSER'),
-          p_stg_tablespace => awrtool_pkg.getconf('AWRSTGTBLSPS'),
-          p_stg_temp => awrtool_pkg.getconf('AWRSTGTMP'),
-          p_dir => awrtool_pkg.getconf('WORKDIR'),
-          p_dmpfile => substr(i.filename,1,instr(i.filename,'.',-1)-1),
-          p_dbid=>l_dbid,
-          p_min_snap_id=>l_min_snap_id,
-          p_max_snap_id=>l_max_snap_id,
-          p_min_snap_dt=>l_min_snap_dt,
-          p_max_snap_dt=>l_max_snap_dt,
-          p_db_description=>l_db_description);
-      end if;
-      update awrdumps set
-        dbid=l_dbid,
-        min_snap_id=l_min_snap_id,
-        max_snap_id=l_max_snap_id,
-        min_snap_dt=l_min_snap_dt,
-        max_snap_dt=l_max_snap_dt,
-        db_description=l_db_description,
-        is_remote=decode(p_dest,'REM','YES','NO')
-      where dump_id=p_dump_id;
-      awrtools_contr.lcc_dump_load(p_dump_id);
-      awrtools_contr.lcc_project_create(i.proj_id);
-      commit;
-      awrtool_pkg.remove_dump(i.filename,awrtool_pkg.getconf('WORKDIR'));
-    end loop;
-end;
-
-procedure unload_dump(p_dump_id awrdumps.dump_id%type)
-is
-begin
-  for i in (select * from awrdumps where dump_id=p_dump_id) loop
-    if i.is_remote='YES' then
-        awrtool_pkg.drop_snapshot_range@DBAWR1(low_snap_id => i.min_snap_id,high_snap_id => i.max_snap_id,dbid => i.dbid);
-      else
-      dbms_workload_repository.drop_snapshot_range(low_snap_id => i.min_snap_id,high_snap_id => i.max_snap_id,dbid => i.dbid);
-    end if;
-    awrtools_contr.lcc_dump_unload(p_dump_id);
-  end loop;
-end;
 end;
 /

@@ -1,123 +1,120 @@
-@version
+conn &localscheme./&localscheme.@&localdb.
 
-begin
-  for i in (select proj_id from awrtoolproject) loop
-    awrtools_api.archive_project(i.proj_id);
-  end loop;
-end;
-/
-
-drop table awrcomp_scripts;
-drop table awrconfig;
-drop table awrcomp_reports;
-drop table awrdumps_files;
-drop table awrdumps;
-drop table awrtoolproject;
-drop table awrcomp_d_sortordrs;
-drop table awrcomp_d_report_types;
-
-define DBLINK=DBAWR1
-
-drop database link &DBLINK.;
-create database link &DBLINK. connect to remawrtools identified by remawrtools using 'localhost:1521/db12c22.localdomain';
+create database link &DBLINK. connect to &remotescheme. identified by &remotescheme. using '&dblinkstr.';
 
 --Create tables
+
+create table awrconfig (
+    ckey varchar2(100),
+    cvalue varchar2(4000),
+    descr varchar2(200)
+);
+
+create table awrcomp_scripts (
+    script_id varchar(100) primary key,
+    script_content clob
+);
+
+create table awrcomp_d_sortordrs (
+    dic_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+    dic_value varchar2(1000) NOT NULL,
+    dic_display_value varchar2(100),
+    dic_filename_pref varchar2(100) NOT NULL
+);
+
+create table awrcomp_d_report_types (
+    dic_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+    dic_value varchar2(1000) NOT NULL,
+    dic_display_value varchar2(100),
+    dic_filename_pref varchar2(100) NOT NULL
+);
 
 CREATE TABLE awrtoolproject (
     proj_id            NUMBER GENERATED ALWAYS AS IDENTITY primary key,
     proj_name          VARCHAR2(100),
     proj_date          DATE default sysdate,
     proj_description   VARCHAR2(4000),
-    proj_status        varchar2(10) default 'ACTIVE' not null check (proj_status in ('ACTIVE','ARCHIVED','COMPRESSED'))
+    proj_status        varchar2(10) /* default 'ACTIVE' not null check (proj_status in ('ACTIVE','ARCHIVED','COMPRESSED'))*/
 );
 
-
-create table awrconfig (
-ckey varchar2(100),
-cvalue varchar2(4000),
-descr varchar2(200)
-);
 
 create table awrdumps (
-dump_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-proj_id NUMBER NOT NULL REFERENCES awrtoolproject ( proj_id ) on delete cascade,
-loading_date date default sysdate,
-filename varchar2(512),
-status varchar2(10) default 'NEW' check (status in ('NEW','LOADED','UNLOADED','COMPRESSED')),
-dbid number,
-min_snap_id number,
-max_snap_id number,
-min_snap_dt timestamp(3),
-max_snap_dt timestamp(3),
-is_remote varchar2(10) default 'NO' NOT NULL check (is_remote in ('YES','NO')),
-db_description varchar2(1000),
-dump_description varchar2(4000)
+    dump_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+    proj_id NUMBER NOT NULL REFERENCES awrtoolproject ( proj_id ) on delete cascade,
+    loading_date date default sysdate,
+    filename varchar2(512),
+    status varchar2(10), /* default 'NEW' check (status in ('NEW','LOADED','UNLOADED','COMPRESSED')), */
+    dbid number,
+    min_snap_id number,
+    max_snap_id number,
+    min_snap_dt timestamp(3),
+    max_snap_dt timestamp(3),
+    is_remote varchar2(10) default 'NO' NOT NULL check (is_remote in ('YES','NO')),
+    db_description varchar2(1000),
+    dump_description varchar2(4000)
 );
 
 create index awrdumps_proj on awrdumps(proj_id);
 
 create table awrdumps_files (
-dump_id number NOT NULL unique references awrdumps(dump_id) on delete cascade,
-filebody blob
+    dump_id number NOT NULL unique references awrdumps(dump_id) on delete cascade,
+    filebody blob
 );
 
-
-create table awrcomp_d_sortordrs (
-dic_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-dic_value varchar2(1000) NOT NULL,
-dic_display_value varchar2(100),
-dic_filename_pref varchar2(100) NOT NULL
-);
-
-create table awrcomp_d_report_types (
-dic_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-dic_value varchar2(1000) NOT NULL,
-dic_display_value varchar2(100),
-dic_filename_pref varchar2(100) NOT NULL
-);
 
 create table awrcomp_reports(
-report_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-created date default sysdate,
-db1_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
-db2_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
-db1_snap_list varchar2(1000),
-db2_snap_list varchar2(1000),
-report_type number references awrcomp_d_sortordrs(dic_id),
-report_sort_ordr number references awrcomp_d_report_types(dic_id),
-statlimit number,
-qry_filter varchar2(1000),
-dblink varchar2(30),
-report_content blob,
-file_mimetype varchar2(30) default 'text/plain',
-file_name varchar2(100)
+    report_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+    created date default sysdate,
+    db1_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
+    db2_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
+    db1_snap_list varchar2(1000),
+    db2_snap_list varchar2(1000),
+    report_type number references awrcomp_d_sortordrs(dic_id),
+    report_sort_ordr number references awrcomp_d_report_types(dic_id),
+    statlimit number,
+    qry_filter varchar2(1000),
+    dblink varchar2(30),
+    report_content blob,
+    file_mimetype varchar2(30) default 'text/plain',
+    file_name varchar2(100)
 );
 
 create index awrdumpsrep1_dump_id on awrcomp_reports(db1_dump_id);
 create index awrdumpsrep2_dump_id on awrcomp_reports(db2_dump_id);
 
-create table awrcomp_scripts (
-script_id varchar(100) primary key,
-script_content clob
-);
 
 --Create source code objects
-@@awrtool_pkg_spec
-set define off
-@@awrtool_pkg_body
-set define on
-@@awrtool_api_spec
-@@awrtool_api_body
-@@awrtools_contr_spec 
-@@awrtools_contr_body
+
+@../src/awrtools_contr_spec 
+show errors
+@../src/awrtools_contr_body
+show errors
+
+@../src/awrtools_loc_utils_spec
+show errors
+@../src/awrtools_loc_utils_body
+show errors
+
+@../src/awrtools_api_spec
+show errors
+@../src/awrtools_api_body
+show errors
+
+@../src/awrtools_reports_spec
+show errors
+set define ~
+@../src/awrtools_reports_body
+set define &
+show errors
+
 
 
 
 
 --Load data
-insert into awrconfig values ('WORKDIR','AWRDATA','Oracle directory for loading AWR dumps');
+insert into awrconfig values ('WORKDIR',upper('&dirname.'),'Oracle directory for loading AWR dumps');
 insert into awrconfig values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load package');
-insert into awrconfig values ('AWRSTGTBLSPS','AWRTOOLSTBS','Default tablespace for AWR staging user');
+insert into awrconfig values ('AWRSTGTBLSPS','&tblspc_name.','Default tablespace for AWR staging user');
 insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
 insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
 insert into awrconfig values ('TOOLVERSION','&awrtoolversion.','AWR tool version');
@@ -139,7 +136,7 @@ set define off
 declare
   l_script clob := 
 q'{
-@@getcomp_iq
+@../scripts/getcomp_iq
 }';
 begin
   delete from awrcomp_scripts where script_id='GETQUERYLIST';
@@ -151,7 +148,7 @@ end;
 declare
   l_script clob := 
 q'{
-@@getplanawr_plancomp_q
+@../scripts/getplanawr_plancomp_q
 }';
 begin
   delete from awrcomp_scripts where script_id='GETCOMPREPORT';
@@ -163,7 +160,7 @@ end;
 declare
   l_script clob := 
 q'{
-@@get_comp_non_comparable_q
+@../scripts/get_comp_non_comparable_q
 }';
 begin
   delete from awrcomp_scripts where script_id='GETNONCOMPREPORT';
@@ -175,7 +172,7 @@ end;
 declare
   l_script clob := 
 q'{
-@@get_sysmetrics_q
+@../scripts/get_sysmetrics_q
 }';
 begin
   delete from awrcomp_scripts where script_id='GETSYSMETRREPORT';
@@ -186,3 +183,5 @@ end;
 
 set define on
 commit;
+
+disc

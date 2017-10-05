@@ -63,7 +63,7 @@ declare
 from dba_hist_sqlstat s
 where
     s.sql_id = p_sql_id
-and s.instance_number = 1
+and s.instance_number=&inst_id.
 and s.dbid=&dbid1.
 and s.snap_id in (&snaps1.)
 and s.plan_hash_value=p_plan_hash
@@ -105,7 +105,7 @@ group by s.dbid,s.plan_hash_value,s.sql_id
 from dba_hist_sqlstat&dblnk. s
 where
     s.sql_id = p_sql_id
-and s.instance_number = 1
+and s.instance_number=&inst_id.
 and s.dbid=&dbid2.
 and s.snap_id in (&snaps2.)
 and s.plan_hash_value=p_plan_hash
@@ -239,7 +239,8 @@ $END
    where i.dbid = sn.dbid 
      and i.startup_time=sn.startup_time
      and sn.dbid = &dbid1.
-     and sn.snap_id in (&snaps1.);
+     and sn.snap_id in (&snaps1.)
+	 and sn.instance_number=&inst_id.;
 
 $IF '&dblnk.' is not null $THEN
   select unique 'DB2(remote): '||sn.DBID,
@@ -267,7 +268,8 @@ $END
    where i.dbid = sn.dbid 
      and i.startup_time=sn.startup_time
      and sn.dbid = &dbid2.
-     and sn.snap_id in (&snaps2.);
+     and sn.snap_id in (&snaps2.)
+	 and sn.instance_number=&inst_id.;
 
   p(l_db1_title_f);
   p(l_db2_title_f);
@@ -287,11 +289,11 @@ $END
        (
         select 'L' src, x.* from dba_hist_sqlstat x 
          where sql_id=l_sql_id --and plan_hash_value <> 0 
-           and (dbid=&dbid1. and snap_id in (&snaps1.))
+           and (dbid=&dbid1. and snap_id in (&snaps1.) and instance_number=&inst_id.)
         union all
         select 'R' src, x.* from dba_hist_sqlstat&dblnk. x
          where sql_id=l_sql_id --and plan_hash_value <> 0 
-           and (dbid=&dbid2. and snap_id in (&snaps2.))
+           and (dbid=&dbid2. and snap_id in (&snaps2.) and instance_number=&inst_id.)
        )
      order by 6,dbid,plan_hash_value,PARSING_USER_ID,module,action
     )
@@ -313,12 +315,12 @@ $END
       (
        select 'L' src, x.* from dba_hist_active_sess_history x
         where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id)--and sql_plan_hash_value <> 0 
-          and (dbid=&dbid1. and snap_id in (&snaps1.))
+          and (dbid=&dbid1. and snap_id in (&snaps1.) and instance_number=&inst_id.)
           and rownum<6
        union all
        select 'R' src, x.* from dba_hist_active_sess_history&dblnk. x
         where (sql_id=l_sql_id or TOP_LEVEL_SQL_ID=l_sql_id) --and sql_plan_hash_value <> 0 
-          and (dbid=&dbid2. and snap_id in (&snaps2.))
+          and (dbid=&dbid2. and snap_id in (&snaps2.) and instance_number=&inst_id.)
           and rownum<6
       )
     order by 6,dbid,sql_plan_hash_value,user_id,module,action)
@@ -349,13 +351,13 @@ $END
        select 'L' src, s.* from dba_hist_sqlstat s
         where sql_id = l_sql_id
           and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
-          and (dbid='&dbid1.' and snap_id in (&snaps1.))
+          and (dbid='&dbid1.' and snap_id in (&snaps1.) and instance_number=&inst_id.)
           --and plan_hash_value <> 0
        union all
        select 'R' src, s.* from dba_hist_sqlstat&dblnk. s
         where sql_id = l_sql_id
           and s.dbid in (select dbid from dba_hist_sqltext where sql_id = l_sql_id)
-          and (dbid='&dbid2.' and snap_id in (&snaps2.))
+          and (dbid='&dbid2.' and snap_id in (&snaps2.) and instance_number=&inst_id.)
           --and plan_hash_value <> 0
       ) s
                     )
@@ -473,7 +475,8 @@ $END
                   where dbid = &dbid1.
                     and snap_id in (&snaps1.)
 					and SQL_PLAN_HASH_VALUE=my_rec(a).plan_hash_value
-                    and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)) x
+                    and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)
+					and instance_number=&inst_id.) x
                   group by wait_class, event),
                   remotes as ( 
                  select x.*, count(1)*10 cntr from (
@@ -482,7 +485,8 @@ $END
                   where dbid = &dbid2.
                     and snap_id in (&snaps2.)
 					and SQL_PLAN_HASH_VALUE=my_rec(b).plan_hash_value
-                    and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)) x
+                    and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)
+					and instance_number=&inst_id.) x
                   group by wait_class, event)
                  select decode(wait_class,'_','.',wait_class) wait_class,event,cntl,cntr,round(100*(cntr-cntl)/decode(cntr,0,1,cntr),2) delta
                  from locals full outer join remotes using (wait_class,event)
@@ -504,7 +508,7 @@ $END
                    count(1) * 10 line
               from dba_hist_active_sess_history
              where (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id) and dbid=&dbid1.
-               and instance_number = 1
+               and instance_number=&inst_id.
                and session_type='FOREGROUND'
                and snap_id in (&snaps1.)
 			   and SQL_PLAN_HASH_VALUE=my_rec(a).plan_hash_value
@@ -527,7 +531,7 @@ $END
                    count(1) * 10 line
               from dba_hist_active_sess_history&dblnk.
              where (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id) and dbid=&dbid2.
-               and instance_number = 1
+               and instance_number=&inst_id.
                and session_type='FOREGROUND'
                and snap_id in (&snaps2.)
 			   and SQL_PLAN_HASH_VALUE=my_rec(b).plan_hash_value
@@ -559,7 +563,7 @@ $END
               from (select sample_time,sql_id, count(1) c
                       from dba_hist_active_sess_history
                      where dbid = &dbid1.
-                       and instance_number = 1
+                       and instance_number=&inst_id.
                        and session_type='FOREGROUND'
                        and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)
                        and snap_id in (&snaps1.)
@@ -578,7 +582,7 @@ $END
               from (select sample_time,sql_id, count(1) c
                       from dba_hist_active_sess_history&dblnk.
                      where dbid = &dbid2.
-                       and instance_number = 1
+                       and instance_number=&inst_id.
                        and session_type='FOREGROUND'
                        and (sql_id = l_sql_id or TOP_LEVEL_SQL_ID = l_sql_id)
                        and snap_id in (&snaps2.)
@@ -604,7 +608,7 @@ $END
       if my_rec(a).plan_hash_value=0 then
         p('ATTENTION: no plan available, plan_hash_value=0');
         p('-----------------------------------------------');
-        select sql_text into l_sql_txt from dba_hist_sqltext where sql_id = l_sql_id and dbid = &dbid1.;
+        select substr(sql_text,1,4000) into l_sql_txt from dba_hist_sqltext where sql_id = l_sql_id and dbid = &dbid1.;
         p(l_sql_txt);
         p(rpad('-',max_l*2+1,'-'));
       end if;
