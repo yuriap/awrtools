@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   15:41 Tuesday November 14, 2017
+--   Date and Time:   16:18 Tuesday November 14, 2017
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -117,7 +117,7 @@ wwv_flow_api.create_flow(
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171114154035'
+,p_last_upd_yyyymmddhh24miss=>'20171114161739'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -10993,7 +10993,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171114154035'
+,p_last_upd_yyyymmddhh24miss=>'20171114161739'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(50250266728534020)
@@ -11177,6 +11177,8 @@ wwv_flow_api.create_worksheet_column(
 ,p_display_order=>130
 ,p_column_identifier=>'M'
 ,p_column_label=>'Action'
+,p_column_link=>'f?p=&APP_ID.:16:&SESSION.::&DEBUG.:RP:P16_REPORT_ID:#REPORT_ID#'
+,p_column_linktext=>'#ACTION#'
 ,p_column_type=>'STRING'
 );
 wwv_flow_api.create_worksheet_rpt(
