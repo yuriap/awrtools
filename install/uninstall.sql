@@ -1,8 +1,15 @@
-spool uninstall.log
+spool uninstall_config.log
 
 @version
 prompt Uninstall of AWR Tools
 prompt Version &awrtoolversion
+
+set echo on
+@install_config
+set echo off
+spool off
+
+spool uninstall.log
 
 set echo on
 
@@ -24,7 +31,8 @@ drop user &localscheme. cascade;
 drop directory &dirname.;
 drop tablespace &tblspc_name.;
 
-
-disc
+set echo off
 
 spool off
+
+disc

@@ -30,34 +30,17 @@ create or replace package awrtools_contr as
   c_dumpstate_archived    constant awrdumps.status%type := 'ARCHIVED';  -- dump file removed and AWR unloaded  
   
   --Project life-cycle set state
-  --procedure lcc_project_set_new(p_proj_id awrtoolproject.proj_id%type);
-  --procedure lcc_project_set_active(p_proj_id awrtoolproject.proj_id%type);
-  --procedure lcc_project_set_locked(p_proj_id awrtoolproject.proj_id%type);
-  --procedure lcc_project_set_status(p_proj_id awrtoolproject.proj_id%type, p_status awrtoolproject.proj_status%type);
   procedure lcc_project_exec_action(p_proj_id awrtoolproject.proj_id%type, p_action number);
   
   --Dump lifecycle set state
-  --procedure lcc_dump_set_new(p_dump_id awrdumps.dump_id%type);
-  --procedure lcc_dump_set_loaded(p_dump_id awrdumps.dump_id%type);
-  --procedure lcc_dump_set_awrloaded(p_dump_id awrdumps.dump_id%type)
-  --procedure lcc_dump_set_unload(p_dump_id awrdumps.dump_id%type);
-  --procedure lcc_dump_set_compress(p_dump_id awrdumps.dump_id%type);
-  --procedure lcc_dump_set_status(p_dump_id awrdumps.dump_id%type, p_status awrdumps.status%type);
   procedure lcc_dump_exec_action(p_dump_id awrdumps.dump_id%type, p_action number);
 
   --Action availability  
   --Project
   function lcc_project_check_action(p_proj_id awrtoolproject.proj_id%type, p_action number) return boolean;
   
-  --function lcc_project_load(p_proj_id awrtoolproject.proj_id%type) return boolean;
-  --function lcc_project_report(p_proj_id awrtoolproject.proj_id%type) return boolean;
-  --function lcc_project_archive(p_proj_id awrtoolproject.proj_id%type) return boolean;
-  --function lcc_project_compress(p_proj_id awrtoolproject.proj_id%type) return boolean;
   --Dump
   function lcc_dump_check_action(p_dump_id awrdumps.dump_id%type, p_action number) return boolean;
-  --function lcc_dump_loadawr(p_dump_id awrdumps.dump_id%type) return boolean;
-  --function lcc_dump_unloadawr(p_dump_id awrdumps.dump_id%type) return boolean;
-  --function lcc_dump_delfile(p_dump_id awrdumps.dump_id%type) return boolean;
   
 end awrtools_contr;
 /

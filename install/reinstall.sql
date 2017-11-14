@@ -1,20 +1,10 @@
-spool reinstall.log
-
-@version
-prompt Reinstallation (recreation) of AWR Tools
-prompt Version &awrtoolversion
-
-set echo on
-@install_config
-spool off
-
+spool uninstall.log
 @uninstall
-
-spool reinstall.log append
-@remote_sys_setup
-@local_sys_setup
-
-@remote_install
-@local_install
-
 spool off
+
+spool install.log
+@install
+spool off
+set echo off
+
+disc

@@ -34,6 +34,8 @@ grant select on AWR_ROOT_SQL_PLAN to &localscheme.;
 grant select on AWR_ROOT_SQLTEXT to &localscheme.;
 grant select on dba_users to &localscheme.;
 grant select on dba_hist_sysmetric_history to &localscheme.;
+grant select on v_$active_session_history to &localscheme.;
+grant select on dba_hist_reports to &localscheme.;
 
 grant execute on dbms_xplan to &localscheme.;
 

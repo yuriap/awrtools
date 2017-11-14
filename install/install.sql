@@ -1,7 +1,7 @@
-spool local_upgrade_config.log
+spool install_config.log
 
 @version
-prompt Upgrade remote scheme of AWR Tools
+prompt Installation of AWR Tools
 prompt Version &awrtoolversion
 
 set echo on
@@ -9,13 +9,15 @@ set echo on
 set echo off
 spool off
 
-spool remote_upgrade.log
+spool install.log
 
 set echo on
-@cleanup
+@local_sys_setup
+@remote_sys_setup
 @remote_install
+@local_install
 
-set echo off
 spool off
+set echo off
 
 disc

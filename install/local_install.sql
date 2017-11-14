@@ -50,6 +50,7 @@ create table awrdumps (
     min_snap_dt timestamp(3),
     max_snap_dt timestamp(3),
     is_remote varchar2(10) default 'NO' NOT NULL check (is_remote in ('YES','NO')),
+	sql_id varchar2(100),
     db_description varchar2(1000),
     dump_description varchar2(4000)
 );
@@ -62,26 +63,33 @@ create table awrdumps_files (
 );
 
 
+
+
 create table awrcomp_reports(
-    report_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-    created date default sysdate,
-    db1_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
-    db2_dump_id number NOT NULL references awrdumps(dump_id) on delete cascade,
-    db1_snap_list varchar2(1000),
-    db2_snap_list varchar2(1000),
-    report_type number references awrcomp_d_sortordrs(dic_id),
-    report_sort_ordr number references awrcomp_d_report_types(dic_id),
-    statlimit number,
-    qry_filter varchar2(1000),
-    dblink varchar2(30),
+    report_id      NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+    created        date default sysdate,
+    db1_dump_id    number NOT NULL references awrdumps(dump_id) on delete cascade,
+    db2_dump_id    number references awrdumps(dump_id) on delete cascade,
+    db1_start_snap number,
+    db1_end_snap   number,
+    db2_start_snap number,
+    db2_end_snap   number,
+    report_type    number references awrcomp_d_report_types(dic_id),
+    sortcol        number references awrcomp_d_sortordrs(dic_id),
+    sortlimit      number,
+    filter         varchar2(1000),
+    dblink         varchar2(30),
+	sql_id         varchar2(100),
     report_content blob,
-    file_mimetype varchar2(30) default 'text/plain',
-    file_name varchar2(100)
+    file_mimetype  varchar2(30) default 'text/html',
+    file_name      varchar2(100)
 );
 
 create index awrdumpsrep1_dump_id on awrcomp_reports(db1_dump_id);
 create index awrdumpsrep2_dump_id on awrcomp_reports(db2_dump_id);
 
+create or replace view awrcomp_remote_data as
+select snap_id, dbid, instance_number, startup_time, begin_interval_time, end_interval_time, snap_level,error_count from dba_hist_snapshot@&DBLINK. x2 where dbid<>(select dbid from v$database@&DBLINK.);
 
 --Create source code objects
 
@@ -102,13 +110,10 @@ show errors
 
 @../src/awrtools_reports_spec
 show errors
-set define ~
+set define off
 @../src/awrtools_reports_body
-set define &
+set define on
 show errors
-
-
-
 
 
 --Load data
@@ -119,65 +124,38 @@ insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR s
 insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
 insert into awrconfig values ('TOOLVERSION','&awrtoolversion.','AWR tool version');
 
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)','Sort by Elapsed Time','ela_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(disk_reads_delta)','Sort by Disk Reads','reads_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(CPU_TIME_DELTA)','Sort by CPU time','cpu_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(BUFFER_GETS_DELTA)','Sort by LIO','lio_tot');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(ELAPSED_TIME_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by Ela/exec','ela_exec');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(CPU_TIME_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by CPU/exec','cpu_exec');
-insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('sum(BUFFER_GETS_DELTA)/decode(sum(EXECUTIONS_DELTA), null, 1,0,1, sum(EXECUTIONS_DELTA))','Sort by LIO/exec','lio_exec');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('ELAPSED_TIME_DELTA','Sort by Elapsed Time','ela_tot');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('DISK_READS_DELTA','Sort by Disk Reads','reads_tot');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('CPU_TIME_DELTA','Sort by CPU time','cpu_tot');
+insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('BUFFER_GETS_DELTA','Sort by LIO','lio_tot');
 
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRCOMP','AWR query plan compare report','comp_ordr_');
-insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRMETRICS','AWR metrics report','sysmetrics');
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRSQLREPORT','AWR SQL report','awr_');
 
 
 set define off
 
 declare
   l_script clob := 
-q'{
-@../scripts/getcomp_iq
-}';
-begin
-  delete from awrcomp_scripts where script_id='GETQUERYLIST';
-  insert into awrcomp_scripts (script_id,script_content) values
-  ('GETQUERYLIST',l_script);
-end;
-/
-
-declare
-  l_script clob := 
-q'{
-@../scripts/getplanawr_plancomp_q
-}';
+q'^
+@../scripts/_getcomph.sql
+^';
 begin
   delete from awrcomp_scripts where script_id='GETCOMPREPORT';
   insert into awrcomp_scripts (script_id,script_content) values
-  ('GETCOMPREPORT',l_script);
+  ('GETCOMPREPORT',l_script||l_script1);
 end;
 /
 
 declare
   l_script clob := 
-q'{
-@../scripts/get_comp_non_comparable_q
-}';
+q'^
+@../scripts/_getplanawrh
+^';
 begin
-  delete from awrcomp_scripts where script_id='GETNONCOMPREPORT';
+  delete from awrcomp_scripts where script_id='GETAWRSQLREPORT';
   insert into awrcomp_scripts (script_id,script_content) values
-  ('GETNONCOMPREPORT',l_script);
-end;
-/
-
-declare
-  l_script clob := 
-q'{
-@../scripts/get_sysmetrics_q
-}';
-begin
-  delete from awrcomp_scripts where script_id='GETSYSMETRREPORT';
-  insert into awrcomp_scripts (script_id,script_content) values
-  ('GETSYSMETRREPORT',l_script);
+  ('GETAWRSQLREPORT',l_script);
 end;
 /
 

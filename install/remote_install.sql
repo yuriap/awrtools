@@ -1,5 +1,3 @@
-@install_config
-
 conn &remotescheme./&remotescheme.@&remotedb.
 
 CREATE OR REPLACE CONTEXT rem_&remotescheme._ctx USING remote_awr_xplan_init;
