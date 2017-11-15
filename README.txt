@@ -4,7 +4,7 @@ AWR dump warehouse with web-based UI.
 
 The main aims are:
 1) to have some user-friendly interface to manipulate AWR dumps (load, store, comment, unload).
-2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are "SQL queries compare report (HTML)" and "AWR SQL Report (HTML)".
+2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are two custom reports "SQL queries compare report (HTML)" and "AWR SQL Report (HTML)" and all standard AWR reports.
 3) to share scripts with command-line AWR Tools. Exact the same main scripts are used for both tools.
 4) to be able to analyze AWR dumps which contain overlapping snapshot ranges (relevant to a situation when FLASHBACK DATABASE is in use for testing different scenarios).
 
@@ -52,3 +52,6 @@ Version 2.1
 Changes:
 1) SQL queries compare report in HTML format only
 2) Added new AWR SQL Report.
+
+Version 2.2
+1) Added all standard AWR reports

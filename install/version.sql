@@ -1,1 +1,1 @@
-define awrtoolversion=2.1
+define awrtoolversion=2.2

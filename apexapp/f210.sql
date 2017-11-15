@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   16:18 Tuesday November 14, 2017
+--   Date and Time:   17:48 Wednesday November 15, 2017
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,7 +37,7 @@ prompt APPLICATION 210 - AWR Tools
 
 -- Application Statistics:
 --   Pages:                     12
---     Items:                   34
+--     Items:                   35
 --     Computations:             1
 --     Validations:              5
 --     Processes:               19
@@ -117,7 +117,7 @@ wwv_flow_api.create_flow(
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171114161739'
+,p_last_upd_yyyymmddhh24miss=>'20171115174812'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9125,7 +9125,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171110131839'
+,p_last_upd_yyyymmddhh24miss=>'20171115174812'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(101247562198740112)
@@ -9136,13 +9136,13 @@ wwv_flow_api.create_page_plug(
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'Web AWR Tools. Ver 2.1<br>',
+'Web AWR Tools. Ver 2.2<br>',
 '<br>',
 'AWR dump warehouse with web-based UI.<br>',
 '<br>',
 'The main aims are:<br>',
 '1) to have some user-friendly interface to manipulate AWR dumps (load, store, comment, unload).<br>',
-'2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are "SQL queries compare report (HTML)" and "AWR SQL Report (HTML)".<br>',
+'2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are two custom reports "SQL queries compare report (HTML)" and "AWR SQL Report (HTML)" and all standard AWR reports.<br>',
 '3) to share scripts with command-line AWR Tools. Exact the same main scripts are used for both tools.<br>',
 '4) to be able to analyze AWR dumps which contain overlapping snapshot ranges (relevant to a situation when FLASHBACK DATABASE is in use for testing different scenarios).<br>',
 '<br>',
@@ -10993,10 +10993,10 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171114161739'
+,p_last_upd_yyyymmddhh24miss=>'20171115161211'
 );
 wwv_flow_api.create_page_plug(
- p_id=>wwv_flow_api.id(50250266728534020)
+ p_id=>wwv_flow_api.id(50253096526534048)
 ,p_plug_name=>'Reports'
 ,p_region_template_options=>'#DEFAULT#'
 ,p_component_template_options=>'#DEFAULT#'
@@ -11008,20 +11008,12 @@ wwv_flow_api.create_page_plug(
 'select',
 '          report_id,',
 '          created,',
-'          d1.dbid "DB1 DBID",',
-'          d2.dbid "DB2 DBID",',
-'          DB1_START_SNAP||'' - ''||DB1_END_SNAP "DB1 SNAPS", ',
-'          DB2_START_SNAP||'' - ''||DB2_END_SNAP "DB2 SNAPS",',
 '          tp.dic_display_value report_type,',
-'          s.dic_display_value sorting,',
-'          r.sql_id,',
-'          sortlimit,',
-'          filter,',
+'          report_params_displ params,',
 '          sys.dbms_lob.getlength(report_content) download,',
 '          ''Delete'' action',
-'from AWRCOMP_REPORTS r, AWRDUMPS d1, AWRDUMPS d2, AWRCOMP_D_SORTORDRS s, AWRCOMP_D_REPORT_TYPES tp',
-'where  DB1_DUMP_ID=d1.dump_id and DB2_DUMP_ID=d2.dump_id(+) and s.DIC_ID(+)=sortcol and tp.DIC_ID=report_type',
-'and d1.proj_id=d2.proj_id(+) and d1.proj_id=:P15_PROJ_ID',
+'from AWRCOMP_REPORTS r, AWRCOMP_D_REPORT_TYPES tp',
+'where tp.DIC_ID=report_type and proj_id=:P15_PROJ_ID',
 'order by created desc;'))
 ,p_plug_source_type=>'NATIVE_IR'
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
@@ -11055,7 +11047,7 @@ wwv_flow_api.create_page_plug(
 ,p_prn_page_footer_alignment=>'CENTER'
 );
 wwv_flow_api.create_worksheet(
- p_id=>wwv_flow_api.id(50250300519534021)
+ p_id=>wwv_flow_api.id(50253114535534049)
 ,p_max_row_count=>'1000000'
 ,p_show_nulls_as=>'-'
 ,p_pagination_type=>'ROWS_X_TO_Y'
@@ -11065,10 +11057,10 @@ wwv_flow_api.create_worksheet(
 ,p_show_notify=>'Y'
 ,p_download_formats=>'CSV:HTML:EMAIL:XLS:PDF:RTF'
 ,p_owner=>'AWRTOOLS21ADM'
-,p_internal_uid=>50250300519534021
+,p_internal_uid=>50253114535534049
 );
 wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50250450546534022)
+ p_id=>wwv_flow_api.id(50253280765534050)
 ,p_db_column_name=>'REPORT_ID'
 ,p_display_order=>10
 ,p_column_identifier=>'A'
@@ -11077,7 +11069,7 @@ wwv_flow_api.create_worksheet_column(
 ,p_display_text_as=>'HIDDEN'
 );
 wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50250559453534023)
+ p_id=>wwv_flow_api.id(50710569661476401)
 ,p_db_column_name=>'CREATED'
 ,p_display_order=>20
 ,p_column_identifier=>'B'
@@ -11087,109 +11079,50 @@ wwv_flow_api.create_worksheet_column(
 ,p_tz_dependent=>'N'
 );
 wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50250688567534024)
-,p_db_column_name=>'DB1 DBID'
+ p_id=>wwv_flow_api.id(50710638737476402)
+,p_db_column_name=>'REPORT_TYPE'
 ,p_display_order=>30
 ,p_column_identifier=>'C'
-,p_column_label=>'Db1 dbid'
-,p_column_type=>'NUMBER'
-,p_column_alignment=>'RIGHT'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50250777641534025)
-,p_db_column_name=>'DB2 DBID'
-,p_display_order=>40
-,p_column_identifier=>'D'
-,p_column_label=>'Db2 dbid'
-,p_column_type=>'NUMBER'
-,p_column_alignment=>'RIGHT'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50250822211534026)
-,p_db_column_name=>'DB1 SNAPS'
-,p_display_order=>50
-,p_column_identifier=>'E'
-,p_column_label=>'Db1 snaps'
-,p_column_type=>'STRING'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50250985408534027)
-,p_db_column_name=>'DB2 SNAPS'
-,p_display_order=>60
-,p_column_identifier=>'F'
-,p_column_label=>'Db2 snaps'
-,p_column_type=>'STRING'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50251099175534028)
-,p_db_column_name=>'REPORT_TYPE'
-,p_display_order=>70
-,p_column_identifier=>'G'
 ,p_column_label=>'Report type'
 ,p_column_type=>'STRING'
 );
 wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50251120543534029)
-,p_db_column_name=>'SORTING'
-,p_display_order=>80
-,p_column_identifier=>'H'
-,p_column_label=>'Sorting'
+ p_id=>wwv_flow_api.id(50710706667476403)
+,p_db_column_name=>'PARAMS'
+,p_display_order=>40
+,p_column_identifier=>'D'
+,p_column_label=>'Params'
 ,p_column_type=>'STRING'
 );
 wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50251262934534030)
-,p_db_column_name=>'SQL_ID'
-,p_display_order=>90
-,p_column_identifier=>'I'
-,p_column_label=>'Sql id'
-,p_column_type=>'STRING'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50251315773534031)
-,p_db_column_name=>'SORTLIMIT'
-,p_display_order=>100
-,p_column_identifier=>'J'
-,p_column_label=>'Sortlimit'
-,p_column_type=>'NUMBER'
-,p_column_alignment=>'RIGHT'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50251462319534032)
-,p_db_column_name=>'FILTER'
-,p_display_order=>110
-,p_column_identifier=>'K'
-,p_column_label=>'Filter'
-,p_column_type=>'STRING'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50251502942534033)
+ p_id=>wwv_flow_api.id(50710814405476404)
 ,p_db_column_name=>'DOWNLOAD'
-,p_display_order=>120
-,p_column_identifier=>'L'
+,p_display_order=>50
+,p_column_identifier=>'E'
 ,p_column_label=>'Download'
 ,p_column_type=>'NUMBER'
 ,p_column_alignment=>'RIGHT'
 ,p_format_mask=>'DOWNLOAD:AWRCOMP_REPORTS:REPORT_CONTENT:REPORT_ID::FILE_MIMETYPE:FILE_NAME:::attachment::'
 );
 wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(50251698197534034)
+ p_id=>wwv_flow_api.id(50710973947476405)
 ,p_db_column_name=>'ACTION'
-,p_display_order=>130
-,p_column_identifier=>'M'
+,p_display_order=>60
+,p_column_identifier=>'F'
 ,p_column_label=>'Action'
 ,p_column_link=>'f?p=&APP_ID.:16:&SESSION.::&DEBUG.:RP:P16_REPORT_ID:#REPORT_ID#'
 ,p_column_linktext=>'#ACTION#'
 ,p_column_type=>'STRING'
 );
 wwv_flow_api.create_worksheet_rpt(
- p_id=>wwv_flow_api.id(50441974493050373)
+ p_id=>wwv_flow_api.id(50718699960483320)
 ,p_application_user=>'APXWS_DEFAULT'
 ,p_report_seq=>10
-,p_report_alias=>'504420'
+,p_report_alias=>'507187'
 ,p_status=>'PUBLIC'
 ,p_is_default=>'Y'
 ,p_display_rows=>50
-,p_report_columns=>'REPORT_ID:CREATED:DB1 DBID:DB2 DBID:DB1 SNAPS:DB2 SNAPS:REPORT_TYPE:SORTING:SQL_ID:SORTLIMIT:FILTER:DOWNLOAD:ACTION'
+,p_report_columns=>'REPORT_ID:CREATED:REPORT_TYPE:PARAMS:DOWNLOAD:ACTION'
 ,p_flashback_enabled=>'N'
 );
 wwv_flow_api.create_page_plug(
@@ -11243,7 +11176,7 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'DB1 start snap'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''DB1_START_SNAP'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11262,7 +11195,7 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'DB1 end snap'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''DB1_END_SNAP'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11281,7 +11214,7 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'DB2 start snap'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''DB2_START_SNAP'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11300,7 +11233,7 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'DB2 end snap'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''DB2_END_SNAP'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11355,7 +11288,7 @@ wwv_flow_api.create_page_item(
 'and d.dump_id=decode(:P15_DB1,''null'',null,:P15_DB1) and s.snap_id>d.min_snap_id',
 'and s.snap_id<=d.max_snap_id and s.dbid=d.dbid'))
 ,p_cSize=>124
-,p_display_when=>':P15_REPORT_TYPE in (''AWRSQLREPORT'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''SQL_ID'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11372,11 +11305,31 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'Remark'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
-,p_display_when=>':P15_REPORT_TYPE in (''AWRSQLREPORT'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''REMARK'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_read_only_when_type=>'ALWAYS'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'N'
+,p_attribute_02=>'N'
+,p_attribute_04=>'TEXT'
+,p_attribute_05=>'BOTH'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(50252133203534039)
+,p_name=>'P15_LEVEL'
+,p_item_sequence=>120
+,p_item_plug_id=>wwv_flow_api.id(106578473812102233)
+,p_prompt=>'Level'
+,p_display_as=>'NATIVE_TEXT_FIELD'
+,p_cSize=>30
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''LEVEL'')'
+,p_display_when_type=>'PLSQL_EXPRESSION'
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_inline_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'For ASH analytics report:<br>',
+'[sqlid]{histogram} or [wait_class]{histogram} -- describes a list of  components to build.'))
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'N'
 ,p_attribute_04=>'TEXT'
@@ -11414,7 +11367,7 @@ wwv_flow_api.create_page_item(
 ,p_lov_null_text=>'Select dump...'
 ,p_lov_null_value=>'null'
 ,p_cHeight=>1
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'',''AWRSQLREPORT'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''DB1'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11441,11 +11394,12 @@ wwv_flow_api.create_page_item(
 '    dump_id',
 'FROM',
 '    awrdumps',
-'where status=''AWRLOADED'' and proj_id=:P15_PROJ_ID;'))
+'where status=''AWRLOADED'' and proj_id=:P15_PROJ_ID',
+'and IS_REMOTE=decode(:P15_REPORT_TYPE,''AWRCOMP'',IS_REMOTE,''NO'');'))
 ,p_lov_display_null=>'YES'
 ,p_lov_null_text=>'Select dump...'
 ,p_cHeight=>1
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''DB2'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11473,7 +11427,7 @@ wwv_flow_api.create_page_item(
 ,p_lov=>'SELECT DIC_DISPLAY_VALUE name, DIC_ID FROM AWRCOMP_D_SORTORDRS order by 2'
 ,p_lov_display_null=>'YES'
 ,p_cHeight=>1
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''SORT'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11490,7 +11444,7 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'Limit'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''LIMIT'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
@@ -11510,15 +11464,18 @@ wwv_flow_api.create_page_item(
 ,p_cSize=>100
 ,p_cMaxlength=>1000
 ,p_cHeight=>5
-,p_display_when=>':P15_REPORT_TYPE in (''AWRCOMP'')'
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''FILTER'')'
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_inline_help_text=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'For AWR query plan compare report:<br>',
 'Any column from DBA_HIST_SQLSTAT can be used in this filter, for example:<br>',
 'not(nvl(action,''~'')=''job name'' or nvl(module,''~'')=''module'' or (nvl(ACTION,''~'') like ''CA%'' and nvl(MODULE,''~'')=''DBMS_SCHEDULER''))',
 '<br>or<br>',
-'sql_id=''sql ID'''))
+'sql_id=''sql ID''<br><br>',
+'For ASH analytics report:<br>',
+'TBD'))
 ,p_attribute_01=>'Y'
 ,p_attribute_02=>'N'
 ,p_attribute_03=>'Y'
@@ -11531,7 +11488,7 @@ wwv_flow_api.create_page_item(
 ,p_item_plug_id=>wwv_flow_api.id(106578473812102233)
 ,p_prompt=>'Report type'
 ,p_display_as=>'NATIVE_SELECT_LIST'
-,p_lov=>'SELECT DIC_DISPLAY_VALUE name, dic_value FROM awrcomp_d_report_types order by 2'
+,p_lov=>'SELECT DIC_DISPLAY_VALUE name, dic_value FROM awrcomp_d_report_types order by dic_ordr'
 ,p_lov_display_null=>'YES'
 ,p_lov_null_text=>'Select report type...'
 ,p_cHeight=>1
@@ -11692,36 +11649,20 @@ wwv_flow_api.create_page_process(
 'declare',
 '  l_id number;',
 'begin',
-'  if v(''P15_REPORT_TYPE'')=''AWRCOMP'' then',
-'    INSERT INTO AWRCOMP_REPORTS (',
-'      DB1_DUMP_ID, DB2_DUMP_ID, DB1_START_SNAP, DB1_END_SNAP, DB2_START_SNAP,DB2_END_SNAP,',
-'      REPORT_TYPE, SORTCOL, SORTLIMIT, FILTER, DBLINK, SQL_ID, REPORT_CONTENT, FILE_MIMETYPE, FILE_NAME )',
-'    VALUES ( ',
-'      v(''P15_DB1''), v(''P15_DB2''), v(''P15_DB1_START_SNAP''), v(''P15_DB1_END_SNAP''), v(''P15_DB2_START_SNAP''), v(''P15_DB2_END_SNAP''),',
-'      (select dic_id from AWRCOMP_D_REPORT_TYPES where dic_value=v(''P15_REPORT_TYPE'')),',
-'      v(''P15_SORT''),v(''P15_LIMIT''), v(''P15_FILTER''),',
-'      (select decode(is_remote,''YES'',''@''||awrtools_api.getconf(''DBLINK''),null) from awrdumps where dump_id=v(''P15_DB2'')),',
-'      null, empty_blob(), default,',
-'      (select dic_filename_pref from AWRCOMP_D_REPORT_TYPES where dic_value=v(''P15_REPORT_TYPE''))||',
-'        (select dic_filename_pref from awrcomp_d_sortordrs where dic_id=v(''P15_SORT''))||''.html''',
-'      )',
-'    returning report_id into l_id;  ',
-'  elsif v(''P15_REPORT_TYPE'')=''AWRSQLREPORT'' then',
-'    INSERT INTO AWRCOMP_REPORTS (',
-'      DB1_DUMP_ID, DB2_DUMP_ID, DB1_START_SNAP, DB1_END_SNAP, DB2_START_SNAP,DB2_END_SNAP,',
-'      REPORT_TYPE, SORTCOL, SORTLIMIT, FILTER, DBLINK, SQL_ID, REPORT_CONTENT, FILE_MIMETYPE, FILE_NAME )',
-'    VALUES ( ',
-'      v(''P15_DB1''), null, null, null, null, null,',
-'      (select dic_id from AWRCOMP_D_REPORT_TYPES where dic_value=v(''P15_REPORT_TYPE'')),',
-'      null, null, null, null,v(''P15_SQL_ID''), empty_blob(), default,',
-'      (select dic_filename_pref from AWRCOMP_D_REPORT_TYPES where dic_value=v(''P15_REPORT_TYPE''))||v(''P15_SQL_ID'')||''.html''   ',
-'      )',
-'    returning report_id into l_id;',
-'  else',
-'    raise_application_error(-20000,''Unimplemented report type: ''||v(''P15_REPORT_TYPE''));',
-'  end if;',
+'  l_id:=awrtools_reports.create_report(:P15_REPORT_TYPE, :P15_PROJ_ID);',
+'  awrtools_reports.save_param(l_id,''DB1'',:P15_DB1);',
+'  awrtools_reports.save_param(l_id,''DB1_START_SNAP'',:P15_DB1_START_SNAP);',
+'  awrtools_reports.save_param(l_id,''DB1_END_SNAP'',:P15_DB1_END_SNAP);',
+'  awrtools_reports.save_param(l_id,''DB2'',:P15_DB2);',
+'  awrtools_reports.save_param(l_id,''DB2_START_SNAP'',:P15_DB2_START_SNAP);',
+'  awrtools_reports.save_param(l_id,''DB2_END_SNAP'',:P15_DB2_END_SNAP);',
+'  awrtools_reports.save_param(l_id,''SORT'',:P15_SORT);',
+'  awrtools_reports.save_param(l_id,''LIMIT'',:P15_LIMIT);',
+'  awrtools_reports.save_param(l_id,''FILTER'',:P15_FILTER);',
+'  awrtools_reports.save_param(l_id,''SQL_ID'',:P15_SQL_ID);',
+'  awrtools_reports.save_param(l_id,''LEVEL'',:P15_LEVEL);',
 '  commit;  ',
-'  awrtools_reports.create_awrcomp_report(l_id);',
+'  awrtools_reports.create_report(l_id);  ',
 'end;'))
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when_button_id=>wwv_flow_api.id(104730799083968645)

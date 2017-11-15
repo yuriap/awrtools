@@ -26,7 +26,8 @@ create table awrcomp_d_report_types (
     dic_id NUMBER GENERATED ALWAYS AS IDENTITY primary key,
     dic_value varchar2(1000) NOT NULL,
     dic_display_value varchar2(100),
-    dic_filename_pref varchar2(100) NOT NULL
+    dic_filename_pref varchar2(100) NOT NULL,
+	dic_ordr number
 );
 
 CREATE TABLE awrtoolproject (
@@ -67,27 +68,23 @@ create table awrdumps_files (
 
 create table awrcomp_reports(
     report_id      NUMBER GENERATED ALWAYS AS IDENTITY primary key,
+	proj_id        NUMBER NOT NULL REFERENCES awrtoolproject ( proj_id ) on delete cascade,
     created        date default sysdate,
-    db1_dump_id    number NOT NULL references awrdumps(dump_id) on delete cascade,
-    db2_dump_id    number references awrdumps(dump_id) on delete cascade,
-    db1_start_snap number,
-    db1_end_snap   number,
-    db2_start_snap number,
-    db2_end_snap   number,
     report_type    number references awrcomp_d_report_types(dic_id),
-    sortcol        number references awrcomp_d_sortordrs(dic_id),
-    sortlimit      number,
-    filter         varchar2(1000),
-    dblink         varchar2(30),
-	sql_id         varchar2(100),
     report_content blob,
     file_mimetype  varchar2(30) default 'text/html',
-    file_name      varchar2(100)
+    file_name      varchar2(100),
+	report_params_displ varchar2(1000)
 );
 
-create index awrdumpsrep1_dump_id on awrcomp_reports(db1_dump_id);
-create index awrdumpsrep2_dump_id on awrcomp_reports(db2_dump_id);
-
+create table awrcomp_reports_params (
+    report_id      number references awrcomp_reports(report_id) on delete cascade,
+	param_name     varchar2(128),
+    param_value    varchar2(4000)
+);	
+	
+create index IDX_PARAMS_RPT_ID on awrcomp_reports_params(report_id);
+	
 create or replace view awrcomp_remote_data as
 select snap_id, dbid, instance_number, startup_time, begin_interval_time, end_interval_time, snap_level,error_count from dba_hist_snapshot@&DBLINK. x2 where dbid<>(select dbid from v$database@&DBLINK.);
 
@@ -129,8 +126,16 @@ insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) v
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('CPU_TIME_DELTA','Sort by CPU time','cpu_tot');
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('BUFFER_GETS_DELTA','Sort by LIO','lio_tot');
 
-insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRCOMP','AWR query plan compare report','comp_ordr_');
-insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref) values('AWRSQLREPORT','AWR SQL report','awr_');
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('AWRCOMP','AWR query plan compare report (custom)','comp_ordr_',1);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('AWRSQLREPORT','AWR SQL report (custom)','awr_',2);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('AWRRPT','AWR report (standard)','awrrpt_',3);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('AWRGLOBALRPT','AWR global report (standard)','awrrpt_glob_',4);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('AWRSQRPT','AWR SQL report (standard)','awrsql_',5);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('AWRDIFF','AWR diff (standard)','awr_diff_',6);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('AWRGLOBALDIFF','AWR global diff (standard)','awr_diff_glob_',7);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHRPT','ASH report (standard)','awr_ash_',8);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHGLOBALRPT','ASH global report (standard)','awr_ash_glob_',9);
+insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHANALYTICS','ASH analytics report (standard)','ash_analyt_',10);
 
 
 set define off
