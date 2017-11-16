@@ -55,3 +55,7 @@ Changes:
 
 Version 2.2
 1) Added all standard AWR reports
+
+Version 2.3
+1) Added protection from loadin already loaded snapshots
+2) Snapshot reports (local and remote) shows the project which each snapshot belongs to or some "UNKNOWN" project for those loaded by any other means.

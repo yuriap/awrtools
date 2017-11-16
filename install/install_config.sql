@@ -29,3 +29,6 @@ define remotesys=qazwsx
 
 rem Database link from local database to remote database
 define DBLINK=DBAWR2
+
+rem Staging user for load AWR dump into repository
+define AWRSTG=awrstg21

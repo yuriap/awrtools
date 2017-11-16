@@ -19,6 +19,7 @@ grant drop user to &localscheme.;
 grant alter user to &localscheme.;
 grant create database link to &localscheme.;
 grant create view to &localscheme.;
+grant create synonym to &localscheme.;
 
 grant select on dba_hist_sqlstat to &localscheme.;
 grant select on dba_hist_database_instance to &localscheme.;

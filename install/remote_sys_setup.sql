@@ -20,6 +20,7 @@ grant create job to &remotescheme.;
 grant execute on dbms_workload_repository to &remotescheme.;
 grant select on dba_users to &remotescheme.;
 grant select on dba_hist_sysmetric_history to &remotescheme.;
+grant select on DBA_HIST_SNAPSHOT to &remotescheme.;
 grant execute on dbms_lock to &remotescheme.;
 
 disc

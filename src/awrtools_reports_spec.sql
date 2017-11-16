@@ -8,3 +8,4 @@ create or replace package awrtools_reports as
   procedure save_param(p_report_id AWRCOMP_REPORTS.REPORT_ID%type, p_param_name varchar2, p_param_value varchar2);
   function get_param(p_report_id AWRCOMP_REPORTS.REPORT_ID%type, p_param_name varchar2) return varchar2 result_cache;
 end;
+/

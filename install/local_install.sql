@@ -82,11 +82,21 @@ create table awrcomp_reports_params (
 	param_name     varchar2(128),
     param_value    varchar2(4000)
 );	
+
+create or replace synonym awrdumps_rem for awrdumps@&DBLINK.;
+
+create or replace synonym awrtools_rem_utils_rem for awrtools_rem_utils@&DBLINK.;
 	
 create index IDX_PARAMS_RPT_ID on awrcomp_reports_params(report_id);
 	
-create or replace view awrcomp_remote_data as
-select snap_id, dbid, instance_number, startup_time, begin_interval_time, end_interval_time, snap_level,error_count from dba_hist_snapshot@&DBLINK. x2 where dbid<>(select dbid from v$database@&DBLINK.);
+CREATE OR REPLACE FORCE EDITIONABLE VIEW AWRCOMP_REMOTE_DATA as
+select x1.snap_id, x1.dbid, x1.instance_number, x1.startup_time, x1.begin_interval_time, x1.end_interval_time, x1.snap_level,x1.error_count, 
+       decode(loc.proj_name,null,'<UNKNOWN PROJECT>',loc.proj_name) project, loc.proj_id
+from dba_hist_snapshot@&DBLINK. x1,
+     (select dbid, min_snap_id, max_snap_id, proj_name, d.proj_id from awrdumps d, AWRTOOLPROJECT p where status='AWRLOADED' and d.proj_id=p.proj_id) loc
+where x1.dbid<>(select dbid from v$database@&DBLINK.) 
+and x1.dbid=loc.dbid(+) and x1.snap_id between loc.min_snap_id(+) and loc.max_snap_id(+)
+order by x1.dbid,x1.snap_id;
 
 --Create source code objects
 
@@ -115,7 +125,7 @@ show errors
 
 --Load data
 insert into awrconfig values ('WORKDIR',upper('&dirname.'),'Oracle directory for loading AWR dumps');
-insert into awrconfig values ('AWRSTGUSER','AWRSTG','Staging user for AWR Load package');
+insert into awrconfig values ('AWRSTGUSER','&AWRSTG.','Staging user for AWR Load package');
 insert into awrconfig values ('AWRSTGTBLSPS','&tblspc_name.','Default tablespace for AWR staging user');
 insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
 insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
