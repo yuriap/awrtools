@@ -1,4 +1,4 @@
-Web AWR Tools. Ver 2.2
+Web AWR Tools. Ver 2.3
 
 AWR dump warehouse with web-based UI.
 

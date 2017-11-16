@@ -86,15 +86,18 @@ create table awrcomp_reports_params (
 create or replace synonym awrdumps_rem for awrdumps@&DBLINK.;
 
 create or replace synonym awrtools_rem_utils_rem for awrtools_rem_utils@&DBLINK.;
+
+create or replace synonym dba_hist_snapshot_rem for dba_hist_snapshot@&DBLINK.;
+create or replace synonym v$database_rem for v$database@&DBLINK.;
 	
 create index IDX_PARAMS_RPT_ID on awrcomp_reports_params(report_id);
 	
 CREATE OR REPLACE FORCE EDITIONABLE VIEW AWRCOMP_REMOTE_DATA as
 select x1.snap_id, x1.dbid, x1.instance_number, x1.startup_time, x1.begin_interval_time, x1.end_interval_time, x1.snap_level,x1.error_count, 
        decode(loc.proj_name,null,'<UNKNOWN PROJECT>',loc.proj_name) project, loc.proj_id
-from dba_hist_snapshot@&DBLINK. x1,
+from dba_hist_snapshot_rem x1,
      (select dbid, min_snap_id, max_snap_id, proj_name, d.proj_id from awrdumps d, AWRTOOLPROJECT p where status='AWRLOADED' and d.proj_id=p.proj_id) loc
-where x1.dbid<>(select dbid from v$database@&DBLINK.) 
+where x1.dbid<>(select dbid from v$database_rem) 
 and x1.dbid=loc.dbid(+) and x1.snap_id between loc.min_snap_id(+) and loc.max_snap_id(+)
 order by x1.dbid,x1.snap_id;
 
