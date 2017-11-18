@@ -19,7 +19,7 @@ Setup
 @install
 
 5. Check logs for errors. Fix it if exists and rerun the same script sequence.
-7. Install APEX application apexapp/f200.sql, use workspace attached to local user (see item 2 of this instruction).
+7. Install APEX application apexapp/f*.sql, use workspace attached to local user (see item 2 of this instruction).
 
 Uninstall
 1. Make sure the file install/install_config.sql contains correct configuration for uninstalled system.
