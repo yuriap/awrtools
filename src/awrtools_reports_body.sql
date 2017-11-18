@@ -6,7 +6,7 @@ create or replace package body awrtools_reports as
       update AWRCOMP_REPORTS set FILE_NAME=p_file_name||'.html', report_params_displ=p_report_params_displ where report_id = p_report_id;
       commit;
     end;
-    
+
     function create_report(p_report_type varchar2, p_proj_id AWRTOOLPROJECT.proj_id%type, p_copy_from AWRCOMP_REPORTS.REPORT_ID%type default null) return AWRCOMP_REPORTS.REPORT_ID%type
     is
       l_id number;
@@ -22,15 +22,15 @@ create or replace package body awrtools_reports as
                l_report.FILE_MIMETYPE,
                l_report.PROJ_ID
           from AWRCOMP_REPORTS where report_id=p_copy_from;
-        
+
         insert into AWRCOMP_REPORTS ( REPORT_TYPE, REPORT_CONTENT, FILE_MIMETYPE, FILE_NAME,  PROJ_ID)
           values ( l_report.REPORT_TYPE, empty_blob(), l_report.FILE_MIMETYPE, null,  l_report.PROJ_ID)
           returning report_id into l_id;
-        
+
       end if;
       return l_id;
     end;
-    
+
     function get_report_params_visibility(p_report_type varchar2, p_control_name varchar2) return boolean result_cache
     is
     begin
@@ -63,7 +63,7 @@ create or replace package body awrtools_reports as
         when not matched then insert (report_id, param_name, param_value) values (id, nm, val);
       end if;
     end;
-   
+
     function get_param(p_report_id AWRCOMP_REPORTS.REPORT_ID%type, p_param_name varchar2) return varchar2 result_cache
     is 
       l_val AWRCOMP_REPORTS_PARAMS.param_value%type;
@@ -92,8 +92,8 @@ create or replace package body awrtools_reports as
       else 
         l_report_content := p_content;
       end if;
-      
-       
+
+
       if l_report_content is null then l_report_content:='No fata found'; end if;
 
       select REPORT_CONTENT into l_trg_lob from AWRCOMP_REPORTS where report_id=p_report_id for update;
@@ -114,7 +114,7 @@ create or replace package body awrtools_reports as
         warning        => ll_warn);
       end;
     end;
-    
+
     procedure create_report(p_report_id AWRCOMP_REPORTS.REPORT_ID%type)
     is
 
@@ -140,44 +140,46 @@ create or replace package body awrtools_reports as
             l_ss   number;
             l_es   number;
             l_is_remote awrdumps.is_remote%type;
+            l_sort AWRCOMP_D_SORTORDRS.DIC_VALUE%type;
           begin
             l_scr := awrtools_api.getscript('GETCOMPREPORT');
             select dbid, min_snap_id, max_snap_id into l_dbid, l_ss, l_es from awrdumps where dump_id=to_number(get_param(p_report_id,'DB1'));
             l_scr := replace(l_scr,'~dbid1.',to_char(l_dbid));
             l_scr := replace(l_scr,'~start_snap1.',to_char(l_ss));
             l_scr := replace(l_scr,'~end_snap1.',to_char(l_es));
-            
+
             l_report_params_displ:='DB1: '||to_char(l_dbid)||'; snaps: '||to_char(l_ss)||'-'||to_char(l_es)||'; ';
-            
+
             select dbid, min_snap_id, max_snap_id, is_remote into l_dbid, l_ss, l_es, l_is_remote from awrdumps where dump_id=to_number(get_param(p_report_id,'DB2'));
             l_scr := replace(l_scr,'~dbid2.',to_char(l_dbid));
             l_scr := replace(l_scr,'~start_snap2.',to_char(l_ss));
             l_scr := replace(l_scr,'~end_snap2.',to_char(l_es));    
-            
+
             l_report_params_displ:=l_report_params_displ||'DB2: '||to_char(l_dbid)||'; snaps: '||to_char(l_ss)||'-'||to_char(l_es)||'; ';
-            
+
             if l_is_remote='YES' then 
               l_scr := replace(l_scr,'~dblnk.','@'||awrtools_api.getconf('DBLINK'));
               l_report_params_displ:=l_report_params_displ||'DB link: '||awrtools_api.getconf('DBLINK')||'; ';
             else
               l_scr := replace(l_scr,'~dblnk.',null);
             end if;
-            l_scr := replace(l_scr,'~sortcol.',get_param(p_report_id,'SORT'));
+            
+            select dic_filename_pref,DIC_VALUE into l_filename,l_sort from awrcomp_d_sortordrs where dic_id=get_param(p_report_id,'SORT');
+            set_filename_and_param_displ(p_report_id,l_file_prefix||l_filename, l_report_params_displ);
+            
+            l_scr := replace(l_scr,'~sortcol.',l_sort);
             l_scr := replace(l_scr,'~filter.',get_param(p_report_id,'FILTER'));
             l_scr := replace(l_scr,'~sortlimit.',get_param(p_report_id,'LIMIT'));
             l_scr := replace(l_scr,'~embeded.','FALSE');
-
-            l_report_params_displ:=l_report_params_displ||'SORT: '||get_param(p_report_id,'SORT')||'; ';
+            
+            l_report_params_displ:=l_report_params_displ||'SORT: '||l_sort||'; ';
             l_report_params_displ:=l_report_params_displ||'FILTER: '||get_param(p_report_id,'FILTER')||'; ';
             l_report_params_displ:=l_report_params_displ||'LIMIT: '||get_param(p_report_id,'LIMIT');
-            
-            select dic_filename_pref into l_filename from awrcomp_d_sortordrs where dic_id=get_param(p_report_id,'SORT');
-            set_filename_and_param_displ(p_report_id,l_file_prefix||l_filename, l_report_params_displ);
-            
+
 --'DB1','DB1_START_SNAP','REMARK','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER','SQL_ID'            
-            
+
             execute immediate l_scr;
-            
+
             save_report_content(p_report_id,p_output=>true);
           end;
         --====================================================================================
@@ -188,7 +190,7 @@ create or replace package body awrtools_reports as
           l_report_params_displ:='SQL_ID: '||get_param(p_report_id,'SQL_ID');
           set_filename_and_param_displ(p_report_id,l_file_prefix||get_param(p_report_id,'SQL_ID'),l_report_params_displ);
           execute immediate l_scr;
-          
+
           save_report_content(p_report_id,p_output=>true);
         --====================================================================================  
         elsif report_type='AWRRPT' then
@@ -242,7 +244,7 @@ create or replace package body awrtools_reports as
               l_inst_num_list:=l_inst_num_list||i.INSTANCE_NUMBER||',';
             end loop;
             l_inst_num_list:=rtrim(l_inst_num_list,',');
-            
+
             begin
               for j in (select output from table(dbms_workload_repository.awr_report_html(l_dbid,l_inst_num_list,get_param(p_report_id,'db1_start_snap'),get_param(p_report_id,'db1_end_snap'))))
               loop
@@ -354,7 +356,7 @@ create or replace package body awrtools_reports as
               l_inst_num_list1:=l_inst_num_list1||i.INSTANCE_NUMBER||',';
             end loop;
             l_inst_num_list1:=rtrim(l_inst_num_list1,',');
-            
+
             for i in (select unique INSTANCE_NUMBER
                         from dba_hist_snapshot x where dbid=l_dbid2 and SNAP_ID between awrtools_reports.get_param(p_report_id,'db2_start_snap') and awrtools_reports.get_param(p_report_id,'db2_end_snap')
                       ) 
@@ -431,7 +433,7 @@ create or replace package body awrtools_reports as
              from dba_hist_snapshot x 
             where dbid=l_dbid 
               and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap');
-              
+
             for i in (select unique INSTANCE_NUMBER
                         from dba_hist_snapshot x where dbid=l_dbid and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
                       ) 
@@ -439,7 +441,7 @@ create or replace package body awrtools_reports as
               l_inst_num_list:=l_inst_num_list||i.INSTANCE_NUMBER||',';
             end loop;
             l_inst_num_list:=rtrim(l_inst_num_list,',');
-            
+
             begin
               for j in (select output from table(dbms_workload_repository.ash_global_report_html(l_dbid,l_inst_num_list,l_begin_date,l_end_date)))
               loop
@@ -496,7 +498,7 @@ create or replace package body awrtools_reports as
       exception
         when others then l_report_content:=sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||chr(10)||l_scr;
       end;
-      
+
       commit;
     exception
       when others then rollback; raise_application_error(-20000, sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||substr(l_report_content,1,100));
