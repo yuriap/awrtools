@@ -10,9 +10,9 @@ create or replace package body awrtools_api as
     INSERT INTO awrtoolproject (
       proj_name,
       proj_date,
-      proj_description) 
-    VALUES 
-     (p_proj_name,default,p_proj_descr) 
+      proj_description)
+    VALUES
+     (p_proj_name,default,p_proj_descr)
     returning proj_id into p_proj_id;
     awrtools_contr.lcc_project_exec_action(p_proj_id,awrtools_contr.c_project_create);
   end add_project;
@@ -39,7 +39,7 @@ create or replace package body awrtools_api as
   begin
     awrtools_contr.lcc_project_exec_action(p_proj_id,awrtools_contr.c_project_lock);
   end;
-   
+
   procedure unlock_project(p_proj_id AWRTOOLPROJECT.PROJ_ID%type)is
   begin
     awrtools_contr.lcc_project_exec_action(p_proj_id,awrtools_contr.c_project_unlock);
@@ -51,20 +51,20 @@ create or replace package body awrtools_api as
       unload_dump(i.dump_id);
     end loop;
   end archive_project;
-  
+
   procedure compress_project(p_proj_id awrtoolproject.proj_id%type) as
   begin
     for i in (select * from AWRDUMPS where proj_id=p_proj_id) loop
       del_file(i.dump_id);
     end loop;
   end;
-  
+
   procedure del_report(p_report_id awrcomp_reports.report_id%type)
   is
   begin
     delete from awrcomp_reports where report_id=p_report_id;
   end;
-  
+
   function getconf(p_key varchar2) return varchar2
   is
     l_res awrconfig.cvalue%type;
@@ -72,7 +72,7 @@ create or replace package body awrtools_api as
     select cvalue into l_res from awrconfig where ckey=p_key;
     return l_res;
   end;
-    
+
   function getscript(p_script_id varchar2) return clob
   is
     l_res clob;
@@ -81,8 +81,8 @@ create or replace package body awrtools_api as
     return l_res;
   exception
     when no_data_found then raise_application_error(-20000,'Script "'||p_script_id||'" not found.');
-  end;  
-  
+  end;
+
   procedure create_new_dump(p_proj_id AWRDUMPS.proj_id%type,
                             p_filename AWRDUMPS.filename%type,
                             p_dump_description AWRDUMPS.dump_description%type,
@@ -93,10 +93,32 @@ create or replace package body awrtools_api as
     INSERT INTO awrdumps (proj_id, filename, dump_description) VALUES (p_proj_id, p_filename, p_dump_description)
     returning dump_id into l_dump_id;
     awrtools_contr.lcc_dump_exec_action(l_dump_id,awrtools_contr.c_dump_create);
-    INSERT INTO awrdumps_files (dump_id, filebody) VALUES (l_dump_id, p_filebody);  
+    INSERT INTO awrdumps_files (dump_id, filebody) VALUES (l_dump_id, p_filebody);
     awrtools_contr.lcc_dump_exec_action(l_dump_id,awrtools_contr.c_dump_loadfile);
   end;
-  
+
+   procedure load_dump_from_file(p_proj_id AWRDUMPS.proj_id%type,
+                                 p_filename AWRDUMPS.filename%type,
+                                 p_dump_description AWRDUMPS.dump_description%type)
+   is
+     l_filebody AWRDUMPS_FILES.filebody%type;
+     l_d_off number := 1;
+     l_s_off number := 1;
+     l_bfile bfile := BFILENAME(awrtools_api.getconf('WORKDIR'), p_filename);
+   begin
+     DBMS_LOB.CREATETEMPORARY(l_filebody, false);
+     DBMS_LOB.fileopen(l_bfile, DBMS_LOB.file_readonly);
+     DBMS_LOB.LOADBLOBFROMFILE (
+       dest_lob    => l_filebody, 
+       src_bfile   => l_bfile, 
+       amount      => DBMS_LOB.LOBMAXSIZE, 
+       dest_offset => l_d_off, 
+       src_offset  => l_s_off);
+   
+     awrtools_api.create_new_dump(p_proj_id, p_filename, p_dump_description, l_filebody);
+     DBMS_LOB.FILECLOSE (l_bfile);
+   end;
+
   procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2) is
     l_dbid number;
     l_min_snap_id number;
@@ -107,7 +129,7 @@ create or replace package body awrtools_api as
   begin
     for i in (select proj_id,filebody,filename
                 from awrdumps a,awrdumps_files b
-               where a.dump_id=b.dump_id and a.dump_id=p_dump_id) 
+               where a.dump_id=b.dump_id and a.dump_id=p_dump_id)
     loop
       awrtools_loc_utils.save_dump(i.filebody,i.filename,awrtools_api.getconf('WORKDIR'));
       if p_dest='REM' then
@@ -149,23 +171,23 @@ create or replace package body awrtools_api as
       awrtools_loc_utils.remove_dump(i.filename,awrtools_api.getconf('WORKDIR'));
     end loop;
   end;
-  
+
   procedure unload_dump(p_dump_id awrdumps.dump_id%type)
   is
   begin
-    for i in (select * from awrdumps where dump_id=p_dump_id) 
+    for i in (select * from awrdumps where dump_id=p_dump_id)
     loop
       awrtools_loc_utils.unload_dump(i.is_remote,i.MIN_SNAP_ID,i.MAX_SNAP_ID,i.DBID);
       awrtools_contr.lcc_dump_exec_action(p_dump_id,awrtools_contr.c_dump_unloadawr);
     end loop;
-  end;  
-  
+  end;
+
   procedure del_file(p_dump_id awrdumps.dump_id%type)
   is
   begin
     update AWRDUMPS_FILES set filebody=null where dump_id=p_dump_id;
     awrtools_contr.lcc_dump_exec_action(p_dump_id,awrtools_contr.c_dump_removefile);
   end;
-  
+
 end awrtools_api;
 /

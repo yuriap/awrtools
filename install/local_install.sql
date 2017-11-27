@@ -51,7 +51,6 @@ create table awrdumps (
     min_snap_dt timestamp(3),
     max_snap_dt timestamp(3),
     is_remote varchar2(10) default 'NO' NOT NULL check (is_remote in ('YES','NO')),
-	sql_id varchar2(100),
     db_description varchar2(1000),
     dump_description varchar2(4000)
 );

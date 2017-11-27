@@ -1,5 +1,5 @@
 create or replace package body awrtools_reports as
- 
+
     procedure set_filename_and_param_displ(p_report_id AWRCOMP_REPORTS.REPORT_ID%type, p_file_name varchar2, p_report_params_displ AWRCOMP_REPORTS.report_params_displ%type)
     is
     begin
@@ -15,7 +15,7 @@ create or replace package body awrtools_reports as
       if p_copy_from is null then
         INSERT INTO AWRCOMP_REPORTS ( REPORT_TYPE, REPORT_CONTENT, FILE_MIMETYPE, FILE_NAME,  PROJ_ID)
                              VALUES ((select dic_id from AWRCOMP_D_REPORT_TYPES where dic_value=p_report_type),empty_blob(),default,null, p_proj_id)
-        returning report_id into l_id;  
+        returning report_id into l_id;
       else
         select REPORT_TYPE, FILE_MIMETYPE, PROJ_ID
           into l_report.REPORT_TYPE,
@@ -34,7 +34,7 @@ create or replace package body awrtools_reports as
     function get_report_params_visibility(p_report_type varchar2, p_control_name varchar2) return boolean result_cache
     is
     begin
-      case 
+      case
         when p_report_type='AWRCOMP' and p_control_name in ('DB1','DB1_START_SNAP','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER') then return true;
         when p_report_type='AWRSQLREPORT' and p_control_name in ('DB1','REMARK','SQL_ID') then return true;
         when p_report_type='AWRRPT' and p_control_name in ('DB1','DB1_START_SNAP','DB1_END_SNAP') then return true;
@@ -52,7 +52,7 @@ create or replace package body awrtools_reports as
 --'DB1','DB1_START_SNAP','REMARK','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER','SQL_ID'
 
     procedure save_param(p_report_id AWRCOMP_REPORTS.REPORT_ID%type, p_param_name varchar2, p_param_value varchar2)
-    is 
+    is
       l_report_type varchar2(100);
     begin
       select tp.DIC_VALUE into l_report_type from AWRCOMP_REPORTS r, awrcomp_d_report_types tp where report_id=p_report_id and tp.DIC_ID=report_type;
@@ -65,12 +65,12 @@ create or replace package body awrtools_reports as
     end;
 
     function get_param(p_report_id AWRCOMP_REPORTS.REPORT_ID%type, p_param_name varchar2) return varchar2 result_cache
-    is 
+    is
       l_val AWRCOMP_REPORTS_PARAMS.param_value%type;
     begin
       select param_value into l_val from AWRCOMP_REPORTS_PARAMS where report_id=p_report_id and param_name=upper(p_param_name);
       return l_val;
-    exception 
+    exception
       when no_data_found then return null;
     end;
 
@@ -89,7 +89,7 @@ create or replace package body awrtools_reports as
           exit when l_status=1;
           l_report_content:=l_report_content||l_line||chr(10);
         end loop;
-      else 
+      else
         l_report_content := p_content;
       end if;
 
@@ -130,7 +130,7 @@ create or replace package body awrtools_reports as
       execute immediate q'[alter session set nls_numeric_characters=', ']';
 
       select tp.DIC_VALUE, tp.dic_filename_pref into report_type,l_file_prefix
-        from AWRCOMP_REPORTS r, awrcomp_d_report_types tp where report_id=p_report_id and tp.DIC_ID=report_type;          
+        from AWRCOMP_REPORTS r, awrcomp_d_report_types tp where report_id=p_report_id and tp.DIC_ID=report_type;
 
       dbms_output.enable(null);
       begin
@@ -153,30 +153,30 @@ create or replace package body awrtools_reports as
             select dbid, min_snap_id, max_snap_id, is_remote into l_dbid, l_ss, l_es, l_is_remote from awrdumps where dump_id=to_number(get_param(p_report_id,'DB2'));
             l_scr := replace(l_scr,'~dbid2.',to_char(l_dbid));
             l_scr := replace(l_scr,'~start_snap2.',to_char(l_ss));
-            l_scr := replace(l_scr,'~end_snap2.',to_char(l_es));    
+            l_scr := replace(l_scr,'~end_snap2.',to_char(l_es));
 
             l_report_params_displ:=l_report_params_displ||'DB2: '||to_char(l_dbid)||'; snaps: '||to_char(l_ss)||'-'||to_char(l_es)||'; ';
 
-            if l_is_remote='YES' then 
+            if l_is_remote='YES' then
               l_scr := replace(l_scr,'~dblnk.','@'||awrtools_api.getconf('DBLINK'));
               l_report_params_displ:=l_report_params_displ||'DB link: '||awrtools_api.getconf('DBLINK')||'; ';
             else
               l_scr := replace(l_scr,'~dblnk.',null);
             end if;
-            
+
             select dic_filename_pref,DIC_VALUE into l_filename,l_sort from awrcomp_d_sortordrs where dic_id=get_param(p_report_id,'SORT');
             set_filename_and_param_displ(p_report_id,l_file_prefix||l_filename, l_report_params_displ);
-            
+
             l_scr := replace(l_scr,'~sortcol.',l_sort);
             l_scr := replace(l_scr,'~filter.',get_param(p_report_id,'FILTER'));
             l_scr := replace(l_scr,'~sortlimit.',get_param(p_report_id,'LIMIT'));
             l_scr := replace(l_scr,'~embeded.','FALSE');
-            
+
             l_report_params_displ:=l_report_params_displ||'SORT: '||l_sort||'; ';
             l_report_params_displ:=l_report_params_displ||'FILTER: '||get_param(p_report_id,'FILTER')||'; ';
             l_report_params_displ:=l_report_params_displ||'LIMIT: '||get_param(p_report_id,'LIMIT');
 
---'DB1','DB1_START_SNAP','REMARK','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER','SQL_ID'            
+--'DB1','DB1_START_SNAP','REMARK','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER','SQL_ID'
 
             execute immediate l_scr;
 
@@ -192,7 +192,7 @@ create or replace package body awrtools_reports as
           execute immediate l_scr;
 
           save_report_content(p_report_id,p_output=>true);
-        --====================================================================================  
+        --====================================================================================
         elsif report_type='AWRRPT' then
           declare
             l_dbid number;
@@ -205,7 +205,7 @@ create or replace package body awrtools_reports as
 
             for i in (select INSTANCE_NUMBER, min(snap_id) mis, max(snap_id) mas
                         from dba_hist_snapshot x where dbid=l_dbid and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
-                      group by INSTANCE_NUMBER) 
+                      group by INSTANCE_NUMBER)
             loop
               begin
                 for j in (select output from table(dbms_workload_repository.awr_report_html(l_dbid,i.INSTANCE_NUMBER,i.mis,i.mas)))
@@ -215,17 +215,17 @@ create or replace package body awrtools_reports as
               exception
                 when others then l_report_content:=sqlerrm;
               end;
-              if l_cnt=1 then                                                                              
+              if l_cnt=1 then
                 set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(p_report_id,false,l_report_content);                                                                              
+                save_report_content(p_report_id,false,l_report_content);
               else
                 l_report_id:=create_report(null,null,p_report_id);
                 set_filename_and_param_displ(l_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(l_report_id,false,l_report_content);                                                                              
+                save_report_content(l_report_id,false,l_report_content);
               end if;
               l_cnt:=l_cnt+1;
             end loop;
-          end; 
+          end;
         --====================================================================================
         elsif report_type='AWRGLOBALRPT' then
           declare
@@ -239,7 +239,7 @@ create or replace package body awrtools_reports as
 
             for i in (select unique INSTANCE_NUMBER
                         from dba_hist_snapshot x where dbid=l_dbid and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
-                      ) 
+                      )
             loop
               l_inst_num_list:=l_inst_num_list||i.INSTANCE_NUMBER||',';
             end loop;
@@ -255,9 +255,9 @@ create or replace package body awrtools_reports as
             end;
 
             set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid||'_'||replace(l_inst_num_list,',','_')||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST List: '||replace(l_inst_num_list,',','_'));
-            save_report_content(p_report_id,false,l_report_content);                                                                              
-          end;  
-        --====================================================================================  
+            save_report_content(p_report_id,false,l_report_content);
+          end;
+        --====================================================================================
         elsif report_type='AWRSQRPT' then
           declare
             l_dbid number;
@@ -270,7 +270,7 @@ create or replace package body awrtools_reports as
 
             for i in (select INSTANCE_NUMBER, min(snap_id) mis, max(snap_id) mas
                         from dba_hist_snapshot x where dbid=l_dbid and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
-                      group by INSTANCE_NUMBER) 
+                      group by INSTANCE_NUMBER)
             loop
               begin
                 for j in (select output from table(dbms_workload_repository.awr_sql_report_html(l_dbid,i.INSTANCE_NUMBER,i.mis,i.mas,get_param(p_report_id,'SQL_ID'))))
@@ -280,17 +280,17 @@ create or replace package body awrtools_reports as
               exception
                 when others then l_report_content:=sqlerrm;
               end;
-              if l_cnt=1 then                                                                              
+              if l_cnt=1 then
                 set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap')||'_'||get_param(p_report_id,'SQL_ID'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(p_report_id,false,l_report_content);                                                                              
+                save_report_content(p_report_id,false,l_report_content);
               else
                 l_report_id:=create_report(null,null,p_report_id);
                 set_filename_and_param_displ(l_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap')||'_'||get_param(p_report_id,'SQL_ID'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(l_report_id,false,l_report_content);                                                                              
+                save_report_content(l_report_id,false,l_report_content);
               end if;
               l_cnt:=l_cnt+1;
             end loop;
-          end;         
+          end;
         --====================================================================================
         elsif report_type='AWRDIFF' then
           declare
@@ -307,12 +307,12 @@ create or replace package body awrtools_reports as
 
             for i in (select INSTANCE_NUMBER, min(snap_id) mis, max(snap_id) mas
                         from dba_hist_snapshot x where dbid=l_dbid1 and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
-                      group by INSTANCE_NUMBER) 
+                      group by INSTANCE_NUMBER)
             loop
               for k in (select INSTANCE_NUMBER, min(snap_id) mis, max(snap_id) mas
                           from dba_hist_snapshot x where dbid=l_dbid2 and SNAP_ID between awrtools_reports.get_param(p_report_id,'db2_start_snap') and awrtools_reports.get_param(p_report_id,'db2_end_snap')
-                        group by INSTANCE_NUMBER) 
-              loop            
+                        group by INSTANCE_NUMBER)
+              loop
                 begin
                   for j in (select output from table(dbms_workload_repository.awr_diff_report_html(l_dbid1,i.INSTANCE_NUMBER,i.mis,i.mas,
                                                                                                    l_dbid2,k.INSTANCE_NUMBER,k.mis,k.mas)))
@@ -322,18 +322,18 @@ create or replace package body awrtools_reports as
                 exception
                   when others then l_report_content:=sqlerrm;
                 end;
-                if l_cnt=1 then                                                                              
+                if l_cnt=1 then
                   set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid1||'_'||l_dbid2||'_'||i.INSTANCE_NUMBER||'-'||k.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db2_start_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER||'-'||k.INSTANCE_NUMBER);
-                  save_report_content(p_report_id,false,l_report_content);                                                                              
+                  save_report_content(p_report_id,false,l_report_content);
                 else
                   l_report_id:=create_report(null,null,p_report_id);
                   set_filename_and_param_displ(l_report_id,l_file_prefix||'_'||l_dbid1||'_'||l_dbid2||'_'||i.INSTANCE_NUMBER||'-'||k.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER||'-'||k.INSTANCE_NUMBER);
-                  save_report_content(l_report_id,false,l_report_content);                                                                              
+                  save_report_content(l_report_id,false,l_report_content);
                 end if;
                 l_cnt:=l_cnt+1;
               end loop;
             end loop;
-          end; 
+          end;
         --====================================================================================
         elsif report_type='AWRGLOBALDIFF' then
           declare
@@ -351,7 +351,7 @@ create or replace package body awrtools_reports as
 
             for i in (select unique INSTANCE_NUMBER
                         from dba_hist_snapshot x where dbid=l_dbid1 and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
-                      ) 
+                      )
             loop
               l_inst_num_list1:=l_inst_num_list1||i.INSTANCE_NUMBER||',';
             end loop;
@@ -359,11 +359,11 @@ create or replace package body awrtools_reports as
 
             for i in (select unique INSTANCE_NUMBER
                         from dba_hist_snapshot x where dbid=l_dbid2 and SNAP_ID between awrtools_reports.get_param(p_report_id,'db2_start_snap') and awrtools_reports.get_param(p_report_id,'db2_end_snap')
-                      ) 
+                      )
             loop
               l_inst_num_list2:=l_inst_num_list2||i.INSTANCE_NUMBER||',';
             end loop;
-            l_inst_num_list2:=rtrim(l_inst_num_list2,',');            
+            l_inst_num_list2:=rtrim(l_inst_num_list2,',');
             begin
               for j in (select output from table(dbms_workload_repository.awr_global_diff_report_html(l_dbid1,l_inst_num_list1,get_param(p_report_id,'db1_start_snap'),get_param(p_report_id,'db1_end_snap'),
                                                                                                       l_dbid2,l_inst_num_list2,get_param(p_report_id,'db2_start_snap'),get_param(p_report_id,'db2_end_snap'))))
@@ -375,8 +375,8 @@ create or replace package body awrtools_reports as
             end;
 
             set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid1||'_'||l_dbid2||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db2_start_snap'),l_report_params_displ||' INST List: #1: '||replace(l_inst_num_list1,',','_')||'; #2: '||replace(l_inst_num_list2,',','_'));
-            save_report_content(p_report_id,false,l_report_content);                                                                              
-          end;          
+            save_report_content(p_report_id,false,l_report_content);
+          end;
         --====================================================================================
         elsif report_type='ASHRPT' then
           -- somehow it generete empty report on my 12.2 box
@@ -393,7 +393,7 @@ create or replace package body awrtools_reports as
 
             for i in (select INSTANCE_NUMBER,min(BEGIN_INTERVAL_TIME)BEGIN_INTERVAL_TIME,max(END_INTERVAL_TIME)END_INTERVAL_TIME
                         from dba_hist_snapshot x where dbid=l_dbid and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
-                       group by INSTANCE_NUMBER) 
+                       group by INSTANCE_NUMBER)
             loop
 
               begin
@@ -405,17 +405,17 @@ create or replace package body awrtools_reports as
                 when others then l_report_content:=sqlerrm;
               end;
 
-              if l_cnt=1 then                                                                              
+              if l_cnt=1 then
                 set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(p_report_id,false,l_report_content);                                                                              
+                save_report_content(p_report_id,false,l_report_content);
               else
                 l_report_id:=create_report(null,null,p_report_id);
                 set_filename_and_param_displ(l_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(l_report_id,false,l_report_content);                                                                              
+                save_report_content(l_report_id,false,l_report_content);
               end if;
               l_cnt:=l_cnt+1;
             end loop;
-          end;        
+          end;
         --====================================================================================
         elsif report_type='ASHGLOBALRPT' then
           declare
@@ -423,20 +423,20 @@ create or replace package body awrtools_reports as
             l_report_id number;
             l_inst_num_list varchar2(1000);
             l_begin_date date;
-            l_end_date date;            
+            l_end_date date;
           begin
             select dbid into l_dbid from awrdumps where dump_id=to_number(get_param(p_report_id,'DB1'));
 
             l_report_params_displ:='DB: '||to_char(l_dbid)||'; snaps: '||get_param(p_report_id,'db1_start_snap')||'-'||get_param(p_report_id,'db1_end_snap')||'; ';
 
            select min(BEGIN_INTERVAL_TIME),max(END_INTERVAL_TIME) into l_begin_date,l_end_date
-             from dba_hist_snapshot x 
-            where dbid=l_dbid 
+             from dba_hist_snapshot x
+            where dbid=l_dbid
               and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap');
 
             for i in (select unique INSTANCE_NUMBER
                         from dba_hist_snapshot x where dbid=l_dbid and SNAP_ID between awrtools_reports.get_param(p_report_id,'db1_start_snap') and awrtools_reports.get_param(p_report_id,'db1_end_snap')
-                      ) 
+                      )
             loop
               l_inst_num_list:=l_inst_num_list||i.INSTANCE_NUMBER||',';
             end loop;
@@ -452,8 +452,8 @@ create or replace package body awrtools_reports as
             end;
 
             set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid||'_'||replace(l_inst_num_list,',','_')||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST List: '||replace(l_inst_num_list,',','_'));
-            save_report_content(p_report_id,false,l_report_content);                                                                              
-          end;          
+            save_report_content(p_report_id,false,l_report_content);
+          end;
         --====================================================================================
         elsif report_type='ASHANALYTICS' then
           -- somehow it generete empty report on my 12.2 box
@@ -481,13 +481,13 @@ create or replace package body awrtools_reports as
               exception
                 when others then l_report_content:=sqlerrm;
               end;
-              if l_cnt=1 then                                                                              
+              if l_cnt=1 then
                 set_filename_and_param_displ(p_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(p_report_id,false,l_report_content);                                                                              
+                save_report_content(p_report_id,false,l_report_content);
               else
                 l_report_id:=create_report(null,null,p_report_id);
                 set_filename_and_param_displ(l_report_id,l_file_prefix||'_'||l_dbid||'_'||i.INSTANCE_NUMBER||'_'||get_param(p_report_id,'db1_start_snap')||'_'||get_param(p_report_id,'db1_end_snap'),l_report_params_displ||' INST: '||i.INSTANCE_NUMBER);
-                save_report_content(l_report_id,false,l_report_content);                                                                              
+                save_report_content(l_report_id,false,l_report_content);
               end if;
               l_cnt:=l_cnt+1;
             end loop;
@@ -496,7 +496,11 @@ create or replace package body awrtools_reports as
             raise_application_error(-20000, 'Unknown report type: '||report_type);
         end if;
       exception
-        when others then l_report_content:=sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||chr(10)||l_scr;
+        when others then 
+          begin
+            l_report_content:=sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||chr(10)||l_scr;
+            save_report_content(p_report_id,false,l_report_content);
+          end;
       end;
 
       commit;
