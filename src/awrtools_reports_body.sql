@@ -165,8 +165,7 @@ create or replace package body awrtools_reports as
             end if;
 
             select dic_filename_pref,DIC_VALUE into l_filename,l_sort from awrcomp_d_sortordrs where dic_id=get_param(p_report_id,'SORT');
-            set_filename_and_param_displ(p_report_id,l_file_prefix||l_filename, l_report_params_displ);
-
+            
             l_scr := replace(l_scr,'~sortcol.',l_sort);
             l_scr := replace(l_scr,'~filter.',get_param(p_report_id,'FILTER'));
             l_scr := replace(l_scr,'~sortlimit.',get_param(p_report_id,'LIMIT'));
@@ -176,6 +175,7 @@ create or replace package body awrtools_reports as
             l_report_params_displ:=l_report_params_displ||'FILTER: '||get_param(p_report_id,'FILTER')||'; ';
             l_report_params_displ:=l_report_params_displ||'LIMIT: '||get_param(p_report_id,'LIMIT');
 
+            set_filename_and_param_displ(p_report_id,l_file_prefix||l_filename, l_report_params_displ);
 --'DB1','DB1_START_SNAP','REMARK','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER','SQL_ID'
 
             execute immediate l_scr;
@@ -496,7 +496,7 @@ create or replace package body awrtools_reports as
             raise_application_error(-20000, 'Unknown report type: '||report_type);
         end if;
       exception
-        when others then 
+        when others then
           begin
             l_report_content:=sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE||chr(10)||chr(10)||l_scr;
             save_report_content(p_report_id,false,l_report_content);
