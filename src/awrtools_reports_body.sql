@@ -165,7 +165,7 @@ create or replace package body awrtools_reports as
             end if;
 
             select dic_filename_pref,DIC_VALUE into l_filename,l_sort from awrcomp_d_sortordrs where dic_id=get_param(p_report_id,'SORT');
-            
+
             l_scr := replace(l_scr,'~sortcol.',l_sort);
             l_scr := replace(l_scr,'~filter.',get_param(p_report_id,'FILTER'));
             l_scr := replace(l_scr,'~sortlimit.',get_param(p_report_id,'LIMIT'));
@@ -189,7 +189,8 @@ create or replace package body awrtools_reports as
           l_scr := replace(l_scr,'~SQLID',get_param(p_report_id,'SQL_ID'));
           l_report_params_displ:='SQL_ID: '||get_param(p_report_id,'SQL_ID');
           set_filename_and_param_displ(p_report_id,l_file_prefix||get_param(p_report_id,'SQL_ID'),l_report_params_displ);
-          execute immediate l_scr;
+          
+          execute immediate l_scr using in replace(awrtools_api.getscript('GETCOMPREPORT'),'~','!'); --embeded comparing report
 
           save_report_content(p_report_id,p_output=>true);
         --====================================================================================
