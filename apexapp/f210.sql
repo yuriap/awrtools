@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   13:05 Thursday November 16, 2017
+--   Date and Time:   12:04 Monday December 11, 2017
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,7 +37,7 @@ prompt APPLICATION 210 - AWR Tools
 
 -- Application Statistics:
 --   Pages:                     12
---     Items:                   35
+--     Items:                   36
 --     Computations:             1
 --     Validations:              5
 --     Processes:               19
@@ -117,7 +117,7 @@ wwv_flow_api.create_flow(
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171116125731'
+,p_last_upd_yyyymmddhh24miss=>'20171211120329'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -10947,7 +10947,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171115161211'
+,p_last_upd_yyyymmddhh24miss=>'20171211120329'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(50253096526534048)
@@ -11290,6 +11290,35 @@ wwv_flow_api.create_page_item(
 ,p_attribute_05=>'BOTH'
 );
 wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(50712894912476424)
+,p_name=>'P15_SQLMULTIPLAN'
+,p_item_sequence=>140
+,p_item_plug_id=>wwv_flow_api.id(106578473812102233)
+,p_prompt=>'SQLs with multiple plans'
+,p_display_as=>'NATIVE_POPUP_LOV'
+,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select s.sql_id||'': ''||cast(substr(sql_text,1,500) as varchar2(500)) || ''...'' text, s.sql_id',
+'              from dba_hist_sqlstat s, AWRDUMPS d, dba_hist_sqltext t',
+'			 where s.plan_hash_value<>0 ',
+'			   and s.parsing_schema_name <> ''SYS''',
+'			   and nvl(s.action,''@#$'') not like ''ORA$%''',
+'               and decode(s.module, ''performance_info'', 0, 1) = 1',
+'               and decode(s.module, ''MMON_SLAVE'', 0, 1) = 1',
+'               and s.CPU_TIME_DELTA+s.ELAPSED_TIME_DELTA+s.BUFFER_GETS_DELTA+s.EXECUTIONS_DELTA>0',
+'               and d.proj_id=26 and d.dbid=s.dbid and s.snap_id between d.min_snap_id and d.max_snap_id',
+'               and t.sql_id=s.sql_id',
+'             group by s.dbid, s.sql_id, cast(substr(sql_text,1,500) as varchar2(500))',
+'            having count(unique plan_hash_value)>1;'))
+,p_cSize=>30
+,p_display_when=>'awrtools_reports.get_report_params_visibility(:P15_REPORT_TYPE,''SQLMULTIPLAN'')'
+,p_display_when_type=>'PLSQL_EXPRESSION'
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'NOT_ENTERABLE'
+,p_attribute_02=>'FIRST_ROWSET'
+);
+wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(104670875776582680)
 ,p_name=>'P15_PROJ_ID'
 ,p_item_sequence=>10
@@ -11562,6 +11591,12 @@ wwv_flow_api.create_page_validation(
 '       return ''Specify all parameters for the report'';',
 '     end if;',
 '  end if;',
+'  if :P15_REPORT_TYPE in (''SQLMULTIPLAN'') then',
+'    if :P15_SQLMULTIPLAN is null',
+'     then',
+'       return ''Specify all parameters for the report'';',
+'     end if;',
+'  end if;',
 'end;'))
 ,p_validation_type=>'FUNC_BODY_RETURNING_ERR_TEXT'
 ,p_always_execute=>'N'
@@ -11615,6 +11650,7 @@ wwv_flow_api.create_page_process(
 '  awrtools_reports.save_param(l_id,''FILTER'',:P15_FILTER);',
 '  awrtools_reports.save_param(l_id,''SQL_ID'',:P15_SQL_ID);',
 '  awrtools_reports.save_param(l_id,''LEVEL'',:P15_LEVEL);',
+'  awrtools_reports.save_param(l_id,''SQLMULTIPLAN'',:P15_SQLMULTIPLAN);',
 '  commit;  ',
 '  awrtools_reports.create_report(l_id);  ',
 'end;'))

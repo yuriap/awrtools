@@ -62,3 +62,6 @@ Version 2.3
 
 Version 2.4
 1) Custom AWR SQL report now has an embeded AWR SQL Compare section
+
+Version 2.5
+1) Custom "Analyze SQLs with multiple plans" report added

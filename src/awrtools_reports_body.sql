@@ -37,6 +37,7 @@ create or replace package body awrtools_reports as
       case
         when p_report_type='AWRCOMP' and p_control_name in ('DB1','DB1_START_SNAP','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER') then return true;
         when p_report_type='AWRSQLREPORT' and p_control_name in ('DB1','REMARK','SQL_ID') then return true;
+        when p_report_type='SQLMULTIPLAN' and p_control_name in ('SQLMULTIPLAN') then return true;
         when p_report_type='AWRRPT' and p_control_name in ('DB1','DB1_START_SNAP','DB1_END_SNAP') then return true;
         when p_report_type='AWRGLOBALRPT' and p_control_name in ('DB1','DB1_START_SNAP','DB1_END_SNAP') then return true;
         when p_report_type='AWRSQRPT' and p_control_name in ('DB1','REMARK','SQL_ID','DB1_START_SNAP','DB1_END_SNAP') then return true;
@@ -119,6 +120,7 @@ create or replace package body awrtools_reports as
     is
 
       report_type awrcomp_d_report_types.DIC_VALUE%type;
+      l_proj_id  AWRCOMP_REPORTS.proj_id%type;
       l_filename varchar2(100);
       l_scr      clob;
       l_report_content clob;
@@ -129,7 +131,7 @@ create or replace package body awrtools_reports as
 
       execute immediate q'[alter session set nls_numeric_characters=', ']';
 
-      select tp.DIC_VALUE, tp.dic_filename_pref into report_type,l_file_prefix
+      select tp.DIC_VALUE, tp.dic_filename_pref, proj_id into report_type,l_file_prefix,l_proj_id
         from AWRCOMP_REPORTS r, awrcomp_d_report_types tp where report_id=p_report_id and tp.DIC_ID=report_type;
 
       dbms_output.enable(null);
@@ -176,12 +178,55 @@ create or replace package body awrtools_reports as
             l_report_params_displ:=l_report_params_displ||'LIMIT: '||get_param(p_report_id,'LIMIT');
 
             set_filename_and_param_displ(p_report_id,l_file_prefix||l_filename, l_report_params_displ);
---'DB1','DB1_START_SNAP','REMARK','DB1_END_SNAP','DB2','DB2_START_SNAP','DB2_END_SNAP','SORT','LIMIT','FILTER','SQL_ID'
 
             execute immediate l_scr;
 
             save_report_content(p_report_id,p_output=>true);
           end;
+        --====================================================================================
+        elsif report_type='SQLMULTIPLAN' then     
+          declare
+            l_dbid number;
+            l_ss   number;
+            l_es   number;
+            l_is_remote awrdumps.is_remote%type;
+            l_sort AWRCOMP_D_SORTORDRS.DIC_VALUE%type;
+          begin
+            l_scr := awrtools_api.getscript('GETCOMPREPORT');
+            
+            begin
+              select s.dbid, min(snap_id) mi, max(snap_id) ma 
+                into l_dbid, l_ss, l_es
+                from dba_hist_sqlstat s, AWRDUMPS d
+			   where s.sql_id = get_param(p_report_id,'SQLMULTIPLAN')
+                 and d.proj_id=l_proj_id and d.dbid=s.dbid and s.snap_id between d.min_snap_id and d.max_snap_id
+               group by s.dbid, sql_id
+              having count(unique plan_hash_value)>1;
+            exception
+              when too_many_rows then raise_application_error(-20000,'Unsupported feature: single SQL_ID has been found for several DBID.');
+              when others then raise_application_error(-20000,sqlerrm||chr(10)||get_param(p_report_id,'SQLMULTIPLAN')||':'||l_proj_id);
+            end;
+            
+            l_scr := replace(l_scr,'~dbid1.',to_char(l_dbid));
+            l_scr := replace(l_scr,'~start_snap1.',to_char(l_ss-1));
+            l_scr := replace(l_scr,'~end_snap1.',to_char(l_es));
+            l_scr := replace(l_scr,'~dbid2.',to_char(l_dbid));
+            l_scr := replace(l_scr,'~start_snap2.',to_char(l_ss-1));
+            l_scr := replace(l_scr,'~end_snap2.',to_char(l_es));
+            l_scr := replace(l_scr,'~dblnk.',null);
+            l_scr := replace(l_scr,'~sortcol.','ELAPSED_TIME_DELTA');
+            l_scr := replace(l_scr,'~filter.',q'[sql_id=']'||get_param(p_report_id,'SQLMULTIPLAN')||q'[']');
+            l_scr := replace(l_scr,'~sortlimit.','1');
+            l_scr := replace(l_scr,'~embeded.','FALSE');
+            
+            l_report_params_displ:='DBID: '||to_char(l_dbid)||'; snaps: '||to_char(l_ss)||'-'||to_char(l_es)||'; SQL_ID='||get_param(p_report_id,'SQLMULTIPLAN');
+
+            set_filename_and_param_displ(p_report_id,l_file_prefix||get_param(p_report_id,'SQLMULTIPLAN'), l_report_params_displ);
+
+            execute immediate l_scr;
+
+            save_report_content(p_report_id,p_output=>true);
+          end;        
         --====================================================================================
         elsif report_type='AWRSQLREPORT' then
 
@@ -189,7 +234,7 @@ create or replace package body awrtools_reports as
           l_scr := replace(l_scr,'~SQLID',get_param(p_report_id,'SQL_ID'));
           l_report_params_displ:='SQL_ID: '||get_param(p_report_id,'SQL_ID');
           set_filename_and_param_displ(p_report_id,l_file_prefix||get_param(p_report_id,'SQL_ID'),l_report_params_displ);
-          
+
           execute immediate l_scr using in replace(awrtools_api.getscript('GETCOMPREPORT'),'~','!'); --embeded comparing report
 
           save_report_content(p_report_id,p_output=>true);
