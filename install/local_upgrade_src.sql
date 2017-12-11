@@ -39,18 +39,7 @@ set define on
 show errors
 
 set define off
-
-declare
-  l_script clob := 
-q'^
-@../scripts/_getcomph.sql
-^';
-begin
-  delete from awrcomp_scripts where script_id='GETCOMPREPORT';
-  insert into awrcomp_scripts (script_id,script_content) values
-  ('GETCOMPREPORT',l_script||l_script1);
-end;
-/
+set serveroutput on
 
 declare
   l_script clob := 
@@ -64,9 +53,20 @@ begin
 end;
 /
 
+declare
+  l_script clob := 
+q'^
+@../scripts/_getcomph.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='GETCOMPREPORT';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('GETCOMPREPORT',l_script||l_script1);
+  dbms_output.put_line('#1: '||dbms_lob.getlength(l_script)||' bytes; #2: '||dbms_lob.getlength(l_script1)||' bytes;');
+end;
+/
+
 set define on
 commit;
 
-
-spool off
 disc

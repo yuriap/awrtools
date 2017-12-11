@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   12:04 Monday December 11, 2017
+--   Date and Time:   14:37 Monday December 11, 2017
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -117,7 +117,7 @@ wwv_flow_api.create_flow(
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171211120329'
+,p_last_upd_yyyymmddhh24miss=>'20171211143248'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -10947,7 +10947,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171211120329'
+,p_last_upd_yyyymmddhh24miss=>'20171211143247'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(50253096526534048)
@@ -11305,7 +11305,7 @@ wwv_flow_api.create_page_item(
 '               and decode(s.module, ''performance_info'', 0, 1) = 1',
 '               and decode(s.module, ''MMON_SLAVE'', 0, 1) = 1',
 '               and s.CPU_TIME_DELTA+s.ELAPSED_TIME_DELTA+s.BUFFER_GETS_DELTA+s.EXECUTIONS_DELTA>0',
-'               and d.proj_id=26 and d.dbid=s.dbid and s.snap_id between d.min_snap_id and d.max_snap_id',
+'               and d.proj_id=:P15_PROJ_ID and d.dbid=s.dbid and s.snap_id between d.min_snap_id and d.max_snap_id',
 '               and t.sql_id=s.sql_id',
 '             group by s.dbid, s.sql_id, cast(substr(sql_text,1,500) as varchar2(500))',
 '            having count(unique plan_hash_value)>1;'))

@@ -153,18 +153,7 @@ insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref
 
 
 set define off
-
-declare
-  l_script clob := 
-q'^
-@../scripts/_getcomph.sql
-^';
-begin
-  delete from awrcomp_scripts where script_id='GETCOMPREPORT';
-  insert into awrcomp_scripts (script_id,script_content) values
-  ('GETCOMPREPORT',l_script||l_script1);
-end;
-/
+set serveroutput on
 
 declare
   l_script clob := 
@@ -175,6 +164,19 @@ begin
   delete from awrcomp_scripts where script_id='GETAWRSQLREPORT';
   insert into awrcomp_scripts (script_id,script_content) values
   ('GETAWRSQLREPORT',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'^
+@../scripts/_getcomph.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='GETCOMPREPORT';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('GETCOMPREPORT',l_script||l_script1);
+  dbms_output.put_line('#1: '||dbms_lob.getlength(l_script)||' bytes; #2: '||dbms_lob.getlength(l_script1)||' bytes;');
 end;
 /
 
