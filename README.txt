@@ -1,4 +1,4 @@
-Web AWR Tools. Ver 2.5
+Web AWR Tools. Ver 2.6
 
 AWR dump warehouse with web-based UI.
 
@@ -65,3 +65,6 @@ Version 2.4
 
 Version 2.5
 1) Custom "Analyze SQLs with multiple plans" report added
+
+Version 2.6
+2) Added coloring for compared query plans
