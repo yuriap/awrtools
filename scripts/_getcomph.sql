@@ -36,12 +36,12 @@ declare
   l_sec1 t_section;
   l_sec2 t_section;  
   l_plan_sections_all my_arrayofstrings := my_arrayofstrings('SQL_ID',
-                                                         'Plan hash value:',
-														 'Query Block Name / Object Alias (identified by operation id):',
-														 'Outline Data',
-														 'Remote SQL Information (identified by operation id):',
-														 'Peeked Binds (identified by position):',
-														 'Note');  
+                                                             'Plan hash value:',
+                                                             'Query Block Name / Object Alias (identified by operation id):',
+                                                             'Outline Data',
+                                                             'Remote SQL Information (identified by operation id):',
+                                                             'Peeked Binds (identified by position):',
+                                                             'Note');  
   l_curr_section number; 
   l_plan_sections my_arrayofstrings := my_arrayofstrings();
   type t_available_sections is table of number index by varchar2(100);
@@ -984,11 +984,11 @@ begin
           end loop;    
           
           --aligning sections
-		  p1.delete;
-		  p2.delete;
-		  l_available_sections.delete;
-		  l_plan_sections.delete;
-		  
+          p1.delete;
+          p2.delete;
+          l_available_sections.delete;
+          l_plan_sections.delete;
+          
           for i in 1..p11.count loop
             for j in 1..l_plan_sections_all.count loop
               if instr(p11(i),l_plan_sections_all(j))>0 then 
@@ -1047,7 +1047,7 @@ begin
               end if;      
             end loop;
           end loop;
-		  l_plan_rowcnt := greatest(p11.count, p21.count);
+          l_plan_rowcnt := greatest(p11.count, p21.count);
         else
           --single plan, width
           for j in 1 .. p11.count loop

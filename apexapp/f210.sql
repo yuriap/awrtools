@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   12:22 Friday December 15, 2017
+--   Date and Time:   14:30 Saturday December 16, 2017
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -41,7 +41,7 @@ prompt APPLICATION 210 - AWR Tools
 --     Computations:             1
 --     Validations:              5
 --     Processes:               20
---     Regions:                 27
+--     Regions:                 28
 --     Buttons:                 16
 --   Shared Components:
 --     Logic:
@@ -118,7 +118,7 @@ wwv_flow_api.create_flow(
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171215122119'
+,p_last_upd_yyyymmddhh24miss=>'20171215175152'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -11818,7 +11818,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171215122119'
+,p_last_upd_yyyymmddhh24miss=>'20171215175152'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(50713209316476428)
@@ -11836,7 +11836,8 @@ wwv_flow_api.create_page_plug(
 '     AWRDUMPS d,',
 '     AWRDUMPS_FILES f',
 'WHERE p.proj_id=d.proj_id',
-'AND d.dump_id  =f.dump_id;'))
+'AND d.dump_id  =f.dump_id',
+'order by proj_name, sz_mb;'))
 ,p_plug_source_type=>'NATIVE_IR'
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_prn_content_disposition=>'ATTACHMENT'
@@ -11912,7 +11913,7 @@ wwv_flow_api.create_worksheet_column(
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(50713714497476433)
 ,p_db_column_name=>'FILENAME'
-,p_display_order=>40
+,p_display_order=>50
 ,p_column_identifier=>'D'
 ,p_column_label=>'Filename'
 ,p_column_type=>'STRING'
@@ -11920,7 +11921,7 @@ wwv_flow_api.create_worksheet_column(
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(50713894125476434)
 ,p_db_column_name=>'DBID'
-,p_display_order=>50
+,p_display_order=>60
 ,p_column_identifier=>'E'
 ,p_column_label=>'Dbid'
 ,p_column_type=>'NUMBER'
@@ -11929,7 +11930,7 @@ wwv_flow_api.create_worksheet_column(
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(50713930177476435)
 ,p_db_column_name=>'MIN_SNAP_ID'
-,p_display_order=>60
+,p_display_order=>70
 ,p_column_identifier=>'F'
 ,p_column_label=>'Min snap id'
 ,p_column_type=>'NUMBER'
@@ -11938,7 +11939,7 @@ wwv_flow_api.create_worksheet_column(
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(50714058349476436)
 ,p_db_column_name=>'MAX_SNAP_ID'
-,p_display_order=>70
+,p_display_order=>80
 ,p_column_identifier=>'G'
 ,p_column_label=>'Max snap id'
 ,p_column_type=>'NUMBER'
@@ -11947,7 +11948,7 @@ wwv_flow_api.create_worksheet_column(
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(50714192760476437)
 ,p_db_column_name=>'DB_DESCRIPTION'
-,p_display_order=>80
+,p_display_order=>90
 ,p_column_identifier=>'H'
 ,p_column_label=>'DB description'
 ,p_column_type=>'STRING'
@@ -11955,7 +11956,7 @@ wwv_flow_api.create_worksheet_column(
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(50714275446476438)
 ,p_db_column_name=>'DUMP_DESCRIPTION'
-,p_display_order=>90
+,p_display_order=>100
 ,p_column_identifier=>'I'
 ,p_column_label=>'Dump description'
 ,p_column_type=>'STRING'
@@ -11970,6 +11971,31 @@ wwv_flow_api.create_worksheet_rpt(
 ,p_display_rows=>50
 ,p_report_columns=>'PROJ_ID:PROJ_NAME:SZ_MB:FILENAME:DBID:MIN_SNAP_ID:MAX_SNAP_ID:DB_DESCRIPTION:DUMP_DESCRIPTION'
 ,p_flashback_enabled=>'N'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(50714418210476440)
+,p_plug_name=>'Total sizes, MB'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>5
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+' l_sz number;',
+' l_totsz number;',
+'begin',
+'  SELECT sum(DBMS_LOB.GETLENGTH(f.filebody)/1024/1024) into l_sz FROM AWRDUMPS_FILES f;',
+'  select bytes/1024/1024 into l_totsz from user_segments ',
+'   where segment_name=(select segment_name from user_lobs where table_name=''AWRDUMPS_FILES'');',
+'  htp.p(''Total dump file size:                           ''||round(l_sz,3));Htp.p(''</br>'');',
+'  htp.p(''Total disk space for dump storage (compressed): ''||round(l_totsz,3));',
+'end;',
+'',
+''))
+,p_plug_source_type=>'NATIVE_PLSQL'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 );
 end;
 /

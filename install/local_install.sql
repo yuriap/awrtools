@@ -62,7 +62,7 @@ create table awrdumps_files (
     filebody blob
 );
 
-
+alter table AWRDUMPS_FILES move lob (FILEBODY) store as (compress high);
 
 
 create table awrcomp_reports(
@@ -75,6 +75,8 @@ create table awrcomp_reports(
     file_name      varchar2(100),
 	report_params_displ varchar2(1000)
 );
+
+alter table awrcomp_reports move lob (report_content) store as (compress high);
 
 create table awrcomp_reports_params (
     report_id      number references awrcomp_reports(report_id) on delete cascade,

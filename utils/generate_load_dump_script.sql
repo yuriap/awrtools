@@ -1,3 +1,7 @@
+set serveroutput on
+set feedback off
+set timing off
+spool load_all_dumps.sql
 declare
   l_header_scr varchar2(32765) := q'[spool loaddumps.log
 set serveroutput on
@@ -49,3 +53,5 @@ begin
    end loop;
    p(l_footer_scr);
 end;
+/
+spool off
