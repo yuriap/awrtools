@@ -14,7 +14,7 @@ begin
 wwv_flow_api.import_begin (
  p_version_yyyy_mm_dd=>'2016.08.24'
 ,p_release=>'5.1.1.00.08'
-,p_default_workspace_id=>50057735323918503
+,p_default_workspace_id=>17366108843695517
 ,p_default_application_id=>210
 ,p_default_owner=>'AWRTOOLS21'
 );
@@ -27,12 +27,12 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   14:30 Saturday December 16, 2017
+--   Date and Time:   19:15 Sunday December 17, 2017
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
 --   Version:         5.1.1.00.08
---   Instance ID:     218223986453927
+--   Instance ID:     218260978313860
 --
 
 -- Application Statistics:
@@ -86,7 +86,7 @@ begin
 wwv_flow_api.create_flow(
  p_id=>wwv_flow.g_flow_id
 ,p_display_id=>nvl(wwv_flow_application_install.get_application_id,210)
-,p_owner=>nvl(wwv_flow_application_install.get_schema,'AWRTOOLS20')
+,p_owner=>nvl(wwv_flow_application_install.get_schema,'AWRTOOLS21')
 ,p_name=>nvl(wwv_flow_application_install.get_application_name,'AWR Tools')
 ,p_alias=>nvl(wwv_flow_application_install.get_application_alias,'F_200')
 ,p_page_view_logging=>'YES'
@@ -118,7 +118,7 @@ wwv_flow_api.create_flow(
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171215175152'
+,p_last_upd_yyyymmddhh24miss=>'20171216145608'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -10960,6 +10960,7 @@ wwv_flow_api.create_page(
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
+,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
@@ -10987,6 +10988,7 @@ wwv_flow_api.create_page_plug(
 'where tp.DIC_ID=report_type and proj_id=:P15_PROJ_ID',
 'order by created desc;'))
 ,p_plug_source_type=>'NATIVE_IR'
+,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_prn_content_disposition=>'ATTACHMENT'
 ,p_prn_document_header=>'APEX'
@@ -11136,6 +11138,7 @@ wwv_flow_api.create_page_button(
 ,p_button_alignment=>'LEFT'
 ,p_button_condition=>':P15_PROJ_ID is not null and :P15_REPORT_TYPE is not null'
 ,p_button_condition_type=>'PLSQL_EXPRESSION'
+,p_grid_new_grid=>false
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(49230683672898134)
@@ -11818,7 +11821,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171215175152'
+,p_last_upd_yyyymmddhh24miss=>'20171216145608'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(50713209316476428)
@@ -11839,6 +11842,7 @@ wwv_flow_api.create_page_plug(
 'AND d.dump_id  =f.dump_id',
 'order by proj_name, sz_mb;'))
 ,p_plug_source_type=>'NATIVE_IR'
+,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_prn_content_disposition=>'ATTACHMENT'
 ,p_prn_document_header=>'APEX'
@@ -11986,15 +11990,20 @@ wwv_flow_api.create_page_plug(
 ' l_sz number;',
 ' l_totsz number;',
 'begin',
-'  SELECT sum(DBMS_LOB.GETLENGTH(f.filebody)/1024/1024) into l_sz FROM AWRDUMPS_FILES f;',
-'  select bytes/1024/1024 into l_totsz from user_segments ',
-'   where segment_name=(select segment_name from user_lobs where table_name=''AWRDUMPS_FILES'');',
-'  htp.p(''Total dump file size:                           ''||round(l_sz,3));Htp.p(''</br>'');',
-'  htp.p(''Total disk space for dump storage (compressed): ''||round(l_totsz,3));',
+'  begin',
+'    SELECT nvl(sum(DBMS_LOB.GETLENGTH(f.filebody)/1024/1024),0) into l_sz FROM AWRDUMPS_FILES f;',
+'  exception when no_data_found then l_sz:=0; end;',
+'  begin',
+'    select bytes/1024/1024 into l_totsz from user_segments ',
+'     where segment_name=(select segment_name from user_lobs where table_name=''AWRDUMPS_FILES'');',
+'  exception when no_data_found then l_totsz:=0; end;',
+'  htp.p(''Total dump file size:              ''||round(l_sz,3));Htp.p(''</br>'');',
+'  htp.p(''Total disk space for dump storage: ''||round(l_totsz,3)||'' (compressed)'');',
 'end;',
 '',
 ''))
 ,p_plug_source_type=>'NATIVE_PLSQL'
+,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 );
 end;
@@ -12205,6 +12214,7 @@ wwv_flow_api.create_page_plug(
 'order by dbid,snap_id',
 ';'))
 ,p_plug_source_type=>'NATIVE_IR'
+,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_prn_content_disposition=>'ATTACHMENT'
 ,p_prn_document_header=>'APEX'
