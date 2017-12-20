@@ -1,4 +1,4 @@
-Web AWR Tools. Ver 2.6
+Web AWR Tools. Ver 2.7
 
 AWR dump warehouse with web-based UI.
 
@@ -68,3 +68,6 @@ Version 2.5
 
 Version 2.6
 2) Added coloring for compared query plans
+
+Version 2.7
+2) Added SQL query search form

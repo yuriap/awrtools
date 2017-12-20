@@ -27,7 +27,7 @@ create table awrcomp_d_report_types (
     dic_value varchar2(1000) NOT NULL,
     dic_display_value varchar2(100),
     dic_filename_pref varchar2(100) NOT NULL,
-	dic_ordr number
+    dic_ordr number
 );
 
 CREATE TABLE awrtoolproject (
@@ -67,22 +67,22 @@ alter table AWRDUMPS_FILES move lob (FILEBODY) store as (compress high);
 
 create table awrcomp_reports(
     report_id      NUMBER GENERATED ALWAYS AS IDENTITY primary key,
-	proj_id        NUMBER NOT NULL REFERENCES awrtoolproject ( proj_id ) on delete cascade,
+    proj_id        NUMBER NOT NULL REFERENCES awrtoolproject ( proj_id ) on delete cascade,
     created        date default sysdate,
     report_type    number references awrcomp_d_report_types(dic_id),
     report_content blob,
     file_mimetype  varchar2(30) default 'text/html',
     file_name      varchar2(100),
-	report_params_displ varchar2(1000)
+    report_params_displ varchar2(1000)
 );
 
 alter table awrcomp_reports move lob (report_content) store as (compress high);
 
 create table awrcomp_reports_params (
     report_id      number references awrcomp_reports(report_id) on delete cascade,
-	param_name     varchar2(128),
+    param_name     varchar2(128),
     param_value    varchar2(4000)
-);	
+);    
 
 create or replace synonym awrdumps_rem for awrdumps@&DBLINK.;
 
@@ -90,9 +90,9 @@ create or replace synonym awrtools_rem_utils_rem for awrtools_rem_utils@&DBLINK.
 
 create or replace synonym dba_hist_snapshot_rem for dba_hist_snapshot@&DBLINK.;
 create or replace synonym v$database_rem for v$database@&DBLINK.;
-	
+    
 create index IDX_PARAMS_RPT_ID on awrcomp_reports_params(report_id);
-	
+    
 CREATE OR REPLACE FORCE EDITIONABLE VIEW AWRCOMP_REMOTE_DATA as
 select x1.snap_id, x1.dbid, x1.instance_number, x1.startup_time, x1.begin_interval_time, x1.end_interval_time, x1.snap_level,x1.error_count, 
        decode(loc.proj_name,null,'<UNKNOWN PROJECT>',loc.proj_name) project, loc.proj_id
