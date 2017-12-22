@@ -3,6 +3,7 @@ set feedback off
 set timing off
 spool load_all_dumps.sql
 declare
+  l_cnt number := 1;
   l_header_scr varchar2(32765) := q'[spool loaddumps.log
 set serveroutput on
 
@@ -27,8 +28,7 @@ begin
 end;
 /]';
 
-l_dump_scr varchar2(32765) := q'[
-declare
+l_dump_scr varchar2(32765) := q'[declare
   l_filename AWRDUMPS.filename%type := '<dump_file_name>';
   l_dump_description AWRDUMPS.dump_description%type := q'{<Dump description>}';
 begin
@@ -47,7 +47,9 @@ begin
    p(l_header_scr);
    for i in (SELECT PROJ_ID, PROJ_NAME, PROJ_DESCRIPTION FROM AWRTOOLPROJECT order by PROJ_ID) loop
      p(replace(replace(l_proj_scr,'<Project name>',i.PROJ_NAME),'<Project description>',i.PROJ_DESCRIPTION));
+	 p('--');
      for j in (SELECT PROJ_ID, FILENAME, DUMP_DESCRIPTION FROM AWRDUMPS where PROJ_ID=i.PROJ_ID) loop
+	   p('-- #'||l_cnt);l_cnt:=l_cnt+1;
        p(replace(replace(l_dump_scr,'<dump_file_name>',j.FILENAME),'<Dump description>',j.DUMP_DESCRIPTION));
      end loop;
    end loop;
