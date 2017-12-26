@@ -6,5 +6,6 @@ create or replace package awrtools_loc_utils as
   procedure remote_awr_load(p_stg_user varchar2, p_stg_tablespace varchar2, p_stg_temp varchar2, p_dir varchar2, p_dmpfile varchar2,
                        p_dbid out number,p_min_snap_id out number,p_max_snap_id out number,p_min_snap_dt out timestamp,p_max_snap_dt out timestamp,p_db_description out varchar2);
   procedure unload_dump(p_is_remote varchar2, p_snap_min number, p_snap_max number, p_dbid number);
+  procedure print_text_as_table(p_text clob, p_t_header varchar2, p_width number, p_search varchar2 default null, p_replacement varchar2 default null, p_comparison boolean default false);
 end;
 /
