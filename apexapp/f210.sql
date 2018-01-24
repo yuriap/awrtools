@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   13:45 Friday December 22, 2017
+--   Date and Time:   15:26 Wednesday January 24, 2018
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -36,21 +36,21 @@ prompt APPLICATION 210 - AWR Tools
 --
 
 -- Application Statistics:
---   Pages:                     15
---     Items:                   43
+--   Pages:                     17
+--     Items:                   73
 --     Computations:             4
 --     Validations:              5
---     Processes:               22
---     Regions:                 31
---     Buttons:                 18
+--     Processes:               27
+--     Regions:                 46
+--     Buttons:                 21
 --   Shared Components:
 --     Logic:
 --       Items:                  1
 --       Data Loading:           1
 --     Navigation:
---       Lists:                  5
+--       Lists:                  6
 --       Breadcrumbs:            1
---         Entries:              4
+--         Entries:              6
 --     Security:
 --       Authentication:         1
 --     User Interface:
@@ -108,7 +108,7 @@ wwv_flow_api.create_flow(
 ,p_logo_image=>'TEXT:AWR Tools'
 ,p_public_user=>'APEX_PUBLIC_USER'
 ,p_proxy_server=> nvl(wwv_flow_application_install.get_proxy,'')
-,p_flow_version=>'release 2.7'
+,p_flow_version=>'release 3.0'
 ,p_flow_status=>'AVAILABLE_W_EDIT_LINK'
 ,p_flow_unavailable_text=>'This application is currently unavailable at this time.'
 ,p_exact_substitutions_only=>'Y'
@@ -118,7 +118,7 @@ wwv_flow_api.create_flow(
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171222134413'
+,p_last_upd_yyyymmddhh24miss=>'20180124152553'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -137,6 +137,19 @@ wwv_flow_api.create_list_item(
 ,p_list_item_link_text=>'Query search'
 ,p_list_item_link_target=>'f?p=&APP_ID.:17:&SESSION.::&DEBUG.::::'
 ,p_list_item_icon=>'fa-window-search'
+,p_list_item_current_type=>'TARGET_PAGE'
+);
+wwv_flow_api.create_list(
+ p_id=>wwv_flow_api.id(55237447938570936)
+,p_name=>'All Online Analysis'
+,p_list_status=>'PUBLIC'
+);
+wwv_flow_api.create_list_item(
+ p_id=>wwv_flow_api.id(55237690152570976)
+,p_list_item_display_sequence=>10
+,p_list_item_link_text=>'ASH Dashboard'
+,p_list_item_link_target=>'f?p=&APP_ID.:63:&SESSION.::&DEBUG.::::'
+,p_list_item_icon=>'fa-range-chart-area'
 ,p_list_item_current_type=>'TARGET_PAGE'
 );
 wwv_flow_api.create_list(
@@ -192,6 +205,24 @@ wwv_flow_api.create_list_item(
 ,p_list_item_current_for_pages=>'10,11'
 );
 wwv_flow_api.create_list_item(
+ p_id=>wwv_flow_api.id(55127629180930895)
+,p_list_item_display_sequence=>60
+,p_list_item_link_text=>'Online Analytics'
+,p_list_item_link_target=>'f?p=&APP_ID.:60:&SESSION.::&DEBUG.::::'
+,p_list_item_icon=>'fa-database-chart'
+,p_list_item_current_type=>'COLON_DELIMITED_PAGE_LIST'
+,p_list_item_current_for_pages=>'60,61,62,63'
+);
+wwv_flow_api.create_list_item(
+ p_id=>wwv_flow_api.id(56061742475542030)
+,p_list_item_display_sequence=>63
+,p_list_item_link_text=>'ASH Dashboard'
+,p_list_item_link_target=>'f?p=&APP_ID.:63:&SESSION.::&DEBUG.::::'
+,p_list_item_icon=>'fa-range-chart-area'
+,p_parent_list_item_id=>wwv_flow_api.id(55127629180930895)
+,p_list_item_current_type=>'TARGET_PAGE'
+);
+wwv_flow_api.create_list_item(
  p_id=>wwv_flow_api.id(99925090461474506)
 ,p_list_item_display_sequence=>200
 ,p_list_item_link_text=>'Storage reports'
@@ -242,6 +273,7 @@ wwv_flow_api.create_list_item(
 ,p_list_item_display_sequence=>310
 ,p_list_item_link_text=>'Query Search'
 ,p_list_item_link_target=>'f?p=&APP_ID.:17:&SESSION.::&DEBUG.::::'
+,p_list_item_icon=>'fa-window-search'
 ,p_parent_list_item_id=>wwv_flow_api.id(51713825299976214)
 ,p_list_item_current_type=>'TARGET_PAGE'
 );
@@ -600,6 +632,19 @@ begin
 wwv_flow_api.create_menu(
  p_id=>wwv_flow_api.id(101267511034147656)
 ,p_name=>' Breadcrumb'
+);
+wwv_flow_api.create_menu_option(
+ p_id=>wwv_flow_api.id(55128517332930913)
+,p_short_name=>'All Online Analytics'
+,p_link=>'f?p=&APP_ID.:60:&SESSION.'
+,p_page_id=>60
+);
+wwv_flow_api.create_menu_option(
+ p_id=>wwv_flow_api.id(56118763117386550)
+,p_parent_id=>wwv_flow_api.id(55128517332930913)
+,p_short_name=>'ASH Dasboard'
+,p_link=>'f?p=&APP_ID.:63:&SESSION.::&DEBUG.:::'
+,p_page_id=>63
 );
 wwv_flow_api.create_menu_option(
  p_id=>wwv_flow_api.id(101267910416147663)
@@ -9160,7 +9205,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171220124726'
+,p_last_upd_yyyymmddhh24miss=>'20180124152553'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(101247562198740112)
@@ -9171,7 +9216,7 @@ wwv_flow_api.create_page_plug(
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'Web AWR Tools. Ver 2.7<br>',
+'Web AWR Tools. Ver 3.0<br>',
 '<br>',
 'AWR dump warehouse with web-based UI.<br>',
 '<br>',
@@ -9180,6 +9225,7 @@ wwv_flow_api.create_page_plug(
 '2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are two custom reports "SQL queries compare report (HTML)" and "AWR SQL Report (HTML)" and all standard AWR reports.<br>',
 '3) to share scripts with command-line AWR Tools. Exact the same main scripts are used for both tools.<br>',
 '4) to be able to analyze AWR dumps which contain overlapping snapshot ranges (relevant to a situation when FLASHBACK DATABASE is in use for testing different scenarios).<br>',
+'5) Added Online Analytic Tool - allows to analyze ASH data from local AWR warehouse as well as from remote one through dblink, V$ASH is also in use.<br>',
 '<br>',
 'Use-cases:<br>',
 '1. Create a project.<br>',
@@ -10995,7 +11041,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171219112623'
+,p_last_upd_yyyymmddhh24miss=>'20171227140146'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(50253096526534048)
@@ -11395,7 +11441,8 @@ wwv_flow_api.create_page_item(
 '    dump_id',
 'FROM',
 '    awrdumps',
-'where status=''AWRLOADED'' and proj_id=:P15_PROJ_ID and IS_REMOTE=''NO'';'))
+'where status=''AWRLOADED'' and proj_id=:P15_PROJ_ID and IS_REMOTE=''NO''',
+'order by MAX_SNAP_DT;'))
 ,p_lov_display_null=>'YES'
 ,p_lov_null_text=>'Select dump...'
 ,p_lov_null_value=>'null'
@@ -11428,7 +11475,8 @@ wwv_flow_api.create_page_item(
 'FROM',
 '    awrdumps',
 'where status=''AWRLOADED'' and proj_id=:P15_PROJ_ID',
-'and IS_REMOTE=decode(:P15_REPORT_TYPE,''AWRCOMP'',IS_REMOTE,''NO'');'))
+'and IS_REMOTE=decode(:P15_REPORT_TYPE,''AWRCOMP'',IS_REMOTE,''NO'')',
+'order by MAX_SNAP_DT;'))
 ,p_lov_display_null=>'YES'
 ,p_lov_null_text=>'Select dump...'
 ,p_cHeight=>1
@@ -11815,7 +11863,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171222102210'
+,p_last_upd_yyyymmddhh24miss=>'20180124144255'
 );
 wwv_flow_api.create_report_region(
  p_id=>wwv_flow_api.id(51598813555693916)
@@ -11957,7 +12005,7 @@ wwv_flow_api.create_report_columns(
 ,p_column_alias=>'SQL_ID'
 ,p_column_display_sequence=>2
 ,p_column_heading=>'Sql id'
-,p_column_link=>'f?p=&APP_ID.:18:&SESSION.::&DEBUG.:RP:P18_SQL_ID:#SQL_ID#'
+,p_column_link=>'f?p=&APP_ID.:18:&SESSION.::&DEBUG.:RP,18:P18_SQL_ID,P18_DBID,P18_DUMP_ID,P18_SOURCE_PAGE,P18_ACTION:#SQL_ID#,#DBID#,#DUMP_ID#,17,SHOW_SQL_TEXT_BY_ID'
 ,p_column_linktext=>'#SQL_ID#'
 ,p_disable_sort_column=>'N'
 ,p_derived_column=>'N'
@@ -11987,12 +12035,8 @@ wwv_flow_api.create_report_columns(
 ,p_query_column_id=>5
 ,p_column_alias=>'PROJ_NAME'
 ,p_column_display_sequence=>5
-,p_column_heading=>'Proj name'
-,p_column_link=>'f?p=&APP_ID.:15:&SESSION.::&DEBUG.:RP:P15_PROJ_ID,P15_DB1,P15_SQL_ID,P15_REPORT_TYPE,CURRENT_PROJECT:#PROJ_ID#,#DUMP_ID#,#SQL_ID#,AWRSQLREPORT,#PROJ_NAME#'
-,p_column_linktext=>'Reports for "#PROJ_NAME#"'
-,p_disable_sort_column=>'N'
+,p_hidden_column=>'Y'
 ,p_derived_column=>'N'
-,p_include_in_export=>'Y'
 );
 wwv_flow_api.create_report_columns(
  p_id=>wwv_flow_api.id(51601439563693942)
@@ -12206,7 +12250,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171222134413'
+,p_last_upd_yyyymmddhh24miss=>'20180124150756'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(51799844575989304)
@@ -12219,21 +12263,216 @@ wwv_flow_api.create_page_plug(
 ,p_plug_display_point=>'BODY'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'declare',
+'  l_ID varchar2(10):=''SQL_ID:'';',
 '  l_sql_text clob;',
+'  procedure getsqltext_localawrrepo(p_sql_id varchar2, p_dbid number, p_text out clob) is',
+'  begin',
+'    select sql_text into p_text from dba_hist_sqltext where sql_id=p_sql_id and DBID=p_dbid;',
+'  exception when no_data_found then p_text:=''No sql text available in AWR repository.'';  ',
+'  end;',
+'  procedure getsqltext_remote(p_sql_id varchar2, p_text out clob) is',
+'    l_sql varchar2(32765);',
+'    l_dbid number;',
+'  begin ',
+'    execute immediate ''select dbid from v$database@''||:P63_SOURCEDB into l_dbid;',
+'    l_sql := ''select txt from ',
+'                (select cast(substr(sql_text,1,4000) as varchar2(4000)) txt from dba_hist_sqltext@''||:P63_SOURCEDB||'' a where sql_id=:p_sql_id and dbid=:p_dbid',
+'                 union all',
+'                 select cast(substr(SQL_FULLTEXT,1,4000) as varchar2(4000)) from gv$sql@''||:P63_SOURCEDB||'' a where sql_id=:p_sql_id',
+'                ) where rownum<2'';',
+'    execute immediate l_sql into p_text using p_sql_id, l_dbid, p_sql_id;  ',
+'  exception ',
+'    when no_data_found then p_text:=''No sql text available in remote database.'';  ',
+'    when others then p_text:=''Error: ''||sqlerrm||chr(10)||l_sql;  ',
+'  end;  ',
+'  procedure getsqltext_localawr_by_hash(p_plan_hash number, p_text out clob) is',
+'    l_cnt number := 0;',
+'    l_dbid number;',
+'    ll_sql_text clob;',
+'  begin',
+'    select dbid into l_dbid from AWRDUMPS where dump_id=:P18_DUMP_ID;',
+'    for i in (select * from (select unique sql_id from remote_ash where SQL_PLAN_HASH_VALUE=p_plan_hash and sess_id=:P63_SESS_ID) where rownum<11) loop',
+'      getsqltext_localawrrepo(i.sql_id,l_dbid,ll_sql_text);',
+'      l_cnt:=l_cnt+1;',
+'      p_text:=p_text||''#''||l_cnt||''; SQL_ID: ''||i.sql_id||chr(10);',
+'      p_text:=p_text||ll_sql_text||chr(10);',
+'      p_text:=p_text||''=======================''||chr(10);',
+'    end loop;',
+'    if l_cnt=0 then p_text:=''No sql text available in AWR repository for given PLAN_HASH=''||p_plan_hash||''.''; end if; ',
+'  end;  ',
+'  procedure getsqltext_remote_by_hash(p_plan_hash number, p_text out clob) is',
+'    l_cnt number := 0;',
+'    ll_sql_text clob;',
+'  begin',
+'    for i in (select * from (select unique sql_id from remote_ash where SQL_PLAN_HASH_VALUE=p_plan_hash and sess_id=:P63_SESS_ID) where rownum<11) loop',
+'      getsqltext_remote(i.sql_id,ll_sql_text);',
+'      l_cnt:=l_cnt+1;',
+'      p_text:=p_text||''#''||l_cnt||''; SQL_ID: ''||i.sql_id||chr(10);',
+'      p_text:=p_text||ll_sql_text||chr(10);',
+'      p_text:=p_text||''=======================''||chr(10);',
+'    end loop;',
+'    if l_cnt=0 then p_text:=''No sql text available in remote DB for given PLAN_HASH=''||p_plan_hash||''.''; end if; ',
+'  end;   ',
 'begin',
-'  select sql_text into l_sql_text from dba_hist_sqltext where sql_id=:P18_SQL_ID;',
-'  awrtools_loc_utils.print_text_as_table(p_text => l_sql_text, p_t_header=> ''SQL_ID: ''||:P18_SQL_ID, p_width => 1000);',
+'  case ',
+'    when :P18_SOURCE_PAGE = 63 and :P18_ACTION = ''SHOW_SQL_TEXT_BY_ID'' then',
+'       begin',
+'         if :P63_SOURCEDB=''$LOCAL$'' and :P63_SOURCETAB = ''AWR'' then',
+'           getsqltext_localawrrepo(:P18_SQL_ID,:P18_DBID,l_sql_text);',
+'         elsif :P63_SOURCEDB<>''$LOCAL$'' then',
+'           getsqltext_remote(:P18_SQL_ID,l_sql_text);',
+'         end if;',
+'       end;',
+'     when :P18_SOURCE_PAGE = 63 and :P18_ACTION = ''SHOW_SQL_TEXT_BY_PLANHASH'' then',
+'       begin',
+'         l_ID:=''PLAN_HASH:'';',
+'         if :P63_SOURCEDB=''$LOCAL$'' and :P63_SOURCETAB = ''AWR'' then',
+'           getsqltext_localawr_by_hash(:P18_SQL_ID,l_sql_text);',
+'         elsif :P63_SOURCEDB<>''$LOCAL$'' then',
+'           getsqltext_remote_by_hash(:P18_SQL_ID,l_sql_text);',
+'         end if;',
+'       end;',
+'    else',
+'      getsqltext_localawrrepo(:P18_SQL_ID,:P18_DBID,l_sql_text);',
+'  end case;',
+'  awrtools_loc_utils.print_text_as_table(p_text => l_sql_text, p_t_header=> l_ID||'' ''||:P18_SQL_ID, p_width => 1000);',
 'end;'))
 ,p_plug_source_type=>'NATIVE_PLSQL'
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_plug_display_condition_type=>'FUNCTION_BODY'
+,p_plug_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  return :P18_ACTION in (''SHOW_SQL_TEXT_BY_ID'',''SHOW_SQL_TEXT_BY_PLANHASH'');',
+'end;'))
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(55599511452835821)
+,p_plug_name=>'Reports'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>5
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_plug_display_condition_type=>'PLSQL_EXPRESSION'
+,p_plug_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'(:P18_DUMP_ID is not null and :P18_SOURCE_PAGE = 17 and :P18_ACTION = ''SHOW_SQL_TEXT_BY_ID'')',
+'or ',
+'(:P18_DUMP_ID is not null and :P18_SOURCE_PAGE = 63 and :P18_ACTION = ''SHOW_SQL_TEXT_BY_ID'' and :P63_SOURCEDB=''$LOCAL$'')'))
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(56149471473396422)
+,p_plug_name=>'Debug'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>3
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'htp.p(''P18_SOURCE_PAGE:''||:P18_SOURCE_PAGE||''<br>'');',
+'htp.p(''P18_ACTION:''||:P18_ACTION||''<br>'');',
+'htp.p(''P63_SOURCEDB:''||:P63_SOURCEDB||''<br>'');',
+'htp.p(''P63_SOURCETAB:''||:P63_SOURCETAB||''<br>'');',
+'htp.p(''P18_SQL_ID:''||:P18_SQL_ID||''<br>'');',
+'htp.p(''P18_DBID:''||:P18_DBID||''<br>'');',
+'htp.p(''P18_DUMP_ID:''||:P18_DUMP_ID||''<br>'');',
+'end;',
+''))
+,p_plug_source_type=>'NATIVE_PLSQL'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_plug_display_condition_type=>'NEVER'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(55599606389835822)
+,p_button_sequence=>10
+,p_button_plug_id=>wwv_flow_api.id(55599511452835821)
+,p_button_name=>'awr_sql_cust_rep'
+,p_button_action=>'REDIRECT_PAGE'
+,p_button_template_options=>'#DEFAULT#:t-Button--link'
+,p_button_template_id=>wwv_flow_api.id(101255455566147533)
+,p_button_image_alt=>'AWR SQL report (custom)'
+,p_button_position=>'BELOW_BOX'
+,p_button_alignment=>'LEFT'
+,p_button_redirect_url=>'f?p=&APP_ID.:15:&SESSION.::&DEBUG.:RP,16:P15_DB1,P15_REPORT_TYPE,P15_SQL_ID,P15_PROJ_ID,CURRENT_PROJECT:&P18_DUMP_ID.,AWRSQLREPORT,&P18_SQL_ID.,&P18_PROJ_ID.,&P18_PROJ_NAME.'
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(51799906047989305)
 ,p_name=>'P18_SQL_ID'
 ,p_item_sequence=>10
-,p_item_plug_id=>wwv_flow_api.id(51799844575989304)
+,p_item_plug_id=>wwv_flow_api.id(55599511452835821)
 ,p_display_as=>'NATIVE_HIDDEN'
 ,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(51804247468989448)
+,p_name=>'P18_DBID'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(55599511452835821)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(55599227111835818)
+,p_name=>'P18_DUMP_ID'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(55599511452835821)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(55599705787835823)
+,p_name=>'P18_PROJ_ID'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(55599511452835821)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(55599967834835825)
+,p_name=>'P18_PROJ_NAME'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(55599511452835821)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56149249096396420)
+,p_name=>'P18_SOURCE_PAGE'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(55599511452835821)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56149367291396421)
+,p_name=>'P18_ACTION'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(55599511452835821)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(56149693223396424)
+,p_process_sequence=>10
+,p_process_point=>'AFTER_HEADER'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'New'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  SELECT',
+'         p.proj_id,',
+'         p.proj_name',
+'    into :p18_proj_id, :p18_proj_name',
+'    FROM awrdumps d, AWRTOOLPROJECT p',
+'   where dump_id=:p18_dump_id and d.proj_id=p.proj_id;',
+'exception',
+'  when no_data_found then :p18_proj_id:=null; :p18_proj_name:=''<UNDEFINED>'';',
+'end;'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 );
 end;
 /
@@ -12865,6 +13104,1366 @@ wwv_flow_api.create_worksheet_rpt(
 ,p_display_rows=>50
 ,p_report_columns=>'SNAP_ID:DBID:INSTANCE_NUMBER:STARTUP_TIME:BEGIN_INTERVAL_TIME:END_INTERVAL_TIME:SNAP_LEVEL:ERROR_COUNT:PROJECT:PROJ_ID'
 ,p_flashback_enabled=>'N'
+);
+end;
+/
+prompt --application/pages/page_00060
+begin
+wwv_flow_api.create_page(
+ p_id=>60
+,p_user_interface_id=>wwv_flow_api.id(101266223782147592)
+,p_name=>'All Online Analytics'
+,p_page_mode=>'NORMAL'
+,p_step_title=>'All Online Analytics'
+,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
+,p_first_item=>'NO_FIRST_ITEM'
+,p_autocomplete_on_off=>'OFF'
+,p_page_template_options=>'#DEFAULT#'
+,p_dialog_chained=>'Y'
+,p_overwrite_navigation_list=>'N'
+,p_page_is_public_y_n=>'N'
+,p_cache_mode=>'NOCACHE'
+,p_last_updated_by=>'AWRTOOLS21ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180116134025'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(51801291696989318)
+,p_plug_name=>'Online Analysis Tools'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_component_template_options=>'#DEFAULT#:u-colors:t-MediaList--large:t-MediaList--cols t-MediaList--2cols'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_list_id=>wwv_flow_api.id(55237447938570936)
+,p_plug_source_type=>'NATIVE_LIST'
+,p_list_template_id=>wwv_flow_api.id(101250961962147523)
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(55128123748930908)
+,p_plug_name=>'Breadcrumb'
+,p_region_template_options=>'#DEFAULT#:t-BreadcrumbRegion--useBreadcrumbTitle'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(101237024490147486)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'REGION_POSITION_01'
+,p_menu_id=>wwv_flow_api.id(101267511034147656)
+,p_plug_source_type=>'NATIVE_BREADCRUMB'
+,p_menu_template_id=>wwv_flow_api.id(101255921228147535)
+,p_plug_query_row_template=>1
+);
+end;
+/
+prompt --application/pages/page_00063
+begin
+wwv_flow_api.create_page(
+ p_id=>63
+,p_user_interface_id=>wwv_flow_api.id(101266223782147592)
+,p_name=>'ASH Dasboard'
+,p_page_mode=>'NORMAL'
+,p_step_title=>'ASH Dasboard'
+,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
+,p_first_item=>'NO_FIRST_ITEM'
+,p_autocomplete_on_off=>'OFF'
+,p_page_template_options=>'#DEFAULT#'
+,p_overwrite_navigation_list=>'N'
+,p_page_is_public_y_n=>'N'
+,p_cache_mode=>'NOCACHE'
+,p_last_updated_by=>'AWRTOOLS21ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180124150659'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(56118392389386540)
+,p_plug_name=>'Breadcrumb'
+,p_region_template_options=>'#DEFAULT#:t-BreadcrumbRegion--useBreadcrumbTitle'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(101237024490147486)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'REGION_POSITION_01'
+,p_menu_id=>wwv_flow_api.id(101267511034147656)
+,p_plug_source_type=>'NATIVE_BREADCRUMB'
+,p_menu_template_id=>wwv_flow_api.id(101255921228147535)
+,p_plug_query_row_template=>1
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(56148449682396412)
+,p_plug_name=>'Source'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>3
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(111725039482229949)
+,p_plug_name=>'Charts'
+,p_plug_display_sequence=>20
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_query_row_template=>1
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_plug_display_condition_type=>'PLSQL_EXPRESSION'
+,p_plug_display_when_condition=>'(nvl(:P63_SHOWL,''N'')=''Y'' and :P63_SOURCEDB=''$LOCAL$'') or (nvl(:P63_SHOW,''N'')=''Y'' and :P63_SOURCEDB<>''$LOCAL$'')'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(56147949376396407)
+,p_plug_name=>'Top PLAN_HASH with non-single SQL_ID'
+,p_parent_plug_id=>wwv_flow_api.id(111725039482229949)
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_escape_on_http_output=>'Y'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>50
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_source_type=>'NATIVE_JET_CHART'
+,p_plug_query_num_rows=>15
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_jet_chart(
+ p_id=>wwv_flow_api.id(56148007496396408)
+,p_region_id=>wwv_flow_api.id(56147949376396407)
+,p_chart_type=>'pie'
+,p_animation_on_display=>'none'
+,p_animation_on_data_change=>'none'
+,p_data_cursor=>'auto'
+,p_data_cursor_behavior=>'auto'
+,p_hide_and_show_behavior=>'none'
+,p_hover_behavior=>'none'
+,p_value_format_scaling=>'auto'
+,p_tooltip_rendered=>'Y'
+,p_show_series_name=>true
+,p_show_value=>true
+,p_legend_rendered=>'on'
+,p_legend_position=>'auto'
+,p_pie_other_threshold=>0
+,p_pie_selection_effect=>'highlight'
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56148189795396409)
+,p_chart_id=>wwv_flow_api.id(56148007496396408)
+,p_seq=>10
+,p_name=>'Top PLAN_HASH with non-single SQL_ID'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select * from ',
+'  (select plan_hash, sum(sec) sec from',
+'    (SELECT sql_id, SQL_PLAN_HASH_VALUE PLAN_HASH, COUNT(1) sec',
+'       FROM remote_ash',
+'      where SQL_PLAN_HASH_VALUE>0 and sess_id = :P63_SESS_ID',
+'      GROUP BY sql_id, SQL_PLAN_HASH_VALUE)',
+'    group by PLAN_HASH having count(unique sql_id)>1',
+'    ORDER BY 2 desc ',
+') where rownum<21;'))
+,p_items_value_column_name=>'SEC'
+,p_items_label_column_name=>'PLAN_HASH'
+,p_items_label_rendered=>false
+,p_link_target=>'f?p=&APP_ID.:18:&SESSION.::&DEBUG.:RP:P18_SOURCE_PAGE,P18_ACTION,P18_SQL_ID,P18_DUMP_ID:63,SHOW_SQL_TEXT_BY_PLANHASH,&PLAN_HASH.,&P63_DUMP_IDL.'
+,p_link_target_type=>'REDIRECT_PAGE'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(107930270538383481)
+,p_plug_name=>'Top SQL'
+,p_parent_plug_id=>wwv_flow_api.id(111725039482229949)
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_escape_on_http_output=>'Y'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>20
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_source_type=>'NATIVE_JET_CHART'
+,p_plug_query_row_template=>1
+,p_plug_query_num_rows=>15
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_jet_chart(
+ p_id=>wwv_flow_api.id(56128308283394194)
+,p_region_id=>wwv_flow_api.id(107930270538383481)
+,p_chart_type=>'pie'
+,p_animation_on_display=>'none'
+,p_animation_on_data_change=>'none'
+,p_data_cursor=>'auto'
+,p_data_cursor_behavior=>'auto'
+,p_hide_and_show_behavior=>'none'
+,p_hover_behavior=>'none'
+,p_value_format_scaling=>'auto'
+,p_tooltip_rendered=>'Y'
+,p_show_series_name=>true
+,p_show_group_name=>false
+,p_show_value=>true
+,p_show_label=>false
+,p_legend_rendered=>'on'
+,p_legend_position=>'auto'
+,p_pie_other_threshold=>0
+,p_pie_selection_effect=>'highlight'
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56128869348394204)
+,p_chart_id=>wwv_flow_api.id(56128308283394194)
+,p_seq=>10
+,p_name=>'Top 10 SQLs'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select * from ',
+'  (SELECT nvl(sql_id,''<UNKNOWN SQL>'') sql_id, COUNT(1) sec',
+'     FROM remote_ash',
+'    where sess_id = :P63_SESS_ID',
+'    GROUP BY nvl(sql_id,''<UNKNOWN SQL>'')',
+'    ORDER BY 2 desc ',
+') where rownum<11;'))
+,p_items_value_column_name=>'SEC'
+,p_items_label_column_name=>'SQL_ID'
+,p_items_label_rendered=>false
+,p_link_target=>'f?p=&APP_ID.:18:&SESSION.::&DEBUG.:RP,18:P18_SQL_ID,P18_DUMP_ID,P18_SOURCE_PAGE,P18_ACTION,P18_DBID:&SQL_ID.,&P63_DUMP_IDL.,63,SHOW_SQL_TEXT_BY_ID,&P63_DBIDL.'
+,p_link_target_type=>'REDIRECT_PAGE'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(107931176885383491)
+,p_plug_name=>'Top Module and Action'
+,p_parent_plug_id=>wwv_flow_api.id(111725039482229949)
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_escape_on_http_output=>'Y'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>40
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_source_type=>'NATIVE_JET_CHART'
+,p_plug_query_row_template=>1
+,p_plug_query_num_rows=>15
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_jet_chart(
+ p_id=>wwv_flow_api.id(56129741432394213)
+,p_region_id=>wwv_flow_api.id(107931176885383491)
+,p_chart_type=>'pie'
+,p_animation_on_display=>'none'
+,p_animation_on_data_change=>'none'
+,p_data_cursor=>'auto'
+,p_data_cursor_behavior=>'auto'
+,p_hide_and_show_behavior=>'none'
+,p_hover_behavior=>'none'
+,p_value_format_scaling=>'auto'
+,p_tooltip_rendered=>'Y'
+,p_show_series_name=>true
+,p_show_group_name=>false
+,p_show_value=>true
+,p_show_label=>false
+,p_legend_rendered=>'on'
+,p_legend_position=>'auto'
+,p_pie_other_threshold=>0
+,p_pie_selection_effect=>'highlight'
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56130217691394214)
+,p_chart_id=>wwv_flow_api.id(56129741432394213)
+,p_seq=>10
+,p_name=>'Top Module/Action'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select * from (SELECT',
+'    ''MODULE:''||nvl(module,''N/A'')||''; ACTION:''||nvl(ACTION,''N/A'') mod_act,',
+'    COUNT(1) sec',
+'FROM',
+'    remote_ash',
+'where sess_id = :P63_SESS_ID',
+'GROUP BY',
+'    ''MODULE:''||nvl(module,''N/A'')||''; ACTION:''||nvl(ACTION,''N/A'')',
+'ORDER BY 2 desc ) where rownum<11;'))
+,p_items_value_column_name=>'SEC'
+,p_items_label_column_name=>'MOD_ACT'
+,p_items_label_rendered=>false
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(111725224827229951)
+,p_plug_name=>'Next top 10 queries'
+,p_parent_plug_id=>wwv_flow_api.id(111725039482229949)
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_escape_on_http_output=>'Y'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>25
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_new_grid_row=>false
+,p_plug_display_point=>'BODY'
+,p_plug_source_type=>'NATIVE_JET_CHART'
+,p_plug_query_row_template=>1
+,p_plug_query_num_rows=>15
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_jet_chart(
+ p_id=>wwv_flow_api.id(56131066339394218)
+,p_region_id=>wwv_flow_api.id(111725224827229951)
+,p_chart_type=>'pie'
+,p_animation_on_display=>'none'
+,p_animation_on_data_change=>'none'
+,p_data_cursor=>'auto'
+,p_data_cursor_behavior=>'auto'
+,p_hide_and_show_behavior=>'none'
+,p_hover_behavior=>'none'
+,p_value_format_scaling=>'auto'
+,p_tooltip_rendered=>'Y'
+,p_show_series_name=>true
+,p_show_group_name=>false
+,p_show_value=>true
+,p_show_label=>false
+,p_legend_rendered=>'on'
+,p_legend_position=>'auto'
+,p_pie_other_threshold=>0
+,p_pie_selection_effect=>'highlight'
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56131563166394218)
+,p_chart_id=>wwv_flow_api.id(56131066339394218)
+,p_seq=>10
+,p_name=>'Next Top 10 SQLs'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select sql_id, sec',
+'from (select x.*, rownum rn from (SELECT',
+'    nvl(sql_id,''<UNKNOWN SQL>'') sql_id,',
+'    COUNT(1) sec',
+'FROM',
+'    remote_ash',
+'where sess_id = :P63_SESS_ID',
+'GROUP BY',
+'    nvl(sql_id,''<UNKNOWN SQL>'')',
+'ORDER BY 2 desc ) x where rownum<21) where rn>10;'))
+,p_items_value_column_name=>'SEC'
+,p_items_label_column_name=>'SQL_ID'
+,p_items_label_rendered=>false
+,p_link_target=>'f?p=&APP_ID.:18:&SESSION.::&DEBUG.:RP,18:P18_DBID,P18_SQL_ID,P18_DUMP_ID,P18_SOURCE_PAGE,P18_ACTION:&P63_DBID.,&SQL_ID.,&P63_DUMP_ID.,63,SHOW_SQL_TEXT_BY_ID'
+,p_link_target_type=>'REDIRECT_PAGE'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(111725694196229956)
+,p_plug_name=>'Top 10 events'
+,p_parent_plug_id=>wwv_flow_api.id(111725039482229949)
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_escape_on_http_output=>'Y'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>30
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_new_grid_row=>false
+,p_plug_display_point=>'BODY'
+,p_plug_source_type=>'NATIVE_JET_CHART'
+,p_plug_query_row_template=>1
+,p_plug_query_num_rows=>15
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_jet_chart(
+ p_id=>wwv_flow_api.id(56132488691394220)
+,p_region_id=>wwv_flow_api.id(111725694196229956)
+,p_chart_type=>'pie'
+,p_animation_on_display=>'none'
+,p_animation_on_data_change=>'none'
+,p_data_cursor=>'auto'
+,p_data_cursor_behavior=>'auto'
+,p_hide_and_show_behavior=>'none'
+,p_hover_behavior=>'none'
+,p_value_format_scaling=>'auto'
+,p_tooltip_rendered=>'Y'
+,p_show_series_name=>true
+,p_show_group_name=>false
+,p_show_value=>true
+,p_show_label=>false
+,p_legend_rendered=>'on'
+,p_legend_position=>'auto'
+,p_pie_other_threshold=>0
+,p_pie_selection_effect=>'highlight'
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56132936609394220)
+,p_chart_id=>wwv_flow_api.id(56132488691394220)
+,p_seq=>10
+,p_name=>'Top 10 Events'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select * from (SELECT',
+'    nvl(event, ''CPU'') event,',
+'    COUNT(1) sec',
+'FROM',
+'    remote_ash',
+'where sess_id = :P63_SESS_ID',
+'GROUP BY',
+'    nvl(event, ''CPU'')',
+'ORDER BY 2 desc ) where rownum<11; '))
+,p_items_value_column_name=>'SEC'
+,p_items_label_column_name=>'EVENT'
+,p_items_label_rendered=>false
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(166674090584920015)
+,p_plug_name=>'Wait event classes by AWR ASH'
+,p_parent_plug_id=>wwv_flow_api.id(111725039482229949)
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>10
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_plug_source_type=>'NATIVE_JET_CHART'
+,p_plug_query_row_template=>1
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+);
+wwv_flow_api.create_jet_chart(
+ p_id=>wwv_flow_api.id(56133851612394225)
+,p_region_id=>wwv_flow_api.id(166674090584920015)
+,p_chart_type=>'area'
+,p_height=>'800'
+,p_animation_on_display=>'auto'
+,p_animation_on_data_change=>'auto'
+,p_orientation=>'vertical'
+,p_data_cursor=>'auto'
+,p_data_cursor_behavior=>'auto'
+,p_hide_and_show_behavior=>'withRescale'
+,p_hover_behavior=>'dim'
+,p_stack=>'on'
+,p_zoom_and_scroll=>'off'
+,p_tooltip_rendered=>'Y'
+,p_show_series_name=>true
+,p_show_group_name=>true
+,p_show_value=>true
+,p_show_label=>true
+,p_legend_rendered=>'on'
+,p_legend_position=>'top'
+,p_time_axis_type=>'disabled'
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56135536204394229)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>10
+,p_name=>'CPU'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''CPU'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time; '))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#00FF00'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''CPU'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56136147188394239)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>20
+,p_name=>'User I/O'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''User I/O'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#0000FF'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''User I/O'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56136796661394241)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>30
+,p_name=>'Administrative'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Administrative'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#FFCC00'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Administrative'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56137381490394242)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>40
+,p_name=>'Application'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Application'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#FF2EF8'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Application'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56139728046394250)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>50
+,p_name=>'Commit'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Commit'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#FF9500'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Commit'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56140317881394252)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>60
+,p_name=>'Concurrency'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Concurrency'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#34AADC'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Concurrency'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56137998673394244)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>70
+,p_name=>'Configuration'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Configuration'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#5856D6'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Configuration'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56140911595394254)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>80
+,p_name=>'Idle'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Idle'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#C7C7CC'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Idle'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56138500896394248)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>90
+,p_name=>'Network'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Network'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#8E8E93'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Network'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56141584211394255)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>100
+,p_name=>'Other'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Other'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#007AFF'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Other'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56139181151394249)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>110
+,p_name=>'Scheduler'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''Scheduler'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#86D94E'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''Scheduler'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(56142171582394257)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_seq=>120
+,p_name=>'System I/O'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, sum(sec) sec ',
+'          from remote_ash where wait_class = ''System I/O'' and sess_id = :P63_SESS_ID',
+'         group by sample_time, wait_class) h, ',
+'       remote_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P63_SESS_ID',
+' ORDER BY sample_time;'))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#FF0000'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM remote_ash',
+' WHERE   wait_class = ''System I/O'' and sess_id = :P63_SESS_ID;'))
+);
+wwv_flow_api.create_jet_chart_axis(
+ p_id=>wwv_flow_api.id(56134931454394228)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_axis=>'y'
+,p_is_rendered=>'on'
+,p_title=>'Number of samples'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_position=>'auto'
+,p_major_tick_rendered=>'auto'
+,p_minor_tick_rendered=>'auto'
+,p_tick_label_rendered=>'on'
+);
+wwv_flow_api.create_jet_chart_axis(
+ p_id=>wwv_flow_api.id(56134351322394225)
+,p_chart_id=>wwv_flow_api.id(56133851612394225)
+,p_axis=>'x'
+,p_is_rendered=>'on'
+,p_baseline_scaling=>'zero'
+,p_major_tick_rendered=>'auto'
+,p_minor_tick_rendered=>'auto'
+,p_tick_label_rendered=>'on'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(163349683556019870)
+,p_plug_name=>'Input Parameters'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>5
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_query_row_template=>1
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_plug_display_condition_type=>'VAL_OF_ITEM_IN_COND_NOT_EQ_COND2'
+,p_plug_display_when_condition=>'P63_SOURCEDB'
+,p_plug_display_when_cond2=>'$LOCAL$'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(163831622141271829)
+,p_plug_name=>'Input Parameters'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(101232642288147479)
+,p_plug_display_sequence=>6
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_query_row_template=>1
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_plug_display_condition_type=>'VAL_OF_ITEM_IN_COND_EQ_COND2'
+,p_plug_display_when_condition=>'P63_SOURCEDB'
+,p_plug_display_when_cond2=>'$LOCAL$'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(56149073202396418)
+,p_button_sequence=>10
+,p_button_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_button_name=>'LoadCubeLocally'
+,p_button_action=>'SUBMIT'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_api.id(101255455566147533)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Analyze'
+,p_button_position=>'BELOW_BOX'
+,p_button_alignment=>'LEFT'
+);
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(56160958627550608)
+,p_button_sequence=>10
+,p_button_plug_id=>wwv_flow_api.id(163349683556019870)
+,p_button_name=>'LoadCubeRemotely'
+,p_button_action=>'SUBMIT'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_api.id(101255455566147533)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Analyze'
+,p_button_position=>'BELOW_BOX'
+,p_button_alignment=>'LEFT'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56147773543396405)
+,p_name=>'P63_SOURCEDB'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(56148449682396412)
+,p_item_default=>'$LOCAL$'
+,p_prompt=>'Sourcedb'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select ''Local warehouse'' name, ''$LOCAL$'' id from dual',
+'union all',
+'select username||''@''||host name, db_link id from user_db_links where db_link not like (select upper(cvalue) from awrconfig where ckey=''DBLINK'')||''%'''))
+,p_cHeight=>1
+,p_colspan=>4
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'SUBMIT'
+,p_attribute_03=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56148510669396413)
+,p_name=>'P63_SESS_ID'
+,p_item_sequence=>20
+,p_item_plug_id=>wwv_flow_api.id(56148449682396412)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56148680443396414)
+,p_name=>'P63_FILTER_REMASH'
+,p_item_sequence=>40
+,p_item_plug_id=>wwv_flow_api.id(163349683556019870)
+,p_prompt=>'Filter (SQL expression)'
+,p_display_as=>'NATIVE_TEXTAREA'
+,p_cSize=>93
+,p_cHeight=>5
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'Y'
+,p_attribute_02=>'N'
+,p_attribute_03=>'N'
+,p_attribute_04=>'BOTH'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56148805714396416)
+,p_name=>'P63_SOURCETAB'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(56148449682396412)
+,p_item_default=>'AWR'
+,p_prompt=>'Sourcetab'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>'STATIC:ASH from AWR Repository;AWR,ASH from memory;V$ASH'
+,p_cHeight=>1
+,p_begin_on_new_line=>'N'
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'NONE'
+,p_attribute_02=>'N'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56148969950396417)
+,p_name=>'P63_FILTER_REMASHL'
+,p_item_sequence=>50
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_prompt=>'Filter (SQL expression)'
+,p_display_as=>'NATIVE_TEXTAREA'
+,p_cSize=>93
+,p_cHeight=>5
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'Y'
+,p_attribute_02=>'N'
+,p_attribute_03=>'N'
+,p_attribute_04=>'BOTH'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56149754387396425)
+,p_name=>'P63_SOURCEDB_PREV'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(56148449682396412)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56162427732550624)
+,p_name=>'P63_INST_ID'
+,p_item_sequence=>20
+,p_item_plug_id=>wwv_flow_api.id(163349683556019870)
+,p_item_default=>'1'
+,p_prompt=>'RAC node'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>'STATIC:Node 1;1,Node 2;2,Node 3;3,Node 4;4'
+,p_cHeight=>1
+,p_colspan=>4
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'NONE'
+,p_attribute_02=>'N'
+);
+end;
+/
+begin
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56164878745550628)
+,p_name=>'P63_START_DT'
+,p_item_sequence=>22
+,p_item_plug_id=>wwv_flow_api.id(163349683556019870)
+,p_prompt=>'Start date'
+,p_format_mask=>'YYYY/MON/DD HH24:MI:SS'
+,p_display_as=>'NATIVE_DATE_PICKER'
+,p_cSize=>30
+,p_colspan=>4
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_04=>'button'
+,p_attribute_05=>'N'
+,p_attribute_07=>'NONE'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56165231641550628)
+,p_name=>'P63_END_DT'
+,p_item_sequence=>24
+,p_item_plug_id=>wwv_flow_api.id(163349683556019870)
+,p_prompt=>'End date'
+,p_format_mask=>'YYYY/MON/DD HH24:MI:SS'
+,p_display_as=>'NATIVE_DATE_PICKER'
+,p_cSize=>30
+,p_begin_on_new_line=>'N'
+,p_grid_column=>5
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_04=>'button'
+,p_attribute_05=>'N'
+,p_attribute_07=>'NONE'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56165662015550629)
+,p_name=>'P63_AGG'
+,p_item_sequence=>26
+,p_item_plug_id=>wwv_flow_api.id(163349683556019870)
+,p_item_default=>'by_mi'
+,p_prompt=>'Aggregation'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>'STATIC:No Aggregation;no_agg,By Minute;by_mi,By hour;by_hour,By day;by_day'
+,p_cHeight=>1
+,p_colspan=>4
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'NONE'
+,p_attribute_02=>'N'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56166071511550629)
+,p_name=>'P63_SHOW'
+,p_item_sequence=>30
+,p_item_plug_id=>wwv_flow_api.id(163349683556019870)
+,p_item_default=>'N'
+,p_prompt=>'Show charts'
+,p_display_as=>'NATIVE_YES_NO'
+,p_begin_on_new_line=>'N'
+,p_grid_column=>5
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'CUSTOM'
+,p_attribute_02=>'Y'
+,p_attribute_03=>'Yes'
+,p_attribute_04=>'N'
+,p_attribute_05=>'No'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56642832900802577)
+,p_name=>'P63_DBIDL'
+,p_item_sequence=>1
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56643224546802584)
+,p_name=>'P63_MIN_SNAPL'
+,p_item_sequence=>2
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56643631653802585)
+,p_name=>'P63_MAX_SNAPL'
+,p_item_sequence=>3
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56644042749802588)
+,p_name=>'P63_INST_IDL'
+,p_item_sequence=>4
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56644411208802589)
+,p_name=>'P63_START_DTHL'
+,p_item_sequence=>5
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56644855082802589)
+,p_name=>'P63_END_DTHL'
+,p_item_sequence=>6
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56645268162802590)
+,p_name=>'P63_PROJ_NAMEL'
+,p_item_sequence=>7
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56645648391802590)
+,p_name=>'P63_PROJ_IDL'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_prompt=>'Project'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select proj_name, proj_id from AWRTOOLPROJECT ',
+' where proj_id in (select proj_id from awrdumps where status=''AWRLOADED'' and IS_REMOTE=''NO'')',
+' order by proj_name'))
+,p_lov_display_null=>'YES'
+,p_lov_null_text=>'Select project...'
+,p_cHeight=>1
+,p_colspan=>3
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'SUBMIT'
+,p_attribute_03=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56646043264802591)
+,p_name=>'P63_DUMP_IDL'
+,p_item_sequence=>20
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_prompt=>'Dump'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT ',
+'    ''DBID: ''||DBID||',
+'    '', ''||MIN_SNAP_ID||''-''||MAX_SNAP_ID||',
+'    '', ''||to_char(MIN_SNAP_DT,''yyyy-mon-dd hh24:mi:ss'')||''-''||to_char(MAX_SNAP_DT,''yyyy-mon-dd hh24:mi:ss'')||',
+'    '', ''||DB_DESCRIPTION||''; REMOTE:''||is_remote',
+'    name,',
+'    dump_id',
+'FROM',
+'    awrdumps',
+'where status=''AWRLOADED'' and proj_id=:P63_PROJ_IDL and IS_REMOTE=''NO''',
+'order by MAX_SNAP_DT;'))
+,p_cHeight=>1
+,p_begin_on_new_line=>'N'
+,p_grid_column=>4
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'SUBMIT'
+,p_attribute_03=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56646494801802592)
+,p_name=>'P63_START_DTL'
+,p_item_sequence=>22
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_prompt=>'Start date'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'WITH r AS (',
+'    SELECT level n FROM dual',
+'    CONNECT BY level <= 1 + round( (TO_DATE(:p63_end_dthl,''YYYY/MON/DD HH24:MI:SS'') - TO_DATE(:p63_start_dthl,''YYYY/MON/DD HH24:MI:SS'') ) * 24 * 60 )',
+') SELECT',
+'    TO_CHAR(dt,''YYYY/MON/DD HH24:MI:SS'') name_c,',
+'    TO_CHAR(dt,''YYYY/MON/DD HH24:MI:SS'') id',
+'  FROM',
+'    (SELECT TO_DATE(:p63_start_dthl,''YYYY/MON/DD HH24:MI:SS'') + ( n - 1 ) / 24 / 60 dt',
+'       FROM r)',
+'  WHERE',
+'    dt <= TO_DATE(:p63_end_dthl,''YYYY/MON/DD HH24:MI:SS'');'))
+,p_cHeight=>1
+,p_colspan=>3
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'NONE'
+,p_attribute_02=>'N'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56646800400802593)
+,p_name=>'P63_END_DTL'
+,p_item_sequence=>24
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_prompt=>'End date'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'WITH r AS (',
+'    SELECT level n FROM dual',
+'    CONNECT BY level <= 3 + round( (TO_DATE(:p63_end_dthl,''YYYY/MON/DD HH24:MI:SS'') - TO_DATE(:p63_start_dthl,''YYYY/MON/DD HH24:MI:SS'') ) * 24 * 60)',
+') SELECT',
+'    TO_CHAR(dt,''YYYY/MON/DD HH24:MI:SS'') name_c,',
+'    TO_CHAR(dt,''YYYY/MON/DD HH24:MI:SS'') id',
+'  FROM',
+'    (SELECT TO_DATE(:p63_start_dthl,''YYYY/MON/DD HH24:MI:SS'') + ( n - 1 ) / 24 / 60 dt',
+'       FROM r)',
+'  WHERE',
+'    dt <= TO_DATE(:p63_end_dthl,''YYYY/MON/DD HH24:MI:SS'') + 2 /24 / 60;'))
+,p_cHeight=>1
+,p_begin_on_new_line=>'N'
+,p_grid_column=>4
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'NONE'
+,p_attribute_02=>'N'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56647294341802593)
+,p_name=>'P63_AGGL'
+,p_item_sequence=>26
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_item_default=>'by_mi'
+,p_prompt=>'Aggregation'
+,p_display_as=>'NATIVE_SELECT_LIST'
+,p_lov=>'STATIC:No Aggregation;no_agg,By Minute;by_mi,By hour;by_hour,By day;by_day'
+,p_cHeight=>1
+,p_colspan=>3
+,p_grid_column=>1
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'NONE'
+,p_attribute_02=>'N'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56647606565802593)
+,p_name=>'P63_SHOWL'
+,p_item_sequence=>30
+,p_item_plug_id=>wwv_flow_api.id(163831622141271829)
+,p_item_default=>'N'
+,p_prompt=>'Show charts'
+,p_display_as=>'NATIVE_YES_NO'
+,p_begin_on_new_line=>'N'
+,p_grid_column=>4
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_attribute_01=>'CUSTOM'
+,p_attribute_02=>'Y'
+,p_attribute_03=>'Yes'
+,p_attribute_04=>'N'
+,p_attribute_05=>'No'
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(56148780006396415)
+,p_process_sequence=>10
+,p_process_point=>'AFTER_HEADER'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'SetParamsFor Local'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  if :P63_DUMP_IDL is null then',
+'    begin',
+'      select DUMP_ID into :P63_DUMP_IDL from awrdumps where proj_id=:P63_PROJ_IDL and rownum<2;',
+'    exception when others then null;',
+'    end;',
+'  end if;',
+'  for i in (SELECT',
+'                   dbid,',
+'                   min_snap_id,',
+'                   max_snap_id,',
+'                   to_date(to_char(min_snap_dt,''YYYY/MON/DD HH24:MI:SS''),''YYYY/MON/DD HH24:MI:SS'') min_snap_dt,',
+'                   to_date(to_char(max_snap_dt,''YYYY/MON/DD HH24:MI:SS''),''YYYY/MON/DD HH24:MI:SS'') max_snap_dt,',
+'                   proj_name',
+'              FROM awrdumps d, AWRTOOLPROJECT p',
+'             where dump_id=:P63_DUMP_IDL and d.proj_id=p.proj_id) loop',
+'    :P63_PROJ_NAMEL:= i.proj_name;',
+'    :P63_DBIDL:=i.dbid;',
+'    :P63_MIN_SNAPL:=i.min_snap_id;',
+'    :P63_MAX_SNAPL:=i.max_snap_id;',
+'    :P63_INST_IDL :=1;',
+'    :P63_START_DTHL:=to_char(i.min_snap_dt,''YYYY/MON/DD HH24:MI:SS'');',
+'    :P63_END_DTHL:=to_char(i.max_snap_dt,''YYYY/MON/DD HH24:MI:SS'');',
+'    :P63_START_DTL:=replace(:P63_START_DTL,''null'','''');',
+'    :P63_END_DTL:=replace(:P63_END_DTL,''null'','''');',
+'    if not nvl(to_date(:P63_START_DTL,''YYYY/MON/DD HH24:MI:SS''),sysdate+1000) between i.min_snap_dt and i.max_snap_dt then',
+'      :P63_START_DTL:=to_char(i.min_snap_dt,''YYYY/MON/DD HH24:MI:SS'');',
+'    end if;',
+'    if not nvl(to_date(:P63_END_DTL,''YYYY/MON/DD HH24:MI:SS''),sysdate+1000) between i.min_snap_dt and i.max_snap_dt + 1/24/60 then',
+'      --:P63_END_DT:=to_char(i.max_snap_dt,''YYYY/MON/DD HH24:MI:SS'');',
+'--raise_application_error(-20000,:P63_END_DT||''--''||to_char(i.min_snap_dt,''YYYY/MON/DD HH24:MI:SS'')||''--''||to_char(i.max_snap_dt+ 2/24/60,''YYYY/MON/DD HH24:MI:SS''));',
+'       WITH r AS (',
+'                  SELECT level n FROM dual',
+'                   CONNECT BY level <= 3 + round( (TO_DATE(:P63_end_dthL,''YYYY/MON/DD HH24:MI:SS'') -',
+'                                                   TO_DATE(:P63_start_dthL,''YYYY/MON/DD HH24:MI:SS'') ) * 24 * 60)',
+'                  )',
+'       SELECT',
+'         to_char(max(dt),''YYYY/MON/DD HH24:MI:SS'') into :P63_END_DTL',
+'         FROM (SELECT TO_DATE(:P63_start_dthL,''YYYY/MON/DD HH24:MI:SS'') + ( n - 1 ) / 24 / 60 dt FROM r)',
+'        WHERE dt <= TO_DATE(:P63_end_dthL,''YYYY/MON/DD HH24:MI:SS'') + 1 /24 / 60;',
+'',
+'    end if;',
+'  end loop;',
+'end;'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when=>'P63_SOURCEDB'
+,p_process_when_type=>'VAL_OF_ITEM_IN_COND_EQ_COND2'
+,p_process_when2=>'$LOCAL$'
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(56149837502396426)
+,p_process_sequence=>20
+,p_process_point=>'AFTER_HEADER'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'New'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  if :P63_SOURCEDB_PREV<>:P63_SOURCEDB then ',
+'    :P63_SHOW:=''N'';',
+'    :P63_SHOWL:=''N'';',
+'  end if;',
+'  :P63_SOURCEDB_PREV:=:P63_SOURCEDB;',
+'end;'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(56147836703396406)
+,p_process_sequence=>10
+,p_process_point=>'AFTER_SUBMIT'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'LoadRemoteAWRASH'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  if :P63_SHOW=''Y'' then',
+'    if :P63_SOURCEDB <> ''$LOCAL$'' then',
+'      AWRTOOLS_REMOTE_ANALYTICS.load_data_cube',
+'       (p_sess_id  => :P63_SESS_ID,',
+'        p_source   => :P63_SOURCETAB,',
+'        p_dblink   => :P63_SOURCEDB,',
+'        p_agg      => :P63_AGG, ',
+'        p_inst_id  => :P63_INST_ID, ',
+'        p_start_dt => to_date(:P63_START_DT,''YYYY/MON/DD HH24:MI:SS''), ',
+'        p_end_dt   => to_date(:P63_END_DT,''YYYY/MON/DD HH24:MI:SS''),',
+'        p_filter   => :P63_FILTER_REMASH);',
+'    end if;',
+'  end if;                                                         ',
+'end;'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when_button_id=>wwv_flow_api.id(56160958627550608)
+);
+wwv_flow_api.create_page_process(
+ p_id=>wwv_flow_api.id(56149144894396419)
+,p_process_sequence=>20
+,p_process_point=>'AFTER_SUBMIT'
+,p_process_type=>'NATIVE_PLSQL'
+,p_process_name=>'LoadLocalAWRASH'
+,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'begin',
+'  if :P63_SHOWL=''Y'' then',
+'    if :P63_SOURCEDB = ''$LOCAL$'' then',
+'      AWRTOOLS_REMOTE_ANALYTICS.load_data_cube',
+'       (p_sess_id  => :P63_SESS_ID,',
+'        p_source   => :P63_SOURCETAB,',
+'        p_dblink   => :P63_SOURCEDB,',
+'        p_agg      => :P63_AGGL, ',
+'        p_inst_id  => :P63_INST_IDL, ',
+'        p_start_dt => to_date(:P63_START_DTL,''YYYY/MON/DD HH24:MI:SS''), ',
+'        p_end_dt   => to_date(:P63_END_DTL,''YYYY/MON/DD HH24:MI:SS''),',
+'        p_filter   => :P63_FILTER_REMASHL,',
+'        p_dump_id  => :P63_DUMP_IDL);    ',
+'    end if;',
+'  end if;                                                         ',
+'end;'))
+,p_error_display_location=>'INLINE_IN_NOTIFICATION'
+,p_process_when_button_id=>wwv_flow_api.id(56149073202396418)
 );
 end;
 /

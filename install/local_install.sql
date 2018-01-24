@@ -92,7 +92,7 @@ create or replace synonym dba_hist_snapshot_rem for dba_hist_snapshot@&DBLINK.;
 create or replace synonym v$database_rem for v$database@&DBLINK.;
     
 create index IDX_PARAMS_RPT_ID on awrcomp_reports_params(report_id);
-    
+
 CREATE OR REPLACE FORCE EDITIONABLE VIEW AWRCOMP_REMOTE_DATA as
 select x1.snap_id, x1.dbid, x1.instance_number, x1.startup_time, x1.begin_interval_time, x1.end_interval_time, x1.snap_level,x1.error_count, 
        decode(loc.proj_name,null,'<UNKNOWN PROJECT>',loc.proj_name) project, loc.proj_id
@@ -101,6 +101,36 @@ from dba_hist_snapshot_rem x1,
 where x1.dbid<>(select dbid from v$database_rem) 
 and x1.dbid=loc.dbid(+) and x1.snap_id between loc.min_snap_id(+) and loc.max_snap_id(+)
 order by x1.dbid,x1.snap_id;
+
+--Online ASH Dashboard
+create table remote_ash_sess (
+sess_id number generated always as identity,
+sess_created timestamp default systimestamp,
+primary key (sess_id));
+
+create table remote_ash_timeline (
+sess_id      number references remote_ash_sess(sess_id) on delete cascade,
+sample_time  date);
+
+create table remote_ash (
+sess_id      number references remote_ash_sess(sess_id) on delete cascade,
+sample_time  date,
+wait_class   VARCHAR2(64),
+sql_id       VARCHAR2(13),
+event        VARCHAR2(64),
+module       VARCHAR2(64),
+action       VARCHAR2(64),
+SQL_PLAN_HASH_VALUE number,
+sec          number);
+
+create index idx_remote_ash_timeline_1 on remote_ash_timeline(sess_id);
+create index idx_remote_ash_1 on remote_ash(sess_id);
+
+create table AWRTOOLS_LOG (
+ts timestamp default systimestamp,
+msg varchar2(4000))
+;
+
 
 --Create source code objects
 
@@ -126,6 +156,8 @@ set define off
 set define on
 show errors
 
+@../src/awrtools_logging
+@../src/AWRTOOLS_REMOTE_ANALYTICS
 
 --Load data
 insert into awrconfig values ('WORKDIR',upper('&dirname.'),'Oracle directory for loading AWR dumps');
@@ -152,7 +184,15 @@ insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHGLOBALRPT','ASH global report (standard)','awr_ash_glob_',100);
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHANALYTICS','ASH analytics report (standard)','ash_analyt_',110);
 
-
+begin
+  dbms_scheduler.create_job(job_name => 'AWRTOOL_CLEANUP_ASHSESS',
+                            job_type => 'STORED_PROCEDURE',
+                            job_action => 'AWRTOOLS_REMOTE_ANALYTICS.AWRTOOL_CLEANUP_ASHSESS',
+                            start_date => trunc(systimestamp,'hh'),
+                            repeat_interval => 'FREQ=MINUTELY; INTERVAL=30',
+                            enabled => true);
+end;
+/
 
 set define off
 set serveroutput on

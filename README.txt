@@ -67,7 +67,10 @@ Version 2.5
 1) Custom "Analyze SQLs with multiple plans" report added
 
 Version 2.6
-2) Added coloring for compared query plans
+1) Added coloring for compared query plans
 
 Version 2.7
-2) Added SQL query search form
+1) Added SQL query search form
+
+Version 3.0
+1) Added Online Analytic Tool - allows to analyze ASH data from local AWR warehouse as well as from remote one through dblink, V$ASH is also in use.

@@ -20,6 +20,7 @@ grant alter user to &localscheme.;
 grant create database link to &localscheme.;
 grant create view to &localscheme.;
 grant create synonym to &localscheme.;
+grant create job to &localscheme.;
 
 grant select on dba_hist_sqlstat to &localscheme.;
 grant select on dba_hist_database_instance to &localscheme.;
@@ -37,6 +38,7 @@ grant select on dba_users to &localscheme.;
 grant select on dba_hist_sysmetric_history to &localscheme.;
 grant select on v_$active_session_history to &localscheme.;
 grant select on dba_hist_reports to &localscheme.;
+grant select on gv_$active_session_history to &localscheme.;
 
 grant execute on dbms_xplan to &localscheme.;
 
