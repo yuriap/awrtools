@@ -74,3 +74,13 @@ Version 2.7
 
 Version 3.0
 1) Added Online Analytic Tool - allows to analyze ASH data from local AWR warehouse as well as from remote one through dblink, V$ASH is also in use.
+How to connect DB through DB link to target DB within VPN is on and make it possible to access APEX at the same time:
+ - use HOSTNAME instead of IP address in all Oracle Net related configs like listener.ora and tnsnames.ora and any other related network services (see below Oracle REST Data Services )
+ - stop all shared servers and dispatchers (notice, Embedded PL/QSL Gateway does not work without shared servers)
+ - deploy Oracle REST Data Services (https://docs.oracle.com/cd/E37099_01/doc.20/e25066/install.htm#AELIG7015) and configure it to work with APEX
+ - after starting VPN session, put IP address of VPN network adapter to hosts file for your HOSTNAME
+ - restart Oracle Net Listener, Oracle Database Instance and start Oracle REST Data Services.
+
+Version 3.0.1
+1) Installation bug fix.
+2) Interface tiny fixes and improvements.

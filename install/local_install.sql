@@ -141,7 +141,9 @@ show errors
 
 @../src/awrtools_loc_utils_spec
 show errors
+set define off
 @../src/awrtools_loc_utils_body
+set define on
 show errors
 
 @../src/awrtools_api_spec
@@ -189,7 +191,7 @@ begin
                             job_type => 'STORED_PROCEDURE',
                             job_action => 'AWRTOOLS_REMOTE_ANALYTICS.AWRTOOL_CLEANUP_ASHSESS',
                             start_date => trunc(systimestamp,'hh'),
-                            repeat_interval => 'FREQ=MINUTELY; INTERVAL=30',
+                            repeat_interval => 'FREQ=MINUTELY; INTERVAL=15',
                             enabled => true);
 end;
 /

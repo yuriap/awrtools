@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   15:26 Wednesday January 24, 2018
+--   Date and Time:   14:50 Friday January 26, 2018
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -108,7 +108,7 @@ wwv_flow_api.create_flow(
 ,p_logo_image=>'TEXT:AWR Tools'
 ,p_public_user=>'APEX_PUBLIC_USER'
 ,p_proxy_server=> nvl(wwv_flow_application_install.get_proxy,'')
-,p_flow_version=>'release 3.0'
+,p_flow_version=>'release 3.0.1'
 ,p_flow_status=>'AVAILABLE_W_EDIT_LINK'
 ,p_flow_unavailable_text=>'This application is currently unavailable at this time.'
 ,p_exact_substitutions_only=>'Y'
@@ -117,8 +117,10 @@ wwv_flow_api.create_flow(
 ,p_rejoin_existing_sessions=>'N'
 ,p_csv_encoding=>'Y'
 ,p_auto_time_zone=>'N'
+,p_substitution_string_01=>'AWRTOOLSVER'
+,p_substitution_value_01=>'3.0.1'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180124152553'
+,p_last_upd_yyyymmddhh24miss=>'20180126144603'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9205,7 +9207,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180124152553'
+,p_last_upd_yyyymmddhh24miss=>'20180126144603'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(101247562198740112)
@@ -9216,7 +9218,7 @@ wwv_flow_api.create_page_plug(
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'Web AWR Tools. Ver 3.0<br>',
+'Web AWR Tools. Ver &AWRTOOLSVER.<br>',
 '<br>',
 'AWR dump warehouse with web-based UI.<br>',
 '<br>',
@@ -13164,6 +13166,7 @@ wwv_flow_api.create_page(
 ,p_name=>'ASH Dasboard'
 ,p_page_mode=>'NORMAL'
 ,p_step_title=>'ASH Dasboard'
+,p_warn_on_unsaved_changes=>'N'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
@@ -13172,7 +13175,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180124150659'
+,p_last_upd_yyyymmddhh24miss=>'20180126124035'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(56118392389386540)
@@ -13222,6 +13225,7 @@ wwv_flow_api.create_page_plug(
 ,p_plug_template=>wwv_flow_api.id(101232642288147479)
 ,p_plug_display_sequence=>50
 ,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_num_rows=>15
@@ -13255,7 +13259,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'select * from ',
 '  (select plan_hash, sum(sec) sec from',
-'    (SELECT sql_id, SQL_PLAN_HASH_VALUE PLAN_HASH, COUNT(1) sec',
+'    (SELECT sql_id, SQL_PLAN_HASH_VALUE PLAN_HASH, sum(sec) sec',
 '       FROM remote_ash',
 '      where SQL_PLAN_HASH_VALUE>0 and sess_id = :P63_SESS_ID',
 '      GROUP BY sql_id, SQL_PLAN_HASH_VALUE)',
@@ -13312,7 +13316,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'select * from ',
-'  (SELECT nvl(sql_id,''<UNKNOWN SQL>'') sql_id, COUNT(1) sec',
+'  (SELECT nvl(sql_id,''<UNKNOWN SQL>'') sql_id, sum(sec) sec',
 '     FROM remote_ash',
 '    where sess_id = :P63_SESS_ID',
 '    GROUP BY nvl(sql_id,''<UNKNOWN SQL>'')',
@@ -13369,7 +13373,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'select * from (SELECT',
 '    ''MODULE:''||nvl(module,''N/A'')||''; ACTION:''||nvl(ACTION,''N/A'') mod_act,',
-'    COUNT(1) sec',
+'    sum(sec) sec',
 'FROM',
 '    remote_ash',
 'where sess_id = :P63_SESS_ID',
@@ -13427,7 +13431,7 @@ wwv_flow_api.create_jet_chart_series(
 'select sql_id, sec',
 'from (select x.*, rownum rn from (SELECT',
 '    nvl(sql_id,''<UNKNOWN SQL>'') sql_id,',
-'    COUNT(1) sec',
+'    sum(sec) sec',
 'FROM',
 '    remote_ash',
 'where sess_id = :P63_SESS_ID',
@@ -13484,9 +13488,11 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Top 10 Events'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'select * from (SELECT',
+'with nm as (select /*+ result_cache */ name, display_name||''(''||name||'')'' display_name from v$event_name where name != display_name)',
+'select coalesce((select display_name from nm where name=event),event) event, sec',
+' from (SELECT',
 '    nvl(event, ''CPU'') event,',
-'    COUNT(1) sec',
+'    sum(sec) sec',
 'FROM',
 '    remote_ash',
 'where sess_id = :P63_SESS_ID',
@@ -13957,7 +13963,7 @@ wwv_flow_api.create_page_item(
 ,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_api.id(56148449682396412)
 ,p_item_default=>'$LOCAL$'
-,p_prompt=>'Sourcedb'
+,p_prompt=>'Source DB'
 ,p_display_as=>'NATIVE_SELECT_LIST'
 ,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'select ''Local warehouse'' name, ''$LOCAL$'' id from dual',
@@ -14005,7 +14011,7 @@ wwv_flow_api.create_page_item(
 ,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_api.id(56148449682396412)
 ,p_item_default=>'AWR'
-,p_prompt=>'Sourcetab'
+,p_prompt=>'Source tables'
 ,p_display_as=>'NATIVE_SELECT_LIST'
 ,p_lov=>'STATIC:ASH from AWR Repository;AWR,ASH from memory;V$ASH'
 ,p_cHeight=>1
