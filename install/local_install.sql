@@ -224,6 +224,131 @@ begin
 end;
 /
 
+declare
+  l_script clob := 
+q'^
+@../scripts/__prn_tbl_html.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_PRNHTMLTBL';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_PRNHTMLTBL',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__getftxt.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_GETGTXT';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_GETGTXT',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__nonshared1.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_NON_SHARED';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_NON_SHARED',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__vsql_stat.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_VSQL_STAT';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_VSQL_STAT',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__offload_percent1.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_OFFLOAD_PCT1';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_OFFLOAD_PCT1',l_script);
+end;
+/
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__sqlmon1.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_SQLMON';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_SQLMON',l_script);
+end;
+/
+
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__sqlwarea.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_SQLWORKAREA';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_SQLWORKAREA',l_script);
+end;
+/
+
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__optenv.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_OPTENV';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_OPTENV',l_script);
+end;
+/
+
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__rac_plans.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_RACPLAN';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_RACPLAN',l_script);
+end;
+/
+
+
+declare
+  l_script clob := 
+q'^
+@../scripts/__sqlmon_hist.sql
+^';
+begin
+  delete from awrcomp_scripts where script_id='PROC_SQLMON_HIST';
+  insert into awrcomp_scripts (script_id,script_content) values
+  ('PROC_SQLMON_HIST',l_script);
+end;
+/
+
+
 set define on
 commit;
 

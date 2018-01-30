@@ -1,4 +1,4 @@
-Web AWR Tools. Ver 2.7
+Web AWR Tools. Ver 3.1
 
 AWR dump warehouse with web-based UI.
 
@@ -84,3 +84,6 @@ How to connect DB through DB link to target DB within VPN is on and make it poss
 Version 3.0.1
 1) Installation bug fix.
 2) Interface tiny fixes and improvements.
+
+Version 3.1.0
+1) SQL run time statistics from memory report added
