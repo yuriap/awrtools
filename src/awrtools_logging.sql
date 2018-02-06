@@ -1,9 +1,9 @@
 create or replace package awrtools_logging is
-  procedure log(p_msg varchar2);
+  procedure log(p_msg clob);
 end;
 /
 create or replace package body awrtools_logging is
-  procedure log(p_msg varchar2)
+  procedure log(p_msg clob)
   is
     PRAGMA AUTONOMOUS_TRANSACTION;
   begin

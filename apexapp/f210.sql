@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   18:05 Tuesday January 30, 2018
+--   Date and Time:   18:28 Tuesday February 6, 2018
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,12 +37,12 @@ prompt APPLICATION 210 - AWR Tools
 
 -- Application Statistics:
 --   Pages:                     18
---     Items:                   76
+--     Items:                   77
 --     Computations:             4
 --     Validations:              5
 --     Processes:               27
 --     Regions:                 48
---     Buttons:                 22
+--     Buttons:                 23
 --   Shared Components:
 --     Logic:
 --       Items:                  1
@@ -120,7 +120,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.1.0'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180130180448'
+,p_last_upd_yyyymmddhh24miss=>'20180206182619'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -157,7 +157,7 @@ wwv_flow_api.create_list_item(
 wwv_flow_api.create_list_item(
  p_id=>wwv_flow_api.id(56951075577997044)
 ,p_list_item_display_sequence=>20
-,p_list_item_link_text=>'SQL run time statistics from memory'
+,p_list_item_link_text=>'SQL runtime statistics'
 ,p_list_item_link_target=>'f?p=&APP_ID.:64:&SESSION.::&DEBUG.::::'
 ,p_list_item_icon=>'fa-missile'
 ,p_list_item_current_type=>'TARGET_PAGE'
@@ -235,7 +235,7 @@ wwv_flow_api.create_list_item(
 wwv_flow_api.create_list_item(
  p_id=>wwv_flow_api.id(56917623743346408)
 ,p_list_item_display_sequence=>64
-,p_list_item_link_text=>'SQL statistics from memory'
+,p_list_item_link_text=>'SQL runtime statistics'
 ,p_list_item_link_target=>'f?p=&APP_ID.:64:&SESSION.::&DEBUG.::::'
 ,p_list_item_icon=>'fa-missile'
 ,p_parent_list_item_id=>wwv_flow_api.id(55127629180930895)
@@ -12270,7 +12270,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180130175916'
+,p_last_upd_yyyymmddhh24miss=>'20180206182619'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(51799844575989304)
@@ -12429,7 +12429,7 @@ wwv_flow_api.create_page_button(
 ,p_button_action=>'REDIRECT_PAGE'
 ,p_button_template_options=>'#DEFAULT#:t-Button--link'
 ,p_button_template_id=>wwv_flow_api.id(101255455566147533)
-,p_button_image_alt=>'SQL run time statistics from memory'
+,p_button_image_alt=>'SQL run time statistics'
 ,p_button_position=>'BELOW_BOX'
 ,p_button_alignment=>'LEFT'
 ,p_button_redirect_url=>'f?p=&APP_ID.:64:&SESSION.::&DEBUG.:RP:P64_SQL_ID,P64_SOURCE:&P18_SQL_ID.,&P18_SOURCE.'
@@ -13221,7 +13221,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180126124035'
+,p_last_upd_yyyymmddhh24miss=>'20180205121738'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(56118392389386540)
@@ -13592,7 +13592,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'CPU'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''CPU'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13620,7 +13620,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'User I/O'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''User I/O'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13648,7 +13648,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Administrative'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Administrative'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13676,7 +13676,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Application'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Application'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13704,7 +13704,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Commit'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Commit'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13732,7 +13732,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Concurrency'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Concurrency'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13760,7 +13760,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Configuration'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Configuration'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13788,7 +13788,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Idle'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Idle'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13816,7 +13816,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Network'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Network'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13844,7 +13844,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Other'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Other'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13872,7 +13872,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Scheduler'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''Scheduler'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -13900,7 +13900,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'System I/O'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-' select TO_CHAR(d.sample_time,''YYYY/MON/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+' select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, sum(sec) sec ',
 '          from remote_ash where wait_class = ''System I/O'' and sess_id = :P63_SESS_ID',
 '         group by sample_time, wait_class) h, ',
@@ -14526,7 +14526,7 @@ wwv_flow_api.create_page(
 ,p_user_interface_id=>wwv_flow_api.id(101266223782147592)
 ,p_name=>'GetPlanHRemote'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'SQL run time statistics from memory'
+,p_step_title=>'SQL runtime statistics'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
@@ -14559,7 +14559,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180130173809'
+,p_last_upd_yyyymmddhh24miss=>'20180205153716'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(56149922582396427)
@@ -14574,11 +14574,18 @@ wwv_flow_api.create_page_plug(
 'declare',
 '  l_output AWRTOOLS_REMOTE_ANALYTICS.t_output_lines;',
 'begin',
-'  if :P64_SQL_ID is not null and :P64_SOURCE is not null then',
-'    AWRTOOLS_REMOTE_ANALYTICS.getplanh ',
-'      (  P_SQL_ID => :P64_SQL_ID,',
-'         P_DBLINK => :P64_SOURCE,',
-'         P_REPORT => l_output ) ;',
+'  if :P64_SQL_ID is not null and :P64_SOURCE is not null and :P64_REPORTTYPE is not null then',
+'    if :P64_REPORTTYPE=''V$SQL'' then',
+'      AWRTOOLS_REMOTE_ANALYTICS.getplanh ',
+'        (  P_SQL_ID => :P64_SQL_ID,',
+'           P_DBLINK => :P64_SOURCE,',
+'           P_REPORT => l_output ) ;',
+'    elsif :P64_REPORTTYPE=''AWR'' then',
+'      AWRTOOLS_REMOTE_ANALYTICS.getplanawrh ',
+'        (  P_SQL_ID => :P64_SQL_ID,',
+'           P_DBLINK => :P64_SOURCE,',
+'           P_REPORT => l_output ) ;',
+'    end if;',
 '    for i in 1..l_output.count loop',
 '      htp.p(l_output(i));',
 '    end loop;',
@@ -14601,6 +14608,21 @@ wwv_flow_api.create_page_plug(
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'HTML'
 );
+wwv_flow_api.create_page_button(
+ p_id=>wwv_flow_api.id(56150522613396433)
+,p_button_sequence=>20
+,p_button_plug_id=>wwv_flow_api.id(56150025581396428)
+,p_button_name=>'Submit'
+,p_button_action=>'SUBMIT'
+,p_button_template_options=>'#DEFAULT#'
+,p_button_template_id=>wwv_flow_api.id(101255311357147531)
+,p_button_is_hot=>'Y'
+,p_button_image_alt=>'Submit'
+,p_button_position=>'BODY'
+,p_icon_css_classes=>'fa-database-arrow-down'
+,p_grid_new_row=>'N'
+,p_grid_new_column=>'Y'
+);
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(56150153680396429)
 ,p_name=>'P64_SQL_ID'
@@ -14609,6 +14631,9 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'SQL ID'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
+,p_colspan=>2
+,p_grid_column=>1
+,p_grid_label_column_span=>1
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'N'
@@ -14624,13 +14649,32 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'Source'
 ,p_display_as=>'NATIVE_SELECT_LIST'
 ,p_lov=>'select username||''@''||host name, db_link id from user_db_links where db_link not like (select upper(cvalue) from awrconfig where ckey=''DBLINK'')||''%'';'
-,p_lov_display_null=>'YES'
 ,p_cHeight=>1
+,p_begin_on_new_line=>'N'
+,p_grid_column=>3
+,p_grid_label_column_span=>1
 ,p_field_template=>wwv_flow_api.id(101254971141147529)
 ,p_item_template_options=>'#DEFAULT#'
-,p_lov_display_extra=>'YES'
+,p_lov_display_extra=>'NO'
 ,p_attribute_01=>'NONE'
 ,p_attribute_02=>'N'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(56150734066396435)
+,p_name=>'P64_REPORTTYPE'
+,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(56150025581396428)
+,p_prompt=>'Type'
+,p_display_as=>'NATIVE_RADIOGROUP'
+,p_lov=>'STATIC:Memory;V$SQL,AWR;AWR'
+,p_begin_on_new_line=>'N'
+,p_grid_column=>7
+,p_grid_label_column_span=>1
+,p_field_template=>wwv_flow_api.id(101254971141147529)
+,p_item_template_options=>'#DEFAULT#'
+,p_lov_display_extra=>'NO'
+,p_attribute_01=>'2'
+,p_attribute_02=>'NONE'
 );
 end;
 /
