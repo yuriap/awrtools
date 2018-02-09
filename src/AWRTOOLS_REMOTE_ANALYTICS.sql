@@ -4,8 +4,15 @@ create or replace PACKAGE AWRTOOLS_REMOTE_ANALYTICS AS
   
   procedure load_data_cube(p_sess_id out number, p_source varchar2, p_dblink varchar2, p_agg varchar2, p_inst_id number, p_start_dt date, p_end_dt date, p_filter varchar2, p_dump_id number default null);
   procedure AWRTOOL_CLEANUP_ASHSESS;
+  procedure AWRTOOL_CLEANUP_RPT;
 
-  procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_report out t_output_lines);
+  --creating report content
+  procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
+  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
+  
+  --getting already created report content
+  procedure getreport(p_id in number, p_report out t_output_lines);
+
   
 END AWRTOOLS_REMOTE_ANALYTICS;
 /
@@ -21,8 +28,20 @@ create or replace PACKAGE BODY AWRTOOLS_REMOTE_ANALYTICS AS
     delete from remote_ash_sess where sess_created < (systimestamp - 1/24);
     dbms_output.put_line('Deleted '||sql%rowcount||' session(s).');
     commit;
+  exception
+    when others then rollback;dbms_output.put_line(sqlerrm);    
   end;
 
+  procedure AWRTOOL_CLEANUP_RPT
+  is
+  begin
+    delete from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - 1/24);
+    dbms_output.put_line('Deleted '||sql%rowcount||' report(s).');
+    commit;
+  exception
+    when others then rollback;dbms_output.put_line(sqlerrm);    
+  end;
+  
   procedure load_data_cube(p_sess_id out number, p_source varchar2, p_dblink varchar2, p_agg varchar2, p_inst_id number, p_start_dt date, p_end_dt date, p_filter varchar2, p_dump_id number default null)
   is
     l_dbid number;
@@ -75,15 +94,15 @@ q'[INSERT INTO REMOTE_ASH
 
     l_sql := replace(replace(replace(replace(replace(l_sql_template,
                                                           '<SOURCE_TABLE>',case 
-                                                                             when p_source = 'V$ASH' then case when p_dblink = '$LOCAL$' then 'gv$active_session_history'
+                                                                             when p_source = 'V$VIEW' then case when p_dblink = '$LOCAL$' then 'gv$active_session_history'
                                                                                                           else 'gv$active_session_history@'||p_dblink
                                                                                                           end
                                                                              when p_source = 'AWR' then case when p_dblink = '$LOCAL$' then 'dba_hist_active_sess_history' 
                                                                                                         else 'dba_hist_active_sess_history@'||p_dblink
                                                                                                         end
                                                                            end),
-                                                  '<DBID>',case when p_source = 'V$ASH' then ':P_DBID is null' else 'DBID = :P_DBID' end),
-                                          '<INSTANCE_NUMBER>',case when p_source = 'V$ASH' then 'INST_ID' else 'INSTANCE_NUMBER' end),
+                                                  '<DBID>',case when p_source = 'V$VIEW' then ':P_DBID is null' else 'DBID = :P_DBID' end),
+                                          '<INSTANCE_NUMBER>',case when p_source = 'V$VIEW' then 'INST_ID' else 'INSTANCE_NUMBER' end),
                                   '<SNAP_FILTER>',case when p_source = 'AWR' then 'SNAP_ID BETWEEN :P_MIN_SNAP AND :P_MAX_SNAP' else ':P_MIN_SNAP is null and :P_MAX_SNAP is null' end),
                           '<FILTER>',nvl(p_filter,'1=1')); 
     case 
@@ -372,19 +391,65 @@ end;]';
     if not p_plsql then p_script:=replace(p_script,';'); end if;
   end;
 
-  procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_report out t_output_lines)
+  procedure save_report_for_download(p_filename varchar2, p_report t_output_lines, p_id in number)
+  is
+    PRAGMA AUTONOMOUS_TRANSACTION;
+    l_rpt clob;
+    l_pref clob;
+    l_brpt blob;
+    l_doff number := 1;
+    l_soff number := 1;
+    l_cont integer := DBMS_LOB.DEFAULT_LANG_CTX;
+    l_warn integer;
+  begin
+         
+    l_pref:=l_pref||HTF.HTMLOPEN||chr(10);
+    l_pref:=l_pref||HTF.HEADOPEN||chr(10);
+    l_pref:=l_pref||HTF.TITLE('SQL runtime statistics report')||chr(10);   
+
+    l_pref:=l_pref||'<style type="text/css">'||chr(10);
+    l_pref:=l_pref||awrtools_api.getscript('PROC_AWRCSS')||chr(10);
+    l_pref:=l_pref||'</style>'||chr(10);
+    l_pref:=l_pref||HTF.HEADCLOSE||chr(10);
+    l_pref:=l_pref||HTF.BODYOPEN(cattributes=>'class="awr"')||chr(10);
+   
+    for i in 1..p_report.count loop
+      l_rpt:=l_rpt||p_report(i)||chr(10);
+    end loop;
+    
+    INSERT INTO awrtools_online_rpt (id,ts,file_mimetype,file_name,report, reportc) 
+         VALUES (p_id,default,default,p_filename,empty_blob(),l_rpt) return report into l_brpt;
+         
+    l_rpt:=l_pref||chr(10)||l_rpt;
+    l_rpt:=l_rpt||(HTF.BODYCLOSE)||chr(10);
+    l_rpt:=l_rpt||(HTF.HTMLCLOSE);    
+    
+    DBMS_LOB.CONVERTTOBLOB(
+      dest_lob       => l_brpt,
+      src_clob       => l_rpt,
+      amount         => DBMS_LOB.LOBMAXSIZE,
+      dest_offset    => l_doff,
+      src_offset     => l_soff, 
+      blob_csid      => DBMS_LOB.DEFAULT_CSID,
+      lang_context   => l_cont,
+      warning        => l_warn);     
+    commit;
+  end;
+  
+  procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number)
   is
     l_timing boolean := true;
     l_time number; l_tot_tim number:=0;
     l_cpu_tim number; l_tot_cpu_tim number:=0;
     l_script varchar2(32767);
+    l_report t_output_lines;
 
     l_output t_output_lines;
     l_plsql_output clob;
     l_indx   number := 1;
     procedure p(p_line varchar2) is
     begin
-      p_report(l_indx):=p_line;
+      l_report(l_indx):=p_line;
       l_indx := l_indx + 1;
     end;
     procedure p1(p_output t_output_lines) is
@@ -393,30 +458,30 @@ end;]';
         p(p_output(i));
       end loop;
     end; 
-   procedure stim is
-   begin
-     if l_timing then
-       l_time:=DBMS_UTILITY.GET_TIME;
-       l_cpu_tim:=DBMS_UTILITY.GET_CPU_TIME;
-     end if;
-   end;
-   procedure etim(p_last boolean default false) is
-     l_delta_t number;
-     l_delta_c number;
-   begin
-     if l_timing then
-       l_delta_t:=DBMS_UTILITY.GET_TIME-l_time;
-       l_delta_c:=DBMS_UTILITY.GET_CPU_TIME-l_cpu_tim;
-       l_tot_tim:=l_tot_tim+l_delta_t;
-       l_tot_cpu_tim:=l_tot_cpu_tim+l_delta_c;
-       
-       if not p_last then
-         p(HTF.header (6,cheader=>'Elapsed (sec): '||to_char(round((l_delta_t)/100,2))||'; CPU (sec): '||to_char(round((l_delta_c)/100,2)),cattributes=>'class="awr"'));
-       else
-         p(HTF.header (6,cheader=>'Totals: Elapsed (sec): '||to_char(round((l_tot_tim)/100,2))||'; CPU (sec): '||to_char(round((l_tot_cpu_tim)/100,2)),cattributes=>'class="awr"'));
-       end if;
-     end if;
-   end;    
+    procedure stim is
+    begin
+      if l_timing then
+        l_time:=DBMS_UTILITY.GET_TIME;
+        l_cpu_tim:=DBMS_UTILITY.GET_CPU_TIME;
+      end if;
+    end;
+    procedure etim(p_last boolean default false) is
+      l_delta_t number;
+      l_delta_c number;
+    begin
+      if l_timing then
+        l_delta_t:=DBMS_UTILITY.GET_TIME-l_time;
+        l_delta_c:=DBMS_UTILITY.GET_CPU_TIME-l_cpu_tim;
+        l_tot_tim:=l_tot_tim+l_delta_t;
+        l_tot_cpu_tim:=l_tot_cpu_tim+l_delta_c;
+        
+        if not p_last then
+          p(HTF.header (6,cheader=>'Elapsed (sec): '||to_char(round((l_delta_t)/100,2))||'; CPU (sec): '||to_char(round((l_delta_c)/100,2)),cattributes=>'class="awr"'));
+        else
+          p(HTF.header (6,cheader=>'Totals: Elapsed (sec): '||to_char(round((l_tot_tim)/100,2))||'; CPU (sec): '||to_char(round((l_tot_cpu_tim)/100,2)),cattributes=>'class="awr"'));
+        end if;
+      end if;
+    end;    
   begin
     --p('SQL_ID='||p_sql_id||'; DB LINK='||p_dblink);
     
@@ -442,9 +507,10 @@ end;]';
     p(HTF.BR); 
     
 --  =============================================================================================================================================
-    l_script:=awrtools_api.getscript('PROC_GETGTXT');  
     --SQL TEXT
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL TEXT');
     stim();
+    l_script:=awrtools_api.getscript('PROC_GETGTXT');  
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL text',cname=>'sql_text',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     prepare_script(l_script,p_sql_id);
@@ -457,9 +523,10 @@ end;]';
     p(HTF.BR);     
     etim();
 --  =============================================================================================================================================    
-    l_script:=awrtools_api.getscript('PROC_NON_SHARED');
     --Non shared
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Non shared');
     stim();
+    l_script:=awrtools_api.getscript('PROC_NON_SHARED');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Non shared reason',cname=>'non_shared',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     prepare_script(l_script,p_sql_id);
@@ -472,9 +539,10 @@ end;]';
     p(HTF.BR);    
     etim();
 --  =============================================================================================================================================
-    l_script:=awrtools_api.getscript('PROC_VSQL_STAT');  
     --V$SQL statistics
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'V$SQL statistics');
     stim();
+    l_script:=awrtools_api.getscript('PROC_VSQL_STAT');  
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'V$SQL statistics',cname=>'v_sql_stat',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     prepare_script(l_script,p_sql_id, p_plsql=>true);
@@ -504,6 +572,7 @@ end;]';
     etim();
 --  =============================================================================================================================================    
     --Exadata statistics
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Exadata statistics');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Exadata statistics',cname=>'exadata',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -529,6 +598,7 @@ end;]';
     etim();
 --  =============================================================================================================================================        
     --SQL Monitor report
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL Monitor report');
     stim();
     l_script:=awrtools_api.getscript('PROC_SQLMON');  
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Monitor report (11g+)',cname=>'sql_mon',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -548,6 +618,7 @@ end;]';
     etim();
 --  =============================================================================================================================================
     --SQL Workarea
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL Workarea');
     stim();
     l_script:=awrtools_api.getscript('PROC_SQLWORKAREA'); 
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Workarea',cname=>'sql_workarea',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -564,6 +635,7 @@ end;]';
     etim();
 --  =============================================================================================================================================
     --CBO environment
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'CBO environment');
     stim();    
     l_script:=awrtools_api.getscript('PROC_OPTENV');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'CBO environment',cname=>'cbo_env',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -591,8 +663,9 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);    
 --  =============================================================================================================================================
-    stim();
     --Display cursor (last)
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (last)');
+    stim();    
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (last)',cname=>'dp_last',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     l_script:=q'[select * from table(dbms_xplan.display_cursor('&SQLID', null, 'LAST ALLSTATS +peeked_binds'))]'||chr(10);
@@ -612,8 +685,9 @@ end;]';
     p(HTF.BR);      
     etim();
 --  =============================================================================================================================================
-    stim();
     --Display cursor (RAC)
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (RAC)');
+    stim();
     l_script:=awrtools_api.getscript('PROC_RACPLAN');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (RAC)',cname=>'dp_rac',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -628,8 +702,9 @@ end;]';
     p(HTF.BR);       
     etim();
 --  =============================================================================================================================================
-    stim();
     --Display cursor (LAST ADVANCED)
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (LAST ADVANCED)');
+    stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (LAST ADVANCED)',cname=>'dp_last_adv',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     l_script:=q'[select * from table(dbms_xplan.display_cursor('&SQLID', null, 'LAST ADVANCED'))]'||chr(10);
@@ -647,8 +722,9 @@ end;]';
     p(HTF.BR);       
     etim();
 --  =============================================================================================================================================
-    stim();
     --Display cursor (ALL)
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (ALL)');
+    stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (ALL)',cname=>'dp_all',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     l_script:=q'[select * from table(dbms_xplan.display_cursor('&SQLID', null, 'ALL ALLSTATS +peeked_binds'))]'||chr(10);
@@ -668,8 +744,9 @@ end;]';
     p(HTF.BR);    
     etim();
 --  =============================================================================================================================================
-    stim();
     --Display cursor (ADAPTIVE)
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (ADAPTIVE)');
+    stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (ADAPTIVE)',cname=>'dp_adaptive',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     l_script:=q'[SELECT * FROM TABLE(DBMS_XPLAN.display_cursor('&SQLID', null, format => 'adaptive LAST ALLSTATS +peeked_binds'))]'||chr(10);
@@ -702,8 +779,9 @@ end;]';
     p(HTF.BR);     
     etim();
 --  =============================================================================================================================================
-    stim();
     --SQL Monitor report history
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL Monitor report history');
+    stim();
     l_script:=awrtools_api.getscript('PROC_SQLMON_HIST');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Monitor report history (12c+)',cname=>'sql_mon_hist',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -722,6 +800,7 @@ end;]';
     p('End of report.');
     etim(true);
 --  =============================================================================================================================================
+    save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id);
   exception 
     when others then 
       awrtools_logging.log(sqlerrm);
@@ -730,12 +809,13 @@ end;]';
       raise_application_error(-20000, sqlerrm);  
   end;
   
-  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_report out t_output_lines)
+  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number)
   is
     l_timing boolean := true;
     l_time number; l_tot_tim number:=0;
     l_cpu_tim number; l_tot_cpu_tim number:=0;
     l_script varchar2(32767);
+    l_report t_output_lines;
 
     l_output t_output_lines;
     l_plsql_output clob;
@@ -753,7 +833,7 @@ end;]';
     
     procedure p(p_line varchar2) is
     begin
-      p_report(l_indx):=p_line;
+      l_report(l_indx):=p_line;
       l_indx := l_indx + 1;
     end;
     procedure p1(p_output t_output_lines) is
@@ -762,31 +842,32 @@ end;]';
         p(p_output(i));
       end loop;
     end; 
-   procedure stim is
-   begin
-     if l_timing then
-       l_time:=DBMS_UTILITY.GET_TIME;
-       l_cpu_tim:=DBMS_UTILITY.GET_CPU_TIME;
-     end if;
-   end;
-   procedure etim(p_last boolean default false) is
-     l_delta_t number;
-     l_delta_c number;
-   begin
-     if l_timing then
-       l_delta_t:=DBMS_UTILITY.GET_TIME-l_time;
-       l_delta_c:=DBMS_UTILITY.GET_CPU_TIME-l_cpu_tim;
-       l_tot_tim:=l_tot_tim+l_delta_t;
-       l_tot_cpu_tim:=l_tot_cpu_tim+l_delta_c;
+    procedure stim is
+    begin
+      if l_timing then
+        l_time:=DBMS_UTILITY.GET_TIME;
+        l_cpu_tim:=DBMS_UTILITY.GET_CPU_TIME;
+      end if;
+    end;
+    procedure etim(p_last boolean default false) is
+      l_delta_t number;
+      l_delta_c number;
+    begin
+      if l_timing then
+        l_delta_t:=DBMS_UTILITY.GET_TIME-l_time;
+        l_delta_c:=DBMS_UTILITY.GET_CPU_TIME-l_cpu_tim;
+        l_tot_tim:=l_tot_tim+l_delta_t;
+        l_tot_cpu_tim:=l_tot_cpu_tim+l_delta_c;
        
-       if not p_last then
-         p(HTF.header (6,cheader=>'Elapsed (sec): '||to_char(round((l_delta_t)/100,2))||'; CPU (sec): '||to_char(round((l_delta_c)/100,2)),cattributes=>'class="awr"'));
-       else
-         p(HTF.header (6,cheader=>'Totals: Elapsed (sec): '||to_char(round((l_tot_tim)/100,2))||'; CPU (sec): '||to_char(round((l_tot_cpu_tim)/100,2)),cattributes=>'class="awr"'));
-       end if;
-     end if;
-   end;    
+        if not p_last then
+          p(HTF.header (6,cheader=>'Elapsed (sec): '||to_char(round((l_delta_t)/100,2))||'; CPU (sec): '||to_char(round((l_delta_c)/100,2)),cattributes=>'class="awr"'));
+        else
+          p(HTF.header (6,cheader=>'Totals: Elapsed (sec): '||to_char(round((l_tot_tim)/100,2))||'; CPU (sec): '||to_char(round((l_tot_cpu_tim)/100,2)),cattributes=>'class="awr"'));
+        end if;
+      end if;
+    end;    
   begin
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Preparation');
 
     execute immediate q'[select nvl(min(snap_id),1) , nvl(max(snap_id),1e6) from dba_hist_sqlstat@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[' and dbid in (select dbid from dba_hist_sqltext@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[')]'
       into l_start_snap, l_end_snap;
@@ -831,6 +912,7 @@ end;]';
     
 --  =============================================================================================================================================
     --SQL TEXT
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'SQL TEXT');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL text',cname=>'sql_text',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -848,6 +930,7 @@ end;]';
 
 --  =============================================================================================================================================
     --DB description
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'DB description');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'DB description',cname=>'db_desc',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -865,6 +948,7 @@ end;]';
    
 --  =============================================================================================================================================
     --SQL statistics
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'SQL statistics');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL statistics',cname=>'sql_stat',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -901,6 +985,7 @@ end;]';
    
 --  =============================================================================================================================================
     --Bind values
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Bind values');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Bind values',cname=>'binds',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -918,6 +1003,7 @@ end;]';
    
 --  =============================================================================================================================================
     --AWR SQL execution plans
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR SQL execution plans');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR SQL execution plans',cname=>'awrplans',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -950,6 +1036,7 @@ end;]';
 
 --  =============================================================================================================================================
     --Comparsion
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Comparsion');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR SQL plans comparison',cname=>'awrplanscomp',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);   
     p('Not implemented for remote database.');
@@ -998,6 +1085,7 @@ end;]';
     
 --  =============================================================================================================================================
     --Explain plan
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Explain plan');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Explain plan',cname=>'epplan',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1068,6 +1156,7 @@ end;]';
     
 --  =============================================================================================================================================
     --ASH PL/SQL
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'ASH PL/SQL');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'ASH PL/SQL',cname=>'ash_plsql',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1094,6 +1183,7 @@ end;]';
    
 --  =============================================================================================================================================
     --ASH summary
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'ASH summary');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'ASH summary',cname=>'ash_summ',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1126,6 +1216,7 @@ end;]';
     
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P1
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P1',cname=>'ash_p1',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1144,7 +1235,7 @@ end;]';
                                  p_style2 =>'awrcbbt',
                                  p_search => 'PLAN_HASH', 
                                  p_replacement => HTF.ANCHOR (curl=>'#awrplan_\1',ctext=>'\1',cattributes=>'class="awr"'),
-                                 p_header=>25,
+                                 p_header=>50,
                                  p_break_col=>'SQL_EXEC_START',
                                  p_dblink => p_dblink, p_output=> l_output);
       p1(l_output);  
@@ -1159,6 +1250,7 @@ end;]';
     
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P1.1
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1.1');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P1.1',cname=>'ash_p1.1',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1191,6 +1283,7 @@ end;]';
  
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P2
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P2');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P2',cname=>'ash_p2',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1208,7 +1301,7 @@ end;]';
                                  p_style2 =>'awrcbbt',
                                  p_search => 'PLAN_HASH', 
                                  p_replacement => HTF.ANCHOR (curl=>'#awrplan_\1',ctext=>'\1',cattributes=>'class="awr"'),
-                                 p_header=>25,
+                                 p_header=>50,
                                  p_break_col=>'SQL_EXEC_START',
                                  p_dblink => p_dblink, p_output=> l_output);
       p1(l_output);  
@@ -1223,6 +1316,7 @@ end;]';
     
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P3
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P3');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P3',cname=>'ash_p3',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1255,6 +1349,7 @@ end;]';
     
 --  =============================================================================================================================================
     --SQL Monitor report history
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'SQL Monitor report history');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Monitor report history (12c+)',cname=>'sql_mon_hist',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1276,6 +1371,9 @@ end;]';
     etim(true);
     p(HTF.BR);
     p(HTF.BR);
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Finished');
+--  =============================================================================================================================================    
+    save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id);
   exception 
     when others then 
       awrtools_logging.log(sqlerrm);
@@ -1283,5 +1381,25 @@ end;]';
       awrtools_logging.log(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
       raise_application_error(-20000, sqlerrm);     
   end;
+  
+  procedure getreport(p_id in number, p_report out t_output_lines)
+  is
+    l_iter number := 1;
+    l_text clob;
+    l_eof  number;
+  begin
+    select reportc into l_text from AWRTOOLS_ONLINE_RPT where id=p_id;
+    if nvl(dbms_lob.getlength(l_text),0)>0 then
+      loop
+        l_eof:=instr(l_text,chr(10));
+        p_report(l_iter):=substr(l_text,1,l_eof);
+        l_text:=substr(l_text,l_eof+1);  l_iter:=l_iter+1;
+        exit when l_iter>10000 or dbms_lob.getlength(l_text)=0;
+      end loop;
+    else
+      p_report(1):='Empty report';
+    end if;
+  end;
+    
 END AWRTOOLS_REMOTE_ANALYTICS;
 /

@@ -126,10 +126,24 @@ sec          number);
 create index idx_remote_ash_timeline_1 on remote_ash_timeline(sess_id);
 create index idx_remote_ash_1 on remote_ash(sess_id);
 
+--Logging
 create table AWRTOOLS_LOG (
 ts timestamp default systimestamp,
 msg clob)
 ;
+create index idx_log_ts on AWRTOOLS_LOG(ts);
+
+--Online reports
+create table AWRTOOLS_ONLINE_RPT (
+    id number primary key,
+    ts timestamp default systimestamp,
+    file_mimetype  varchar2(30) default 'text/html',
+    file_name      varchar2(100),
+    report blob,
+	reportc clob)
+;
+create index idx_rpt_ts on AWRTOOLS_ONLINE_RPT(ts);
+create sequence sq_online_rpt;
 
 
 --Create source code objects
@@ -187,9 +201,13 @@ insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHANALYTICS','ASH analytics report (standard)','ash_analyt_',110);
 
 begin
-  dbms_scheduler.create_job(job_name => 'AWRTOOL_CLEANUP_ASHSESS',
-                            job_type => 'STORED_PROCEDURE',
-                            job_action => 'AWRTOOLS_REMOTE_ANALYTICS.AWRTOOL_CLEANUP_ASHSESS',
+  dbms_scheduler.drop_job(job_name => 'AWRTOOL_CLEANUP');
+end;
+/
+begin
+  dbms_scheduler.create_job(job_name => 'AWRTOOL_CLEANUP',
+                            job_type => 'PLSQL_BLOCK',
+                            job_action => 'begin AWRTOOLS_REMOTE_ANALYTICS.AWRTOOL_CLEANUP_ASHSESS; AWRTOOLS_LOGGING.cleanup; AWRTOOLS_REMOTE_ANALYTICS.AWRTOOL_CLEANUP_RPT; end;',
                             start_date => trunc(systimestamp,'hh'),
                             repeat_interval => 'FREQ=MINUTELY; INTERVAL=15',
                             enabled => true);
@@ -302,45 +320,51 @@ declare
 begin
   l_script :=
 q'{
-@@__sqlstat.sql
+@@../scripts/__sqlstat.sql
 }';
-  delete from awrcomp_scripts where script_id='PROC_';
+  delete from awrcomp_scripts where script_id='PROC_AWRSQLSTAT';
   insert into awrcomp_scripts (script_id,script_content) values ('PROC_AWRSQLSTAT',l_script);
   
   l_script := 
 q'[
-@@__ash_summ
+@@../scripts/__ash_summ
 ]';
-  delete from awrcomp_scripts where script_id='PROC_';
+  delete from awrcomp_scripts where script_id='PROC_AWRASHSUMM';
   insert into awrcomp_scripts (script_id,script_content) values ('PROC_AWRASHSUMM',l_script);
 
   l_script := 
 q'[
-@@__ash_p1
+@@../scripts/__ash_p1
 ]';
-  delete from awrcomp_scripts where script_id='PROC_';
+  delete from awrcomp_scripts where script_id='PROC_AWRASHP1';
   insert into awrcomp_scripts (script_id,script_content) values ('PROC_AWRASHP1',l_script);
 
   l_script := 
 q'[
-@@__ash_p1_1
+@@../scripts/__ash_p1_1
 ]';
-  delete from awrcomp_scripts where script_id='PROC_';
+  delete from awrcomp_scripts where script_id='PROC_AWRASHP1_1';
   insert into awrcomp_scripts (script_id,script_content) values ('PROC_AWRASHP1_1',l_script);
 
   l_script := 
 q'[
-@@__ash_p2
+@@../scripts/__ash_p2
 ]';
-  delete from awrcomp_scripts where script_id='PROC_';
+  delete from awrcomp_scripts where script_id='PROC_AWRASHP2';
   insert into awrcomp_scripts (script_id,script_content) values ('PROC_AWRASHP2',l_script);
 
   l_script := 
 q'[
-@@__ash_p3
+@@../scripts/__ash_p3
 ]';
-  delete from awrcomp_scripts where script_id='PROC_';
+  delete from awrcomp_scripts where script_id='PROC_AWRASHP3';
   insert into awrcomp_scripts (script_id,script_content) values ('PROC_AWRASHP3',l_script);
+  l_script := 
+q'[
+@@../scripts/awr.css
+]';
+  delete from awrcomp_scripts where script_id='PROC_AWRCSS';
+  insert into awrcomp_scripts (script_id,script_content) values ('PROC_AWRCSS',l_script);  
 end;
 /
 

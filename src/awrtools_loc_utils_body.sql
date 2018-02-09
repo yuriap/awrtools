@@ -215,5 +215,144 @@ create or replace package body awrtools_loc_utils as
 
       p(HTF.TABLECLOSE);
     end;    
+    
+    function get_search_query_local(p_startsearch varchar2, p_search_type varchar2, p_search_condition varchar2) return varchar2
+    is
+      l_sql varchar2(32767):=q'[select dbid,sql_id,sql_text,proj_id,proj_name, min(dump_id)dump_id 
+from (
+SELECT 
+    t.dbid,
+    t.sql_id,
+    cast(substr(t.sql_text,1,4000) as varchar2(4000)) sql_text,
+    p.proj_id,
+    p.proj_name,
+    d.dump_id
+FROM
+    dba_hist_sqltext t,
+    dba_hist_sqlstat s,
+    awrdumps d,
+    awrtoolproject p
+  where 1=2 ) group by dbid,sql_id,sql_text,proj_id,proj_name]'; --default query
+    begin
+      if p_startsearch='YES' then
+        case 
+          when p_search_type='SQLTEXT' then
+            l_sql := q'[select dbid,sql_id,sql_text,proj_id,proj_name, min(dump_id)dump_id 
+from (
+SELECT 
+    t.dbid,
+    t.sql_id,
+    cast(substr(t.sql_text,1,4000) as varchar2(4000)) sql_text,
+    p.proj_id,
+    p.proj_name,
+    d.dump_id
+FROM
+    (select * from dba_hist_sqltext
+     where ]'|| case when p_search_condition is null then '1=2' else p_search_condition end ||
+     q'[) t,
+    dba_hist_sqlstat s,
+    awrdumps d,
+    awrtoolproject p
+WHERE
+    t.dbid = s.dbid (+)
+    AND   t.sql_id = s.sql_id (+)
+    AND   s.snap_id BETWEEN d.min_snap_id (+) AND d.max_snap_id (+)
+    AND   s.dbid= d.dbid(+)
+    AND   d.is_remote(+)='NO'
+    AND   d.proj_id = p.proj_id (+) 
+    AND   d.STATUS(+) in ('AWRLOADED','COMPRESSED')
+) group by dbid,sql_id,sql_text,proj_id,proj_name]';
+
+          when p_search_type='SQLSTAT' then
+            l_sql := q'[select dbid,sql_id,sql_text,proj_id,proj_name, min(dump_id)dump_id 
+from (
+SELECT 
+    t.dbid,
+    t.sql_id,
+    cast(substr(t.sql_text,1,4000) as varchar2(4000)) sql_text,
+    p.proj_id,
+    p.proj_name,
+    d.dump_id
+FROM
+    dba_hist_sqltext t,
+    (select * from dba_hist_sqlstat where ]' || case when p_search_condition is null then '1=2' else p_search_condition end ||
+    q'[)s,
+    awrdumps d,
+    awrtoolproject p
+WHERE
+    t.dbid = s.dbid
+    AND   t.sql_id = s.sql_id
+    AND   s.snap_id BETWEEN d.min_snap_id AND d.max_snap_id
+    AND   s.dbid= d.dbid
+    AND   d.is_remote='NO'
+    AND   d.proj_id = p.proj_id
+    AND   d.STATUS in ('AWRLOADED','COMPRESSED') 
+) group by dbid,sql_id,sql_text,proj_id,proj_name]';  
+
+          when p_search_type='ASH' then    
+            l_sql := q'[select dbid,sql_id,sql_text,proj_id,proj_name, min(dump_id)dump_id 
+from (
+SELECT 
+    t.dbid,
+    t.sql_id,
+    cast(substr(t.sql_text,1,4000) as varchar2(4000)) sql_text,
+    p.proj_id,
+    p.proj_name,
+    d.dump_id
+FROM
+    dba_hist_sqltext t,
+    (select * from dba_hist_active_sess_history where ]' || case when p_search_condition is null then '1=2' else p_search_condition end ||
+    q'[)s,
+    awrdumps d,
+    awrtoolproject p
+WHERE
+    t.dbid = s.dbid
+    AND   t.sql_id = s.sql_id
+    AND   s.snap_id BETWEEN d.min_snap_id AND d.max_snap_id
+    AND   s.dbid= d.dbid
+    AND   d.is_remote='NO'
+    AND   d.proj_id = p.proj_id
+    AND   d.STATUS in ('AWRLOADED','COMPRESSED') 
+) group by dbid,sql_id,sql_text,proj_id,proj_name]';  
+        else
+          null;
+        end case;
+      end if;
+      return l_sql;
+    end;    
+    function get_search_query_remote(p_startsearch varchar2, p_search_type varchar2, p_search_condition varchar2, p_sourcedb varchar2, p_sourcetab varchar2) return varchar2
+    is
+      l_sql varchar2(32767):=q'[SELECT unique
+    sql_id,
+    cast(substr(sql_text,1,4000) as varchar2(4000)) sql_text
+FROM
+    <SOURCE_TABLE>]'; --default query
+    begin
+      if p_startsearch='YES' then
+        if p_sourcetab = 'AWR' then
+          case 
+            when p_search_type='SQLTEXT' then 
+              l_sql:=replace(l_sql,'<SOURCE_TABLE>','(select sql_id, sql_text from dba_hist_sqltext@'||p_sourcedb||'  where '||nvl(p_search_condition,'1=2')||')');
+            when p_search_type='SQLSTAT' then
+              l_sql:=replace(l_sql,'<SOURCE_TABLE>',q'[(select s.sql_id, nvl(t.sql_text,'<UNAVAILABLE>') sql_text from dba_hist_sqltext@]'||p_sourcedb||' t, (select * from dba_hist_sqlstat@'||p_sourcedb||'  where '||nvl(p_search_condition,'1=2')||') s where t.dbid(+)=s.dbid and t.sql_id(+)=s.sql_id)');
+            when p_search_type='ASH' then
+              l_sql:=replace(l_sql,'<SOURCE_TABLE>',q'[(select s.sql_id, nvl(t.sql_text,'<UNAVAILABLE>') sql_text from dba_hist_sqltext@]'||p_sourcedb||' t, (select * from dba_hist_active_sess_history@'||p_sourcedb||'  where '||nvl(p_search_condition,'1=2')||') s where t.dbid(+)=s.dbid and t.sql_id(+)=s.sql_id)');            
+          else
+            null;
+          end case;
+        elsif p_sourcetab = 'V$VIEW' then
+          case 
+            when p_search_type='SQLTEXT' or p_search_type='SQLSTAT' then 
+              l_sql:=replace(l_sql,'<SOURCE_TABLE>','(select sql_id, sql_text from gv$sql@'||p_sourcedb||'  where '||nvl(p_search_condition,'1=2')||')');
+            when p_search_type='ASH' then
+              l_sql:=replace(l_sql,'<SOURCE_TABLE>',q'[(select s.sql_id, nvl(t.sql_text,'<UNAVAILABLE>') sql_text from gv$sql@]'||p_sourcedb||' t, (select * from gv$active_session_history@'||p_sourcedb||'  where '||nvl(p_search_condition,'1=2')||') s where t.sql_id(+)=s.sql_id)');            
+          else
+            null;
+          end case;
+        end if;
+      end if;
+      return replace(l_sql,'<SOURCE_TABLE>','dba_hist_sqltext where 1=2 ');
+    end;
+
 end;
 /

@@ -1,4 +1,4 @@
-Web AWR Tools. Ver 3.1
+Web AWR Tools. Ver 3.2
 
 AWR dump warehouse with web-based UI.
 
@@ -87,3 +87,7 @@ Version 3.0.1
 
 Version 3.1.0
 1) SQL run time statistics from memory report added
+
+Version 3.2.0
+1) SQL run time statistics from AWR report added
+2) SQL run time statistics reports integrated into SQL query search and Online Analytic Tool
