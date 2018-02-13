@@ -147,7 +147,7 @@ create sequence sq_online_rpt;
 
 
 --Create source code objects
-
+set define off
 @../src/awrtools_contr_spec 
 show errors
 @../src/awrtools_contr_body
@@ -155,9 +155,8 @@ show errors
 
 @../src/awrtools_loc_utils_spec
 show errors
-set define off
+
 @../src/awrtools_loc_utils_body
-set define on
 show errors
 
 @../src/awrtools_api_spec
@@ -167,13 +166,14 @@ show errors
 
 @../src/awrtools_reports_spec
 show errors
-set define off
 @../src/awrtools_reports_body
-set define on
 show errors
 
 @../src/awrtools_logging
+show errors
 @../src/AWRTOOLS_REMOTE_ANALYTICS
+show errors
+set define on
 
 --Load data
 insert into awrconfig values ('WORKDIR',upper('&dirname.'),'Oracle directory for loading AWR dumps');
@@ -199,6 +199,8 @@ insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHRPT','ASH report (standard)','awr_ash_',90);
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHGLOBALRPT','ASH global report (standard)','awr_ash_glob_',100);
 insert into awrcomp_d_report_types(dic_value,dic_display_value,dic_filename_pref, dic_ordr) values('ASHANALYTICS','ASH analytics report (standard)','ash_analyt_',110);
+
+prompt ORA-27475: unknown job can be ignored
 
 begin
   dbms_scheduler.drop_job(job_name => 'AWRTOOL_CLEANUP');
@@ -235,7 +237,7 @@ q'^
 ^';
 begin
   delete from awrcomp_scripts where script_id='GETCOMPREPORT';
-  insert into awrcomp_scripts (script_id,script_content) values 'GETCOMPREPORT',l_script||l_script1);
+  insert into awrcomp_scripts (script_id,script_content) values ('GETCOMPREPORT',l_script||l_script1);
   dbms_output.put_line('#1: '||dbms_lob.getlength(l_script)||' bytes; #2: '||dbms_lob.getlength(l_script1)||' bytes;');
 end;
 /

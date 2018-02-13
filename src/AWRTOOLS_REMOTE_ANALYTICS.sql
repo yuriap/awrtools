@@ -150,7 +150,7 @@ q'[INSERT INTO REMOTE_ASH
     l_sql2exec      varchar2(32767);
     l_sql clob:=  
 q'[declare
-l_out clob;
+l_out clob; l_len number;
 l_chunk varchar2(32767);
 l_status integer;  
 l_pos number;
@@ -168,7 +168,7 @@ q'[loop
   l_out:=l_out||l_chunk||chr(10);
 end loop;
 if l_out is null then l_out:='No data found.';end if;
-l_pos:=1;
+l_pos:=1;l_len:=length(l_out);
 loop
   l_chunk:=substr(l_out,l_pos,l_chunk_length);
   l_pos:=l_pos+l_chunk_length;
@@ -176,7 +176,7 @@ loop
   l_rc:=UTL_COMPRESS.LZ_COMPRESS(l_r);
   dbms_output.put(l_rc);
   DBMS_OUTPUT.NEW_LINE;
-  exit when length(l_out)<l_pos;         
+  exit when l_len<l_pos;         
 end loop;
 end;]'
 else q'[end;]' end;    
@@ -205,20 +205,28 @@ else q'[end;]' end;
       awrtools_logging.log(l_sql2exec);
       raise_application_error(-20000, sqlerrm||chr(10)||l_sql2exec); 
   end;
+  
   procedure execute_plsql_remotelly(p_sql varchar2, p_dblink varchar2, p_output out t_output_lines)
   is 
     l_output        clob;
     l_line varchar2(32767);  
-    l_eof number;  
+    l_eof  number;  
     l_iter number := 1;
+    l_off  number:=1;
+    l_len  number;
   begin
     execute_plsql_remotelly(p_sql, p_dblink, l_output);
+    l_len:=dbms_lob.getlength(l_output);
     loop
-      l_eof:=instr(l_output,chr(10));
-      p_output(l_iter):=substr(l_output,1,l_eof);
-      l_output:=substr(l_output,l_eof+1);  
+      l_eof:=instr(l_output,chr(10),l_off); 
+      if l_eof=0 then 
+        p_output(l_iter):=rtrim(rtrim(substr(l_output,l_off),chr(13)),chr(10));
+      else
+        p_output(l_iter):=rtrim(rtrim(substr(l_output,l_off,l_eof-l_off+1),chr(13)),chr(10));
+      end if;
+      l_off:=1+l_eof;
       l_iter:=l_iter+1;
-      exit when l_iter>10000 or dbms_lob.getlength(l_output)=0;
+      exit when l_eof=0;
     end loop;  
   end;
   
@@ -1387,14 +1395,18 @@ end;]';
     l_iter number := 1;
     l_text clob;
     l_eof  number;
+    l_chunk varchar2(32767);
+    l_off  number:=1;
+    l_chunk_size number := 32767;
   begin
     select reportc into l_text from AWRTOOLS_ONLINE_RPT where id=p_id;
     if nvl(dbms_lob.getlength(l_text),0)>0 then
       loop
-        l_eof:=instr(l_text,chr(10));
-        p_report(l_iter):=substr(l_text,1,l_eof);
-        l_text:=substr(l_text,l_eof+1);  l_iter:=l_iter+1;
-        exit when l_iter>10000 or dbms_lob.getlength(l_text)=0;
+        --l_eof:=instr(l_text,chr(10));
+        p_report(l_iter):=substr(l_text,l_off,l_chunk_size);
+        exit when length(p_report(l_iter))<l_chunk_size;
+        l_iter:=l_iter+1;
+        l_off:=l_off+l_chunk_size;
       end loop;
     else
       p_report(1):='Empty report';

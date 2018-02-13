@@ -10,3 +10,4 @@ create or replace package awrtools_loc_utils as
   function get_search_query_local(p_startsearch varchar2, p_search_type varchar2, p_search_condition varchar2) return varchar2;
   function get_search_query_remote(p_startsearch varchar2, p_search_type varchar2, p_search_condition varchar2, p_sourcedb varchar2, p_sourcetab varchar2) return varchar2;
 end;
+/

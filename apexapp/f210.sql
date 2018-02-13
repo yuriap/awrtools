@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   11:38 Friday February 9, 2018
+--   Date and Time:   15:26 Tuesday February 13, 2018
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -120,7 +120,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180209113231'
+,p_last_upd_yyyymmddhh24miss=>'20180209171433'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -12349,7 +12349,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180208130317'
+,p_last_upd_yyyymmddhh24miss=>'20180209171051'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(51799844575989304)
@@ -12511,7 +12511,7 @@ wwv_flow_api.create_page_button(
 ,p_button_image_alt=>'SQL run time statistics'
 ,p_button_position=>'BELOW_BOX'
 ,p_button_alignment=>'LEFT'
-,p_button_redirect_url=>'f?p=&APP_ID.:64:&SESSION.::&DEBUG.:RP:P64_SQL_ID,P64_SOURCEDB,P64_SOURCETAB:&P18_SQL_ID.,&P18_SOURCEDB.,&P18_SOURCETAB.'
+,p_button_redirect_url=>'f?p=&APP_ID.:64:&SESSION.::&DEBUG.:RP:P64_SQL_ID,P64_SOURCEDB,P64_SOURCETAB,P64_RPT_ID:&P18_SQL_ID.,&P18_SOURCEDB.,&P18_SOURCETAB.,'
 ,p_button_condition=>':P18_SOURCEDB!=''$LOCAL$'''
 ,p_button_condition_type=>'PLSQL_EXPRESSION'
 );
@@ -14665,7 +14665,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180209113231'
+,p_last_upd_yyyymmddhh24miss=>'20180209171433'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(56149922582396427)
@@ -14760,10 +14760,10 @@ wwv_flow_api.create_page_button(
 ,p_button_plug_id=>wwv_flow_api.id(56150025581396428)
 ,p_button_name=>'Submit'
 ,p_button_action=>'SUBMIT'
-,p_button_template_options=>'#DEFAULT#'
-,p_button_template_id=>wwv_flow_api.id(101255311357147531)
+,p_button_template_options=>'#DEFAULT#:t-Button--iconRight'
+,p_button_template_id=>wwv_flow_api.id(101255557052147533)
 ,p_button_is_hot=>'Y'
-,p_button_image_alt=>'Submit'
+,p_button_image_alt=>'Create report'
 ,p_button_position=>'BODY'
 ,p_icon_css_classes=>'fa-database-arrow-down'
 ,p_grid_new_row=>'N'
