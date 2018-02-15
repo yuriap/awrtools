@@ -27,7 +27,7 @@ prompt APPLICATION 210 - AWR Tools
 -- Application Export:
 --   Application:     210
 --   Name:            AWR Tools
---   Date and Time:   15:26 Tuesday February 13, 2018
+--   Date and Time:   11:41 Thursday February 15, 2018
 --   Exported By:     AWRTOOLS21ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -41,7 +41,7 @@ prompt APPLICATION 210 - AWR Tools
 --     Computations:             4
 --     Validations:              5
 --     Processes:               28
---     Regions:                 51
+--     Regions:                 52
 --     Buttons:                 23
 --   Shared Components:
 --     Logic:
@@ -120,7 +120,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180209171433'
+,p_last_upd_yyyymmddhh24miss=>'20180215103722'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -14665,7 +14665,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180209171433'
+,p_last_upd_yyyymmddhh24miss=>'20180215103722'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(56149922582396427)
@@ -14673,7 +14673,7 @@ wwv_flow_api.create_page_plug(
 ,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
 ,p_component_template_options=>'#DEFAULT#'
 ,p_plug_template=>wwv_flow_api.id(101232642288147479)
-,p_plug_display_sequence=>10
+,p_plug_display_sequence=>100
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
@@ -14751,6 +14751,90 @@ wwv_flow_api.create_report_columns(
 ,p_use_as_row_header=>'N'
 ,p_column_format=>'DOWNLOAD:AWRTOOLS_ONLINE_RPT:REPORT:ID::FILE_MIMETYPE:FILE_NAME:::attachment::'
 ,p_disable_sort_column=>'N'
+,p_derived_column=>'N'
+,p_include_in_export=>'Y'
+);
+wwv_flow_api.create_report_region(
+ p_id=>wwv_flow_api.id(57271842224656344)
+,p_name=>'Recursive queries'
+,p_template=>wwv_flow_api.id(101232642288147479)
+,p_display_sequence=>20
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_component_template_options=>'#DEFAULT#:t-Report--altRowsDefault:t-Report--rowHighlight'
+,p_display_point=>'BODY'
+,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT',
+'    id,',
+'    file_mimetype,',
+'    file_name,',
+'    report,',
+'    sys.dbms_lob.getlength(report) download',
+'FROM',
+'    awrtools_online_rpt',
+'    where parent_id = :P64_RPT_ID',
+'    order by ts'))
+,p_source_type=>'NATIVE_SQL_REPORT'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'  l_cnt number;',
+'begin',
+'  select count(1) into l_cnt from awrtools_online_rpt where parent_id = :P64_RPT_ID;',
+'  return nvl(l_cnt,0)>0;',
+'end;'))
+,p_display_condition_type=>'FUNCTION_BODY'
+,p_ajax_enabled=>'Y'
+,p_query_row_template=>wwv_flow_api.id(101242666033147507)
+,p_query_headings_type=>'NO_HEADINGS'
+,p_query_num_rows=>100
+,p_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_query_show_nulls_as=>'-'
+,p_csv_output=>'N'
+,p_prn_output=>'N'
+,p_sort_null=>'L'
+,p_plug_query_strip_html=>'N'
+);
+wwv_flow_api.create_report_columns(
+ p_id=>wwv_flow_api.id(57271910806656345)
+,p_query_column_id=>1
+,p_column_alias=>'ID'
+,p_column_display_sequence=>1
+,p_hidden_column=>'Y'
+,p_derived_column=>'N'
+);
+wwv_flow_api.create_report_columns(
+ p_id=>wwv_flow_api.id(57272077871656346)
+,p_query_column_id=>2
+,p_column_alias=>'FILE_MIMETYPE'
+,p_column_display_sequence=>2
+,p_hidden_column=>'Y'
+,p_derived_column=>'N'
+);
+wwv_flow_api.create_report_columns(
+ p_id=>wwv_flow_api.id(57272139162656347)
+,p_query_column_id=>3
+,p_column_alias=>'FILE_NAME'
+,p_column_display_sequence=>3
+,p_use_as_row_header=>'N'
+,p_derived_column=>'N'
+,p_include_in_export=>'Y'
+);
+wwv_flow_api.create_report_columns(
+ p_id=>wwv_flow_api.id(57272240041656348)
+,p_query_column_id=>4
+,p_column_alias=>'REPORT'
+,p_column_display_sequence=>4
+,p_hidden_column=>'Y'
+,p_derived_column=>'N'
+);
+wwv_flow_api.create_report_columns(
+ p_id=>wwv_flow_api.id(57272392242656349)
+,p_query_column_id=>5
+,p_column_alias=>'DOWNLOAD'
+,p_column_display_sequence=>5
+,p_column_heading=>'Download'
+,p_use_as_row_header=>'N'
+,p_column_format=>'DOWNLOAD:AWRTOOLS_ONLINE_RPT:REPORT:ID::FILE_MIMETYPE:FILE_NAME:::attachment::'
 ,p_derived_column=>'N'
 ,p_include_in_export=>'Y'
 );

@@ -136,6 +136,7 @@ create index idx_log_ts on AWRTOOLS_LOG(ts);
 --Online reports
 create table AWRTOOLS_ONLINE_RPT (
     id number primary key,
+	parent_id number references AWRTOOLS_ONLINE_RPT on delete cascade,
     ts timestamp default systimestamp,
     file_mimetype  varchar2(30) default 'text/html',
     file_name      varchar2(100),
@@ -143,6 +144,7 @@ create table AWRTOOLS_ONLINE_RPT (
 	reportc clob)
 ;
 create index idx_rpt_ts on AWRTOOLS_ONLINE_RPT(ts);
+create index idx_rpt_prnt on AWRTOOLS_ONLINE_RPT(parent_id);
 create sequence sq_online_rpt;
 
 

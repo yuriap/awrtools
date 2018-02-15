@@ -213,10 +213,8 @@ else q'[end;]' end;
     l_eof  number;  
     l_iter number := 1;
     l_off  number:=1;
-    l_len  number;
   begin
     execute_plsql_remotelly(p_sql, p_dblink, l_output);
-    l_len:=dbms_lob.getlength(l_output);
     loop
       l_eof:=instr(l_output,chr(10),l_off); 
       if l_eof=0 then 
@@ -399,7 +397,7 @@ end;]';
     if not p_plsql then p_script:=replace(p_script,';'); end if;
   end;
 
-  procedure save_report_for_download(p_filename varchar2, p_report t_output_lines, p_id in number)
+  procedure save_report_for_download(p_filename varchar2, p_report t_output_lines, p_id in number, p_parent_id number default null)
   is
     PRAGMA AUTONOMOUS_TRANSACTION;
     l_rpt clob;
@@ -425,8 +423,8 @@ end;]';
       l_rpt:=l_rpt||p_report(i)||chr(10);
     end loop;
     
-    INSERT INTO awrtools_online_rpt (id,ts,file_mimetype,file_name,report, reportc) 
-         VALUES (p_id,default,default,p_filename,empty_blob(),l_rpt) return report into l_brpt;
+    INSERT INTO awrtools_online_rpt (id,ts,file_mimetype,file_name,report, reportc, parent_id) 
+         VALUES (p_id,default,default,p_filename,empty_blob(),l_rpt, p_parent_id) return report into l_brpt;
          
     l_rpt:=l_pref||chr(10)||l_rpt;
     l_rpt:=l_rpt||(HTF.BODYCLOSE)||chr(10);
@@ -444,7 +442,7 @@ end;]';
     commit;
   end;
   
-  procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  procedure getplanh_i(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_parent_id number default null)
   is
     l_timing boolean := true;
     l_time number; l_tot_tim number:=0;
@@ -808,7 +806,7 @@ end;]';
     p('End of report.');
     etim(true);
 --  =============================================================================================================================================
-    save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id);
+    save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id, p_parent_id);
   exception 
     when others then 
       awrtools_logging.log(sqlerrm);
@@ -817,7 +815,7 @@ end;]';
       raise_application_error(-20000, sqlerrm);  
   end;
   
-  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  procedure getplanawrh_i(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_parent_id number default null)
   is
     l_timing boolean := true;
     l_time number; l_tot_tim number:=0;
@@ -1381,7 +1379,7 @@ end;]';
     p(HTF.BR);
     DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Finished');
 --  =============================================================================================================================================    
-    save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id);
+    save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id, p_parent_id);
   exception 
     when others then 
       awrtools_logging.log(sqlerrm);
@@ -1402,16 +1400,54 @@ end;]';
     select reportc into l_text from AWRTOOLS_ONLINE_RPT where id=p_id;
     if nvl(dbms_lob.getlength(l_text),0)>0 then
       loop
-        --l_eof:=instr(l_text,chr(10));
-        p_report(l_iter):=substr(l_text,l_off,l_chunk_size);
-        exit when length(p_report(l_iter))<l_chunk_size;
+        l_eof:=instr(l_text,chr(10),l_off); 
+        if l_eof=0 then 
+          p_report(l_iter):=rtrim(rtrim(substr(l_text,l_off),chr(13)),chr(10));
+        else
+          p_report(l_iter):=rtrim(rtrim(substr(l_text,l_off,l_eof-l_off+1),chr(13)),chr(10));
+        end if;
+        l_off:=1+l_eof;
         l_iter:=l_iter+1;
-        l_off:=l_off+l_chunk_size;
-      end loop;
+        exit when l_eof=0;
+      end loop;       
     else
       p_report(1):='Empty report';
     end if;
   end;
     
+  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  is
+    l_crsr sys_refcursor;
+    l_sql_id varchar2(100);
+    l_id number;
+  begin
+    getplanawrh_i(p_sql_id,p_dblink,p_id);
+    open l_crsr for 'select sql_id from dba_hist_active_sess_history@'||p_dblink||q'[ where sql_id is not null and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>6]';
+    loop
+      fetch l_crsr into l_sql_id;
+      exit when l_crsr%notfound;
+      select sq_online_rpt.nextval into l_id from dual;
+      getplanawrh_i(l_sql_id,p_dblink,l_id, p_id);
+    end loop;
+    close l_crsr;
+  end;
+
+  procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  is
+    l_crsr sys_refcursor;
+    l_sql_id varchar2(100);
+    l_id number;  
+  begin
+    getplanh_i(p_sql_id,p_dblink,p_id);
+    open l_crsr for 'select sql_id from gv$active_session_history@'||p_dblink||q'[ where sql_id is not null and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>60]';
+    loop
+      fetch l_crsr into l_sql_id;
+      exit when l_crsr%notfound;
+      select sq_online_rpt.nextval into l_id from dual;
+      getplanh_i(l_sql_id,p_dblink,l_id, p_id);
+    end loop;
+    close l_crsr;    
+  end;
+  
 END AWRTOOLS_REMOTE_ANALYTICS;
 /
