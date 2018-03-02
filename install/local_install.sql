@@ -284,6 +284,13 @@ q'^
   
   l_script := 
 q'^
+@../scripts/__offload_percent2.sql
+^';
+  delete from awrcomp_scripts where script_id='PROC_OFFLOAD_PCT2';
+  insert into awrcomp_scripts (script_id,script_content) values ('PROC_OFFLOAD_PCT2',l_script);
+  
+  l_script := 
+q'^
 @../scripts/__sqlmon1.sql
 ^';
   delete from awrcomp_scripts where script_id='PROC_SQLMON';

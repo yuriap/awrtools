@@ -7,6 +7,7 @@ The main aims are:
 2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are two custom reports "SQL queries compare report (HTML)" and "AWR SQL Report (HTML)" and all standard AWR reports.
 3) to share scripts with command-line AWR Tools. Exact the same main scripts are used for both tools.
 4) to be able to analyze AWR dumps which contain overlapping snapshot ranges (relevant to a situation when FLASHBACK DATABASE is in use for testing different scenarios).
+5) Online analytics allows visualize and analyze a target database online. No object is created on the target database. SELECT_CATALOG_ROLE is enough.
 
 Setup
 
