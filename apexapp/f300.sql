@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   16:44 Friday March 2, 2018
+--   Date and Time:   15:53 Monday March 5, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -121,7 +121,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180228144514'
+,p_last_upd_yyyymmddhh24miss=>'20180305150720'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -12514,8 +12514,8 @@ wwv_flow_api.create_page(
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180208121511'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180305125326'
 );
 wwv_flow_api.create_report_region(
  p_id=>wwv_flow_api.id(53499105645175971)
@@ -12568,7 +12568,7 @@ wwv_flow_api.create_report_columns(
 ,p_column_alias=>'SQL_ID'
 ,p_column_display_sequence=>2
 ,p_column_heading=>'Sql id'
-,p_column_link=>'f?p=&APP_ID.:18:&SESSION.::&DEBUG.:RP,18:P18_SQL_ID,P18_SOURCEDB,P18_SOURCETAB,P18_SOURCE_PAGE,P18_ACTION,P17_DUMP_ID:#SQL_ID#,&P17_SOURCEDB.,&P17_SOURCETAB.,17,SHOW_SQL_TEXT_BY_ID,#DUMP_ID#'
+,p_column_link=>'f?p=&APP_ID.:18:&SESSION.::&DEBUG.:RP,18:P18_SQL_ID,P18_SOURCEDB,P18_SOURCE_PAGE,P18_ACTION,P18_DUMP_ID,P18_DBID,P18_PROJ_ID,CURRENT_PROJECT,P18_SOURCETAB:#SQL_ID#,&P17_SOURCEDB.,17,SHOW_SQL_TEXT_BY_ID,#DUMP_ID#,#DBID#,#PROJ_ID#,#PROJ_NAME#,AWR'
 ,p_column_linktext=>'#SQL_ID#'
 ,p_disable_sort_column=>'N'
 ,p_derived_column=>'N'
@@ -12957,8 +12957,8 @@ wwv_flow_api.create_page(
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180209171051'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180305150720'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(53700136665471359)
@@ -13027,7 +13027,11 @@ wwv_flow_api.create_page_plug(
 '  end;   ',
 'begin',
 '  l_sourcedb:=case when :P18_SOURCE_PAGE=17 then :P17_SOURCEDB when :P18_SOURCE_PAGE=63 then :P63_SOURCEDB end;',
-'  l_sourcetab:=case when :P18_SOURCE_PAGE=17 then :P17_SOURCETAB when :P18_SOURCE_PAGE=63 then :P63_SOURCETAB end;',
+'  l_sourcetab:=case when :P18_SOURCE_PAGE=17 ',
+'                      then case when l_sourcedb = ''$LOCAL$'' then ''AWR'' else :P17_SOURCETAB end',
+'                    when :P18_SOURCE_PAGE=63 ',
+'                      then :P63_SOURCETAB ',
+'               end;',
 '--raise_application_error(-20000,:P18_SOURCE_PAGE||'':''||l_sourcedb||'':''||l_sourcetab);  ',
 '  if :P18_ACTION = ''SHOW_SQL_TEXT_BY_ID'' then',
 '--raise_application_error(-20000,''111'');',
@@ -13090,6 +13094,8 @@ wwv_flow_api.create_page_plug(
 'htp.p(''P18_SQL_ID:''||:P18_SQL_ID||''<br>'');',
 'htp.p(''P18_DBID:''||:P18_DBID||''<br>'');',
 'htp.p(''P18_DUMP_ID:''||:P18_DUMP_ID||''<br>'');',
+'htp.p(''P18_PROJ_ID:''||:P18_PROJ_ID||''<br>'');',
+'htp.p(''P18_PROJ_NAME:''||:P18_PROJ_NAME||''<br>'');',
 'end;',
 ''))
 ,p_plug_source_type=>'NATIVE_PLSQL'
@@ -13109,9 +13115,8 @@ wwv_flow_api.create_page_button(
 ,p_button_position=>'BELOW_BOX'
 ,p_button_alignment=>'LEFT'
 ,p_button_redirect_url=>'f?p=&APP_ID.:15:&SESSION.::&DEBUG.:RP,16:P15_DB1,P15_REPORT_TYPE,P15_SQL_ID,P15_PROJ_ID,CURRENT_PROJECT:&P18_DUMP_ID.,AWRSQLREPORT,&P18_SQL_ID.,&P18_PROJ_ID.,&P18_PROJ_NAME.'
-,p_button_condition=>':P18_SOURCEDB=''$LOCAL$'' and :P18_SOURCETAB=''AWR'' and :P18_DUMP_ID is not null'
+,p_button_condition=>':P18_SOURCEDB=''$LOCAL$'' /*and :P18_SOURCETAB=''AWR''*/ and :P18_DUMP_ID is not null'
 ,p_button_condition_type=>'PLSQL_EXPRESSION'
-,p_grid_new_grid=>false
 );
 wwv_flow_api.create_page_button(
  p_id=>wwv_flow_api.id(58050660021878486)
@@ -13209,7 +13214,7 @@ wwv_flow_api.create_page_process(
 ,p_process_name=>'GetData'
 ,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'begin',
-'  if :P18_SOURCEDB = ''$LOCAL$'' and :P18_SOURCETAB = ''AWR'' then',
+'  if :P18_SOURCEDB = ''$LOCAL$'' /*and :P18_SOURCETAB = ''AWR''*/ then',
 '    case',
 '      when :P18_SOURCE_PAGE=63 then ',
 '        begin',
