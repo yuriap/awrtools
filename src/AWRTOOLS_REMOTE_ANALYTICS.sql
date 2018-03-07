@@ -509,6 +509,7 @@ end;]';
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#dp_all',ctext=>'Display cursor (ALL)',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#dp_adaptive',ctext=>'Display cursor (ADAPTIVE)',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#sql_mon_hist',ctext=>'SQL Monitor report history',cattributes=>'class="awr"')));
+    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p3',ctext=>'ASH Summary',cattributes=>'class="awr"')));
     p(HTF.BR);
     p(HTF.BR); 
     
@@ -802,6 +803,36 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);    
     etim();
+    
+--  =============================================================================================================================================
+    --AWR ASH (SQL Monitor) P3
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'ASH Summary');
+    stim();
+    p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'ASH Summary',cname=>'ash_p3',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
+    p(HTF.BR);
+
+    l_script:=awrtools_api.getscript('PROC_AWRASHP3');
+    prepare_script(l_script,p_sql_id); 
+
+    l_output.delete;
+    print_table_html_remotelly(p_query=>l_script,
+                               p_width=>1000,
+                               p_summary=>'ASH summary',
+                               p_style1 =>'awrncbbt',
+                               p_style2 =>'awrcbbt',
+                               --p_search => 'PLAN_HASH', 
+                               --p_replacement => HTF.ANCHOR (curl=>'#awrplan_\1',ctext=>'\1',cattributes=>'class="awr"'),
+                               p_header=>25,
+                               p_break_col=>'SQL_EXEC_START',
+                               p_dblink => p_dblink, p_output=> l_output);
+    p1(l_output);  
+    p(HTF.BR);
+    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#tblofcont',ctext=>'Back to top',cattributes=>'class="awr"')));
+    p(HTF.BR);
+    etim();
+
+    p(HTF.BR);
+    p(HTF.BR);      
     p(HTF.BR);
     p('End of report.');
     etim(true);
@@ -1326,29 +1357,27 @@ end;]';
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P3',cname=>'ash_p3',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
-    for i in 1..l_dbid.count
-    loop 
-      p('DBID: '||l_dbid(i));
-      l_script:=awrtools_api.getscript('PROC_AWRASHP3');
-      prepare_script(l_script,p_sql_id,p_dbid=>l_dbid(i), p_start_snap => l_start_snap, p_end_snap => l_end_snap); 
 
-      l_output.delete;
-      print_table_html_remotelly(p_query=>l_script,
-                                 p_width=>1000,
-                                 p_summary=>'AWR ASH (SQL Monitor) P3',
-                                 p_style1 =>'awrncbbt',
-                                 p_style2 =>'awrcbbt',
-                                 p_search => 'PLAN_HASH', 
-                                 p_replacement => HTF.ANCHOR (curl=>'#awrplan_\1',ctext=>'\1',cattributes=>'class="awr"'),
-                                 p_header=>25,
-                                 p_break_col=>'SQL_EXEC_START',
-                                 p_dblink => p_dblink, p_output=> l_output);
-      p1(l_output);  
-      p(HTF.BR);
-      p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash',ctext=>'Back to ASH',cattributes=>'class="awr"')));
-      p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#tblofcont',ctext=>'Back to top',cattributes=>'class="awr"')));
-      p(HTF.BR);
-    end loop;
+    l_script:=awrtools_api.getscript('PROC_AWRASHP3');
+    prepare_script(l_script,p_sql_id, p_start_snap => l_start_snap, p_end_snap => l_end_snap); 
+
+    l_output.delete;
+    print_table_html_remotelly(p_query=>l_script,
+                               p_width=>1000,
+                               p_summary=>'AWR ASH (SQL Monitor) P3',
+                               p_style1 =>'awrncbbt',
+                               p_style2 =>'awrcbbt',
+                               p_search => 'PLAN_HASH', 
+                               p_replacement => HTF.ANCHOR (curl=>'#awrplan_\1',ctext=>'\1',cattributes=>'class="awr"'),
+                               p_header=>25,
+                               p_break_col=>'SQL_EXEC_START',
+                               p_dblink => p_dblink, p_output=> l_output);
+    p1(l_output);  
+    p(HTF.BR);
+    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash',ctext=>'Back to ASH',cattributes=>'class="awr"')));
+    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#tblofcont',ctext=>'Back to top',cattributes=>'class="awr"')));
+    p(HTF.BR);
+
     etim();
     p(HTF.BR);
     p(HTF.BR);   
