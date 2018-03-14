@@ -13,10 +13,10 @@ rem Tablespace name for AWR Tools
 define tblspc_name=awrtool21tbs
 
 rem Local database connection string host:port/service_name
-define localdb=192.168.56.102:1521/db12c21m.localdomain
+define localdb=localhost:1521/db12c21m.localdomain
 
 rem Remote database connection string host:port/service_name
-define remotedb=192.168.56.102:1521/db12c22.localdomain
+define remotedb=localhost:1521/db12c22.localdomain
 
 rem Connection string host:port/service_name from local to remote database
 define dblinkstr=localhost:1521/db12c22.localdomain
