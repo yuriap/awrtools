@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   15:53 Monday March 5, 2018
+--   Date and Time:   17:37 Thursday March 15, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,8 +37,8 @@ prompt APPLICATION 300 - AWR Tools
 
 -- Application Statistics:
 --   Pages:                     18
---     Items:                   82
---     Computations:             4
+--     Items:                   83
+--     Computations:             7
 --     Validations:              5
 --     Processes:               28
 --     Regions:                 52
@@ -121,7 +121,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180305150720'
+,p_last_upd_yyyymmddhh24miss=>'20180315172814'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -10366,8 +10366,8 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_protection_level=>'C'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171215120908'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180315093920'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(103399999921169966)
@@ -10452,6 +10452,18 @@ wwv_flow_api.create_worksheet_column(
 ,p_column_label=>'Dump id'
 ,p_column_type=>'NUMBER'
 ,p_display_text_as=>'HIDDEN'
+);
+wwv_flow_api.create_worksheet_column(
+ p_id=>wwv_flow_api.id(101196337062324654)
+,p_db_column_name=>'ACTION'
+,p_display_order=>15
+,p_column_identifier=>'T'
+,p_column_label=>'Action'
+,p_column_link=>'f?p=&APP_ID.:12:&SESSION.::&DEBUG.:RP:P12_DUMP_ID,P12_DUMP_FILE_NAME,P12_DBID,P12_SNAP1,P12_SNAP2:#DUMP_ID#,#FILENAME#,#DBID#,#MIN_SNAP_ID#,#MAX_SNAP_ID#'
+,p_column_linktext=>'<img src="#IMAGE_PREFIX#app_ui/img/icons/apex-edit-pencil-alt.png" class="apex-edit-pencil-alt" alt="">'
+,p_column_type=>'STRING'
+,p_display_condition_type=>'PLSQL_EXPRESSION'
+,p_display_condition=>'awrtools_contr.lcc_project_check_action(:P11_PROJ_ID,awrtools_contr.c_project_analyze)'
 );
 wwv_flow_api.create_worksheet_column(
  p_id=>wwv_flow_api.id(106540804229507124)
@@ -10567,18 +10579,6 @@ wwv_flow_api.create_worksheet_column(
 ,p_column_label=>'Size, MB'
 ,p_column_type=>'NUMBER'
 ,p_column_alignment=>'RIGHT'
-);
-wwv_flow_api.create_worksheet_column(
- p_id=>wwv_flow_api.id(101196337062324654)
-,p_db_column_name=>'ACTION'
-,p_display_order=>170
-,p_column_identifier=>'T'
-,p_column_label=>'Action'
-,p_column_link=>'f?p=&APP_ID.:12:&SESSION.::&DEBUG.:RP:P12_DUMP_ID,P12_DUMP_FILE_NAME,P12_DBID,P12_SNAP1,P12_SNAP2:#DUMP_ID#,#FILENAME#,#DBID#,#MIN_SNAP_ID#,#MAX_SNAP_ID#'
-,p_column_linktext=>'<img src="#IMAGE_PREFIX#app_ui/img/icons/apex-edit-pencil-alt.png" class="apex-edit-pencil-alt" alt="">'
-,p_column_type=>'STRING'
-,p_display_condition_type=>'PLSQL_EXPRESSION'
-,p_display_condition=>'awrtools_contr.lcc_project_check_action(:P11_PROJ_ID,awrtools_contr.c_project_analyze)'
 );
 wwv_flow_api.create_worksheet_rpt(
  p_id=>wwv_flow_api.id(106550449382511404)
@@ -13943,7 +13943,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180228144514'
+,p_last_upd_yyyymmddhh24miss=>'20180315172814'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(58018684478868595)
@@ -14283,17 +14283,17 @@ wwv_flow_api.create_jet_chart_series(
 ' from (SELECT',
 '    nvl(event, ''CPU'') event,',
 '    sum(sec) sec,',
-'    q''[case when event is null then ''CPU'' else event end = ]''||q''['']''||nvl(event, ''CPU'')||q''['']'' flt1',
+'    event_id flt1',
 'FROM',
 '    remote_ash',
 'where sess_id = :P63_SESS_ID',
 'GROUP BY',
-'    nvl(event, ''CPU'')',
+'    nvl(event, ''CPU''),event_id',
 'ORDER BY 2 desc ) where rownum<11; '))
 ,p_items_value_column_name=>'SEC'
 ,p_items_label_column_name=>'EVENT'
 ,p_items_label_rendered=>false
-,p_link_target=>'f?p=&APP_ID.:63:&SESSION.::&DEBUG.:RP:P63_FILTER_REMASH,P63_FILTER_REMASHL:&FLT1.,&FLT1.'
+,p_link_target=>'f?p=&APP_ID.:63:&SESSION.::&DEBUG.:RP:P63_EVENT_ID:&FLT1.'
 ,p_link_target_type=>'REDIRECT_PAGE'
 );
 wwv_flow_api.create_page_plug(
@@ -14754,6 +14754,14 @@ wwv_flow_api.create_page_button(
 ,p_grid_new_grid=>false
 );
 wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(5222885994733116)
+,p_name=>'P63_EVENT_ID'
+,p_item_sequence=>100
+,p_item_plug_id=>wwv_flow_api.id(165731914230753884)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(58048065632878460)
 ,p_name=>'P63_SOURCEDB'
 ,p_item_sequence=>10
@@ -15144,6 +15152,58 @@ wwv_flow_api.create_page_item(
 ,p_attribute_03=>'Yes'
 ,p_attribute_04=>'N'
 ,p_attribute_05=>'No'
+);
+wwv_flow_api.create_page_computation(
+ p_id=>wwv_flow_api.id(5222907553733117)
+,p_computation_sequence=>10
+,p_computation_item=>'P63_FILTER_REMASH'
+,p_computation_point=>'BEFORE_BOX_BODY'
+,p_computation_type=>'FUNCTION_BODY'
+,p_computation=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'  l_event varchar2(1000);',
+'BEGIN',
+'  IF :P63_EVENT_ID is not null then',
+'    if :P63_EVENT_ID=-1 then',
+'      l_event:=''CPU'';',
+'    else',
+'      select name into l_event from v$event_name where event_id=:P63_EVENT_ID;',
+'    end if;',
+'    return q''[nvl(event,''CPU'')='']''||l_event||q''['']'';',
+'  else',
+'    return :P63_FILTER_REMASH;',
+'  end if;',
+'end;'))
+);
+wwv_flow_api.create_page_computation(
+ p_id=>wwv_flow_api.id(5223078865733118)
+,p_computation_sequence=>20
+,p_computation_item=>'P63_FILTER_REMASHL'
+,p_computation_point=>'BEFORE_BOX_BODY'
+,p_computation_type=>'FUNCTION_BODY'
+,p_computation=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'declare',
+'  l_event varchar2(1000);',
+'BEGIN',
+'  IF :P63_EVENT_ID is not null then',
+'    if :P63_EVENT_ID=-1 then',
+'      l_event:=''CPU'';',
+'    else',
+'      select name into l_event from v$event_name where event_id=:P63_EVENT_ID;',
+'    end if;',
+'    return q''[nvl(event,''CPU'')='']''||l_event||q''['']'';',
+'  else',
+'    return :P63_FILTER_REMASHL;',
+'  end if;',
+'end;'))
+);
+wwv_flow_api.create_page_computation(
+ p_id=>wwv_flow_api.id(5223140535733119)
+,p_computation_sequence=>100
+,p_computation_item=>'P63_EVENT_ID'
+,p_computation_point=>'BEFORE_BOX_BODY'
+,p_computation_type=>'PLSQL_EXPRESSION'
+,p_computation=>'null'
 );
 wwv_flow_api.create_page_process(
  p_id=>wwv_flow_api.id(58049072095878470)
