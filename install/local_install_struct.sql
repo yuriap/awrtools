@@ -125,6 +125,15 @@ sec          number);
 create index idx_remote_ash_timeline_1 on remote_ash_timeline(sess_id);
 create index idx_remote_ash_1 on remote_ash(sess_id);
 
+create table remote_metrics (
+sess_id      number references remote_ash_sess(sess_id) on delete cascade,
+metric_id    number,
+end_time     date,
+value        number
+);
+
+create index idx_remote_metric on remote_metrics(sess_id);
+
 --Logging
 create table AWRTOOLS_LOG (
 ts timestamp default systimestamp,

@@ -39,6 +39,7 @@ grant select on dba_hist_sysmetric_history to &localscheme.;
 grant select on v_$active_session_history to &localscheme.;
 grant select on dba_hist_reports to &localscheme.;
 grant select on gv_$active_session_history to &localscheme.;
+grant select on V_$METRICGROUP to &localscheme.;
 
 grant execute on dbms_xplan to &localscheme.;
 

@@ -1,19 +1,30 @@
-create or replace PACKAGE AWRTOOLS_REMOTE_ANALYTICS AS 
+create or replace PACKAGE AWRTOOLS_REMOTE_ANALYTICS AS
 
   type t_output_lines is table of varchar2(32767) index by pls_integer;
-  
-  procedure load_data_cube(p_sess_id out number, p_source varchar2, p_dblink varchar2, p_agg varchar2, p_inst_id number, p_start_dt date, p_end_dt date, p_filter varchar2, p_dump_id number default null);
+
+  procedure load_data_cube(p_sess_id out number, 
+                           p_source varchar2, 
+                           p_dblink varchar2, 
+                           p_agg varchar2, 
+                           p_inst_id number, 
+                           p_start_dt date, 
+                           p_end_dt date, 
+                           p_filter varchar2, 
+                           p_dump_id number default null,
+                           p_metric_id number default null,
+                           p_metricgroup_id number default null,
+                           p_aggr_func varchar2 default null);
   procedure AWRTOOL_CLEANUP_ASHSESS;
   procedure AWRTOOL_CLEANUP_RPT;
 
   --creating report content
   procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
   procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
-  
+
   --getting already created report content
   procedure getreport(p_id in number, p_report out t_output_lines);
 
-  
+
 END AWRTOOLS_REMOTE_ANALYTICS;
 /
 
@@ -41,12 +52,24 @@ create or replace PACKAGE BODY AWRTOOLS_REMOTE_ANALYTICS AS
   exception
     when others then rollback;dbms_output.put_line(sqlerrm);
   end;
-
-  procedure load_data_cube(p_sess_id out number, p_source varchar2, p_dblink varchar2, p_agg varchar2, p_inst_id number, p_start_dt date, p_end_dt date, p_filter varchar2, p_dump_id number default null)
+    
+  procedure load_data_cube(p_sess_id out number, 
+                           p_source varchar2, 
+                           p_dblink varchar2, 
+                           p_agg varchar2, 
+                           p_inst_id number, 
+                           p_start_dt date, 
+                           p_end_dt date, 
+                           p_filter varchar2, 
+                           p_dump_id number default null,
+                           p_metric_id number default null,
+                           p_metricgroup_id number default null,
+                           p_aggr_func varchar2 default null)
   is
     l_dbid number;
     l_min_snap number;
     l_max_snap number;
+    l_int_size number;
 
     l_sql_template varchar2(32765):=
 q'[INSERT INTO REMOTE_ASH (sess_id, sample_time, wait_class, sql_id, event, module, action, sql_plan_hash_value, event_id, sec)
@@ -59,6 +82,18 @@ q'[INSERT INTO REMOTE_ASH (sess_id, sample_time, wait_class, sql_id, event, modu
       AND   <FILTER>
     GROUP BY  <GROUPBY_COL>, NVL(WAIT_CLASS,'CPU'), SQL_ID, EVENT, MODULE, ACTION, SQL_PLAN_HASH_VALUE, EVENT_ID]';
     l_sql varchar2(32765);
+    
+    l_sql_template_metrics varchar2(32765):=
+q'[insert into remote_metrics (sess_id, metric_id, end_time, value)
+   select   :P_SESS_ID, metric_id, <GROUPBY_COL>, <AGGFNC>(value)
+     from   <SOURCE_TABLE>
+    where   <DBID>
+      AND   <INSTANCE_NUMBER> = :P_INST_ID
+      AND   <SNAP_FILTER>
+      AND   end_time BETWEEN :P_START_DT AND :P_END_DT
+      and   metric_id = :P_METRIC_ID
+      and   group_id=:p_metricgroup_id
+    group by <GROUPBY_COL>, metric_id]';    
   begin
     insert into remote_ash_sess values (default, default) returning sess_id into p_sess_id;
 
@@ -136,6 +171,62 @@ q'[INSERT INTO REMOTE_ASH (sess_id, sample_time, wait_class, sql_id, event, modu
     --commit;
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash', cascade=>true);
     insert /*+ append */ into remote_ash_timeline select unique p_sess_id, sample_time from remote_ash where sess_id = p_sess_id;
+    
+    if p_metric_id is not null then
+      l_sql := replace(replace(replace(replace(replace(l_sql_template_metrics,
+                                                            '<SOURCE_TABLE>',case
+                                                                               when p_source = 'V$VIEW' then case when p_dblink = '$LOCAL$' then 'gv$sysmetric_history'
+                                                                                                            else 'gv$sysmetric_history@'||p_dblink
+                                                                                                            end
+                                                                               when p_source = 'AWR' then case when p_dblink = '$LOCAL$' then 'dba_hist_sysmetric_history'
+                                                                                                          else 'dba_hist_sysmetric_history@'||p_dblink
+                                                                                                          end
+                                                                             end),
+                                                    '<DBID>',case when p_source = 'V$VIEW' then ':P_DBID is null' else 'DBID = :P_DBID' end),
+                                            '<INSTANCE_NUMBER>',case when p_source = 'V$VIEW' then 'INST_ID' else 'INSTANCE_NUMBER' end),
+                                    '<SNAP_FILTER>',case when p_source = 'AWR' then 'SNAP_ID BETWEEN :P_MIN_SNAP AND :P_MAX_SNAP' else ':P_MIN_SNAP is null and :P_MAX_SNAP is null' end),
+                            '<AGGFNC>',p_aggr_func);
+      select interval_size into l_int_size from V$METRICGROUP where group_id = p_metricgroup_id;
+      case
+        when p_agg = 'no_agg'  then
+          l_sql := replace(l_sql,'<GROUPBY_COL>','end_time');
+        when p_agg = 'by_mi'   then
+          if l_int_size<6000 then
+            l_sql := replace(l_sql,'<GROUPBY_COL>',q'[trunc(end_time,'mi')]');
+          else
+            l_sql := replace(l_sql,'<GROUPBY_COL>','end_time');
+          end if;
+        when p_agg = 'by_hour' then
+          if l_int_size<360000 then
+            l_sql := replace(l_sql,'<GROUPBY_COL>',q'[trunc(end_time,'hh')]');
+          else
+            l_sql := replace(l_sql,'<GROUPBY_COL>','end_time');
+          end if;          
+        when p_agg = 'by_day'  then
+          l_sql := replace(l_sql,'<GROUPBY_COL>',q'[trunc(end_time,'dd')]');
+        else
+          null;
+      end case;    
+/*    
+    awrtools_logging.log(l_sql);
+    awrtools_logging.log('p_sess_id:'||p_sess_id);
+    awrtools_logging.log('l_dbid:'||l_dbid);
+    awrtools_logging.log('p_inst_id:'||p_inst_id);
+    awrtools_logging.log('l_min_snap:'||l_min_snap);
+    awrtools_logging.log('l_max_snap:'||l_max_snap);
+    awrtools_logging.log('p_start_dt:'||p_start_dt);
+    awrtools_logging.log('p_end_dt:'||p_end_dt);
+    awrtools_logging.log('p_metric_id:'||p_metric_id);
+    awrtools_logging.log('p_aggr_func:'||p_aggr_func);
+*/    
+      begin
+        execute immediate l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt, p_metric_id, p_metricgroup_id;
+      exception
+        when others then
+          raise_application_error(-20000,sqlerrm);
+      end;    
+    end if;
+    
     commit;
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash_timeline', cascade=>true);
   end;
