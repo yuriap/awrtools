@@ -52,15 +52,15 @@ create or replace PACKAGE BODY AWRTOOLS_REMOTE_ANALYTICS AS
   exception
     when others then rollback;dbms_output.put_line(sqlerrm);
   end;
-    
-  procedure load_data_cube(p_sess_id out number, 
-                           p_source varchar2, 
-                           p_dblink varchar2, 
-                           p_agg varchar2, 
-                           p_inst_id number, 
-                           p_start_dt date, 
-                           p_end_dt date, 
-                           p_filter varchar2, 
+
+  procedure load_data_cube(p_sess_id out number,
+                           p_source varchar2,
+                           p_dblink varchar2,
+                           p_agg varchar2,
+                           p_inst_id number,
+                           p_start_dt date,
+                           p_end_dt date,
+                           p_filter varchar2,
                            p_dump_id number default null,
                            p_metric_id number default null,
                            p_metricgroup_id number default null,
@@ -70,7 +70,7 @@ create or replace PACKAGE BODY AWRTOOLS_REMOTE_ANALYTICS AS
     l_min_snap number;
     l_max_snap number;
     l_int_size number;
-
+    
     l_sql_template varchar2(32765):=
 q'[INSERT INTO REMOTE_ASH (sess_id, sample_time, wait_class, sql_id, event, module, action, sql_plan_hash_value, event_id, sec)
    SELECT   :P_SESS_ID, <GROUPBY_COL>, NVL(WAIT_CLASS,'CPU'),SQL_ID,EVENT,MODULE,ACTION,SQL_PLAN_HASH_VALUE,nvl(EVENT_ID,-1), COUNT(1)
@@ -82,7 +82,7 @@ q'[INSERT INTO REMOTE_ASH (sess_id, sample_time, wait_class, sql_id, event, modu
       AND   <FILTER>
     GROUP BY  <GROUPBY_COL>, NVL(WAIT_CLASS,'CPU'), SQL_ID, EVENT, MODULE, ACTION, SQL_PLAN_HASH_VALUE, EVENT_ID]';
     l_sql varchar2(32765);
-    
+
     l_sql_template_metrics varchar2(32765):=
 q'[insert into remote_metrics (sess_id, metric_id, end_time, value)
    select   :P_SESS_ID, metric_id, <GROUPBY_COL>, <AGGFNC>(value)
@@ -93,7 +93,7 @@ q'[insert into remote_metrics (sess_id, metric_id, end_time, value)
       AND   end_time BETWEEN :P_START_DT AND :P_END_DT
       and   metric_id = :P_METRIC_ID
       and   group_id=:p_metricgroup_id
-    group by <GROUPBY_COL>, metric_id]';    
+    group by <GROUPBY_COL>, metric_id]';
   begin
     insert into remote_ash_sess values (default, default) returning sess_id into p_sess_id;
 
@@ -170,8 +170,27 @@ q'[insert into remote_metrics (sess_id, metric_id, end_time, value)
     end;
     --commit;
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash', cascade=>true);
-    insert /*+ append */ into remote_ash_timeline select unique p_sess_id, sample_time from remote_ash where sess_id = p_sess_id;
     
+    if p_agg = 'no_agg' then
+      insert /* append */ into remote_ash_timeline select unique p_sess_id, sample_time from remote_ash where sess_id = p_sess_id;
+    else
+      if p_agg = 'by_mi' then
+        insert /* append */ into remote_ash_timeline 
+          select p_sess_id,
+                 trunc(p_start_dt,'mi')+(level-1)/24/60 from dual connect by level <=round((p_end_dt-trunc(p_start_dt,'mi'))*24*60)+1;
+      end if;
+      if p_agg = 'by_hour' then
+        insert /* append */ into remote_ash_timeline 
+          select p_sess_id,
+                 trunc(p_start_dt,'hh')+(level-1)/24 from dual connect by level <=round((p_end_dt-trunc(p_start_dt,'hh'))*24)+1;
+      end if;
+      if p_agg = 'by_day' then
+        insert /* append */ into remote_ash_timeline 
+          select p_sess_id,
+                 trunc(p_start_dt)+(level-1) from dual connect by level <=round(p_end_dt-trunc(p_start_dt))+1;
+      end if;      
+    end if;
+
     if p_metric_id is not null then
       l_sql := replace(replace(replace(replace(replace(l_sql_template_metrics,
                                                             '<SOURCE_TABLE>',case
@@ -201,13 +220,13 @@ q'[insert into remote_metrics (sess_id, metric_id, end_time, value)
             l_sql := replace(l_sql,'<GROUPBY_COL>',q'[trunc(end_time,'hh')]');
           else
             l_sql := replace(l_sql,'<GROUPBY_COL>','end_time');
-          end if;          
+          end if;
         when p_agg = 'by_day'  then
           l_sql := replace(l_sql,'<GROUPBY_COL>',q'[trunc(end_time,'dd')]');
         else
           null;
-      end case;    
-/*    
+      end case;
+/*
     awrtools_logging.log(l_sql);
     awrtools_logging.log('p_sess_id:'||p_sess_id);
     awrtools_logging.log('l_dbid:'||l_dbid);
@@ -218,15 +237,15 @@ q'[insert into remote_metrics (sess_id, metric_id, end_time, value)
     awrtools_logging.log('p_end_dt:'||p_end_dt);
     awrtools_logging.log('p_metric_id:'||p_metric_id);
     awrtools_logging.log('p_aggr_func:'||p_aggr_func);
-*/    
+*/
       begin
         execute immediate l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt, p_metric_id, p_metricgroup_id;
       exception
         when others then
           raise_application_error(-20000,sqlerrm);
-      end;    
+      end;
     end if;
-    
+
     commit;
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash_timeline', cascade=>true);
   end;
