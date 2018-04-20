@@ -120,10 +120,18 @@ event_id     number,
 module       VARCHAR2(64),
 action       VARCHAR2(64),
 SQL_PLAN_HASH_VALUE number,
+segment_id   number,
 sec          number);
 
 create index idx_remote_ash_timeline_1 on remote_ash_timeline(sess_id);
 create index idx_remote_ash_1 on remote_ash(sess_id);
+
+create table remote_ash_seg (
+sess_id      number references remote_ash_sess(sess_id) on delete cascade,
+segment_id   number,
+segment_name varchar2(260));
+
+create index idx_remote_ash_seg on remote_ash_seg(sess_id);
 
 create table remote_metrics (
 sess_id      number references remote_ash_sess(sess_id) on delete cascade,
