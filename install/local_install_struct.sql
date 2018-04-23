@@ -142,6 +142,57 @@ value        number
 
 create index idx_remote_metric on remote_metrics(sess_id);
 
+--Online ASH Dashboard V2
+
+create table cube_ash_sess (
+sess_id number generated always as identity,
+sess_created timestamp default systimestamp,
+primary key (sess_id));
+
+create table cube_ash_timeline (
+sess_id      number references cube_ash_sess(sess_id) on delete cascade,
+sample_time  date);
+
+create index idx_cube_ash_timeline_1 on cube_ash_timeline(sess_id);
+
+create table cube_ash (
+sess_id      number references cube_ash_sess(sess_id) on delete cascade,
+sample_time  date,
+wait_class   VARCHAR2(64),
+sql_id       VARCHAR2(13),
+event        VARCHAR2(64),
+event_id     number,
+module       VARCHAR2(64),
+action       VARCHAR2(64),
+sql_id1      VARCHAR2(13),
+SQL_PLAN_HASH_VALUE number,
+segment_id   number,
+g1           number,
+g2           number,
+g3           number,
+g4           number,
+g5           number,
+g6           number,
+smpls        number);
+
+create index idx_cube_ash_1 on cube_ash(sess_id);
+
+create table cube_ash_seg (
+sess_id      number references cube_ash_sess(sess_id) on delete cascade,
+segment_id   number,
+segment_name varchar2(260));
+
+create index idx_cube_ash_seg on cube_ash_seg(sess_id);
+
+create table cube_metrics (
+sess_id      number references cube_ash_sess(sess_id) on delete cascade,
+metric_id    number,
+end_time     date,
+value        number
+);
+
+create index idx_cube_metrics on cube_metrics(sess_id);
+
 --Logging
 create table AWRTOOLS_LOG (
 ts timestamp default systimestamp,

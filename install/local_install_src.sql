@@ -22,6 +22,14 @@ show errors
 
 @../src/awrtools_logging
 show errors
+
+prompt Depricated
 @../src/AWRTOOLS_REMOTE_ANALYTICS
 show errors
+
+@../src/AWRTOOLS_ONLINE_REPORTS
+show errors
+@../src/AWRTOOLS_CUBE_ASH
+show errors
+
 set define on

@@ -89,14 +89,14 @@ begin
       p('LIO/Exec, PIO/Exec, CPU/EXEC, ELA/EXEC: '||tptformat(round(i.buffer_gets))||'; '||tptformat(round(i.disk_reads+i.DIRECT_WRITES))||'; '||tptformat(round(i.cpu_time),'TIME')||'; '||tptformat(round(i.elapsed_time),'TIME'));	
     end if;
     if i.ROWS_PROCESSED>0 then 
-      p('LIO/Row, PIO/Row, CPU/Row, ELA/Row, Rows/Sec: '||tptformat(round(i.buffer_gets/i.ROWS_PROCESSED,3))||'; '||tptformat(round((i.disk_reads+i.DIRECT_WRITES)/i.ROWS_PROCESSED,3))||'; '||tptformat(round(i.cpu_time/i.ROWS_PROCESSED,3),'TIME')||'; '||tptformat(round(i.elapsed_time/i.ROWS_PROCESSED,3),'TIME')||'; '||tptformat(round(1e6*i.ROWS_PROCESSED/i.elapsed_time,3)));	
+      p('LIO/Row, PIO/Row, CPU/Row, ELA/Row, Rows/Sec: '||tptformat(round(i.buffer_gets/i.ROWS_PROCESSED,3))||'; '||tptformat(round((i.disk_reads+i.DIRECT_WRITES)/i.ROWS_PROCESSED,3))||'; '||tptformat(round(i.cpu_time/i.ROWS_PROCESSED,3),'TIME')||'; '||tptformat(round(i.elapsed_time/i.ROWS_PROCESSED,3),'TIME')||'; '||tptformat(round(1e6*i.ROWS_PROCESSED/case when i.elapsed_time=0 then 1 else i.elapsed_time end,3)));	
     else
       p('LIO/Row, PIO/Row, CPU/Row, ELA/Row: '||tptformat(round(i.buffer_gets))||'; '||tptformat(round(i.disk_reads+i.DIRECT_WRITES))||'; '||tptformat(round(i.cpu_time),'TIME')||'; '||tptformat(round(i.elapsed_time),'TIME'));	
     end if;  
     $IF DBMS_DB_VERSION.version>=11 $THEN
 	  if i.IO_CELL_OFFLOAD_ELIGIBLE_BYTES>0 then
 	    p('=================================================================================================');
-		p('Saved %: '||round(100 * (i.IO_CELL_OFFLOAD_ELIGIBLE_BYTES - i.IO_INTERCONNECT_BYTES) / i.IO_CELL_OFFLOAD_ELIGIBLE_BYTES,2));
+		p('Saved %: '||round(100 * (i.IO_CELL_OFFLOAD_ELIGIBLE_BYTES - i.IO_INTERCONNECT_BYTES) / case when i.IO_CELL_OFFLOAD_ELIGIBLE_BYTES=0 then 1 else i.IO_CELL_OFFLOAD_ELIGIBLE_BYTES end,2));
         p('IO_CELL_OFFLOAD_ELIGIBLE_BYTES: '||tptformat(i.IO_CELL_OFFLOAD_ELIGIBLE_BYTES));
 	    p('IO_INTERCONNECT_BYTES:          '||tptformat(i.IO_INTERCONNECT_BYTES));
 	    p('OPTIMIZED_PHY_READ_REQUESTS:    '||tptformat(i.OPTIMIZED_PHY_READ_REQUESTS));
