@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   16:03 Monday April 23, 2018
+--   Date and Time:   14:29 Wednesday April 25, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -121,7 +121,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180423155450'
+,p_last_upd_yyyymmddhh24miss=>'20180425105024'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -9844,20 +9844,19 @@ begin
 wwv_flow_api.create_page(
  p_id=>1
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'Home'
+,p_name=>'AWR Tools Home'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'Home'
+,p_step_title=>'AWR Tools Home'
 ,p_step_sub_title=>'Home'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180126144603'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104549'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(103147854288222167)
@@ -9915,20 +9914,19 @@ begin
 wwv_flow_api.create_page(
  p_id=>2
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'AWR load config'
+,p_name=>'AWR Tools configuration'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'AWR loading configuration'
+,p_step_title=>'AWR Tools configuration'
 ,p_step_sub_title=>'AWR load config'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170712125547'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104605'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(103172633332740665)
@@ -10171,19 +10169,18 @@ begin
 wwv_flow_api.create_page(
  p_id=>10
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'Projects'
+,p_name=>'AWR Warehouse Projects'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'Projects'
+,p_step_title=>'AWR Warehouse Projects'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171215121150'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104613'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(106518015938937430)
@@ -10353,21 +10350,20 @@ begin
 wwv_flow_api.create_page(
  p_id=>11
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'Project'
+,p_name=>'AWR Warehouse Project'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'Project'
+,p_step_title=>'AWR Warehouse Project'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_javascript_code=>'var htmldb_delete_message=''"DELETE_CONFIRM_MSG"'';'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_protection_level=>'C'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180322231941'
+,p_last_upd_yyyymmddhh24miss=>'20180425104622'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5224936558733137)
@@ -11898,20 +11894,19 @@ begin
 wwv_flow_api.create_page(
  p_id=>15
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'Reports'
+,p_name=>'AWR Reports'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'Reports'
+,p_step_title=>'AWR Reports'
 ,p_warn_on_unsaved_changes=>'N'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180406215627'
+,p_last_upd_yyyymmddhh24miss=>'20180425104638'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(52153388616016103)
@@ -12638,9 +12633,9 @@ begin
 wwv_flow_api.create_page(
  p_id=>16
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'Delete report'
+,p_name=>'Delete AWR report'
 ,p_page_mode=>'MODAL'
-,p_step_title=>'Delete report'
+,p_step_title=>'Delete AWR report'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
@@ -12649,8 +12644,8 @@ wwv_flow_api.create_page(
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLADM'
-,p_last_upd_yyyymmddhh24miss=>'20170522165647'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104646'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(109716410670415453)
@@ -12728,20 +12723,19 @@ begin
 wwv_flow_api.create_page(
  p_id=>17
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'Query Search'
+,p_name=>'Query Search Tool'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'Query Search'
+,p_step_title=>'Query Search Tool'
 ,p_warn_on_unsaved_changes=>'N'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'AUTO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180407014537'
+,p_last_upd_yyyymmddhh24miss=>'20180425104710'
 );
 wwv_flow_api.create_report_region(
  p_id=>wwv_flow_api.id(53499105645175971)
@@ -13184,7 +13178,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180423152909'
+,p_last_upd_yyyymmddhh24miss=>'20180424124032'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(53700136665471359)
@@ -13201,6 +13195,7 @@ wwv_flow_api.create_page_plug(
 '  l_sql_text clob;',
 '  l_sourcedb varchar2(100);',
 '  l_sourcetab varchar2(100);',
+'  l_sess_id number;',
 '  procedure getsqltext_localawrrepo(p_sql_id varchar2, p_dbid number, p_text out clob) is',
 '  begin',
 '    select sql_text into p_text from dba_hist_sqltext where sql_id=p_sql_id and DBID=nvl(p_dbid,DBID) and rownum=1;',
@@ -13229,7 +13224,7 @@ wwv_flow_api.create_page_plug(
 '    ll_sql_text clob;',
 '  begin',
 '    select dbid into l_dbid from AWRDUMPS where dump_id=:P18_DUMP_ID;',
-'    for i in (select * from (select unique sql_id from remote_ash where SQL_PLAN_HASH_VALUE=p_plan_hash and sess_id=:P63_SESS_ID) where rownum<11) loop',
+'    for i in (select * from (select unique sql_id1 sql_id from cube_ash where SQL_PLAN_HASH_VALUE=p_plan_hash and sess_id=l_sess_id and g5=0) where rownum<11) loop',
 '      getsqltext_localawrrepo(i.sql_id,l_dbid,ll_sql_text);',
 '      l_cnt:=l_cnt+1;',
 '      p_text:=p_text||''#''||l_cnt||''; SQL_ID: ''||i.sql_id||chr(10);',
@@ -13242,7 +13237,7 @@ wwv_flow_api.create_page_plug(
 '    l_cnt number := 0;',
 '    ll_sql_text clob;',
 '  begin',
-'    for i in (select * from (select unique sql_id from remote_ash where SQL_PLAN_HASH_VALUE=p_plan_hash and sess_id=:P63_SESS_ID) where rownum<11) loop',
+'    for i in (select * from (select unique sql_id1 sql_id from cube_ash where SQL_PLAN_HASH_VALUE=p_plan_hash and sess_id=l_sess_id and g5=0) where rownum<11) loop',
 '      getsqltext_remote(i.sql_id,p_sourcedb,ll_sql_text);',
 '      l_cnt:=l_cnt+1;',
 '      p_text:=p_text||''#''||l_cnt||''; SQL_ID: ''||i.sql_id||chr(10);',
@@ -13252,11 +13247,17 @@ wwv_flow_api.create_page_plug(
 '    if l_cnt=0 then p_text:=''No sql text available in remote DB for given PLAN_HASH=''||p_plan_hash||''.''; end if; ',
 '  end;   ',
 'begin',
-'  l_sourcedb:=case when :P18_SOURCE_PAGE=17 then :P17_SOURCEDB when :P18_SOURCE_PAGE=63 then :P63_SOURCEDB when :P18_SOURCE_PAGE=65 then :P65_SOURCEDB end;',
+'  l_sourcedb:=case when :P18_SOURCE_PAGE=17 then :P17_SOURCEDB ',
+'                   --when :P18_SOURCE_PAGE=63 then :P63_SOURCEDB ',
+'                   when :P18_SOURCE_PAGE=65 then :P65_SOURCEDB ',
+'                   end;',
 '  l_sourcetab:=case when :P18_SOURCE_PAGE=17 then case when l_sourcedb = ''$LOCAL$'' then ''AWR'' else :P17_SOURCETAB end',
-'                    when :P18_SOURCE_PAGE=63 then :P63_SOURCETAB ',
+'                    --when :P18_SOURCE_PAGE=63 then :P63_SOURCETAB ',
 '                    when :P18_SOURCE_PAGE=65 then :P65_SOURCETAB ',
-'               end;',
+'                    end;',
+'  l_sess_id:=case --  when :P18_SOURCE_PAGE=63 then :P63_SESS_ID ',
+'                  when :P18_SOURCE_PAGE=65 then :P65_SESS_ID ',
+'                  else null end;',
 '--raise_application_error(-20000,:P18_SOURCE_PAGE||'':''||l_sourcedb||'':''||l_sourcetab);  ',
 '  if :P18_ACTION = ''SHOW_SQL_TEXT_BY_ID'' then',
 '--raise_application_error(-20000,''111'');',
@@ -13483,9 +13484,9 @@ begin
 wwv_flow_api.create_page(
  p_id=>19
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'Segment'
+,p_name=>'DB Segment Properties'
 ,p_page_mode=>'MODAL'
-,p_step_title=>'Segment'
+,p_step_title=>'DB Segment Properties'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
@@ -13495,7 +13496,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180423155450'
+,p_last_upd_yyyymmddhh24miss=>'20180425104749'
 );
 wwv_flow_api.create_report_region(
  p_id=>wwv_flow_api.id(5831353573576307)
@@ -15737,19 +15738,18 @@ begin
 wwv_flow_api.create_page(
  p_id=>20
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'All Utilities'
+,p_name=>'All AWR Utilities'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'All Utilities'
+,p_step_title=>'All AWR Utilities'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171219171649'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104841'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(53501033020175990)
@@ -15773,19 +15773,18 @@ begin
 wwv_flow_api.create_page(
  p_id=>40
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'All reports'
+,p_name=>'All AWR Tool reports'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'All reports'
+,p_step_title=>'All AWR Tool reports'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171219171711'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104824'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(101885850938100287)
@@ -15807,20 +15806,19 @@ begin
 wwv_flow_api.create_page(
  p_id=>41
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'All dumps space usage'
+,p_name=>'AWR Dumps Space Usage'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'All dumps space usage'
+,p_step_title=>'AWR Dumps Space Usage'
 ,p_step_sub_title=>'All dumps space usage'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20171218094145'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104905'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(52613501405958483)
@@ -16370,19 +16368,18 @@ begin
 wwv_flow_api.create_page(
  p_id=>60
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'All Online Analytics'
+,p_name=>'Online Analytics'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'All Online Analytics'
+,p_step_title=>'Online Analytics'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
-,p_last_updated_by=>'AWRTOOLS21ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180116134025'
+,p_last_updated_by=>'AWRTOOLS30ADM'
+,p_last_upd_yyyymmddhh24miss=>'20180425104932'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(53701583786471373)
@@ -18534,21 +18531,20 @@ begin
 wwv_flow_api.create_page(
  p_id=>65
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'ASH Cube Dashboard'
+,p_name=>'ASH Analytic Dashboard'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'ASH Cube Dashboard'
+,p_step_title=>'ASH Analytic Dashboard'
 ,p_warn_on_unsaved_changes=>'N'
 ,p_step_sub_title=>'ASH Cube Dashboard'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180423154905'
+,p_last_upd_yyyymmddhh24miss=>'20180425104958'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(64340039173679706)
@@ -20278,9 +20274,9 @@ begin
 wwv_flow_api.create_page(
  p_id=>66
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
-,p_name=>'GetPlanHRemote'
+,p_name=>'SQL Run-Time Statistics Reports'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'GetPlanHRemote'
+,p_step_title=>'SQL Run-Time Statistics Reports'
 ,p_warn_on_unsaved_changes=>'N'
 ,p_step_sub_title=>'GetPlanHRemote'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
@@ -20311,12 +20307,11 @@ wwv_flow_api.create_page(
 '.doublepad  {margin-left:34px;}',
 'span.nm    {background-color:#cceeff;color:red;}'))
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180423151224'
+,p_last_upd_yyyymmddhh24miss=>'20180425105024'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(64441290616017510)

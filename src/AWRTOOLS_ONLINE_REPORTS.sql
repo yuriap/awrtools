@@ -823,8 +823,8 @@ end;]';
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash',ctext=>'ASH',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_plsql',ctext=>'PL/SQL',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_summ',ctext=>'ASH summary',cattributes=>'class="awr"')));
-    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1',ctext=>'AWR ASH (SQL Monitor) P1',cattributes=>'class="awr"')));
-    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1.1',ctext=>'AWR ASH (SQL Monitor) P1.1',cattributes=>'class="awr"')));
+    --p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1',ctext=>'AWR ASH (SQL Monitor) P1',cattributes=>'class="awr"')));
+    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1.1',ctext=>'AWR ASH (SQL Monitor) P1',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p2',ctext=>'AWR ASH (SQL Monitor) P2',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p3',ctext=>'AWR ASH (SQL Monitor) P3',cattributes=>'class="awr"')));
 
@@ -1072,8 +1072,8 @@ end;]';
     p(HTF.BR);
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_plsql',ctext=>'PL/SQL',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_summ',ctext=>'ASH summary',cattributes=>'class="awr"')));
-    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1',ctext=>'AWR ASH (SQL Monitor) P1',cattributes=>'class="awr"')));
-    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1.1',ctext=>'AWR ASH (SQL Monitor) P1.1',cattributes=>'class="awr"')));
+    --p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1',ctext=>'AWR ASH (SQL Monitor) P1',cattributes=>'class="awr"')));
+    p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p1.1',ctext=>'AWR ASH (SQL Monitor) P1',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p2',ctext=>'AWR ASH (SQL Monitor) P2',cattributes=>'class="awr"')));
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#ash_p3',ctext=>'AWR ASH (SQL Monitor) P3',cattributes=>'class="awr"')));
     p(HTF.BR);p(HTF.BR);
@@ -1140,7 +1140,7 @@ end;]';
 
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P1
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1');
+/*    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P1',cname=>'ash_p1',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1170,13 +1170,13 @@ end;]';
     end loop;
     etim();
     p(HTF.BR);
-    p(HTF.BR);
+    p(HTF.BR);*/
 
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P1.1
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1.1');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1');
     stim();
-    p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P1.1',cname=>'ash_p1.1',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
+    p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P1',cname=>'ash_p1.1',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     for i in 1..l_dbid.count
     loop
@@ -1187,7 +1187,7 @@ end;]';
       l_output.delete;
       print_table_html_remotelly(p_query=>l_script,
                                  p_width=>1000,
-                                 p_summary=>'AWR ASH (SQL Monitor) P1.1',
+                                 p_summary=>'AWR ASH (SQL Monitor) P1',
                                  p_style1 =>'awrncbbt',
                                  p_style2 =>'awrcbbt',
                                  p_search => 'PLAN_HASH',
@@ -1295,7 +1295,7 @@ end;]';
     p(HTF.BR);
     DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Finished');
 --  =============================================================================================================================================
-    save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id, p_parent_id);
+    save_report_for_download('awr_'||p_sql_id||'.html', l_report, p_id, p_parent_id);
   exception
     when others then
       awrtools_logging.log(sqlerrm);
@@ -1312,9 +1312,11 @@ end;]';
     l_chunk varchar2(32767);
     l_off  number:=1;
     l_chunk_size number := 32767;
+    l_size number;
   begin
     select reportc into l_text from AWRTOOLS_ONLINE_RPT where id=p_id;
-    if nvl(dbms_lob.getlength(l_text),0)>0 then
+    l_size := nvl(dbms_lob.getlength(l_text),0);
+    if l_size > 0 and l_size <= 3e6 then
       loop
         l_eof:=instr(l_text,chr(10),l_off);
         if l_eof=0 then
@@ -1326,6 +1328,8 @@ end;]';
         l_iter:=l_iter+1;
         exit when l_eof=0;
       end loop;
+    elsif l_size > 5e6 then
+      p_report(1):='A report is too big. Only download option is available';
     else
       p_report(1):='Empty report';
     end if;
