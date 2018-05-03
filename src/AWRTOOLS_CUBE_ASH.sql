@@ -11,7 +11,9 @@ create or replace PACKAGE AWRTOOLS_CUBE_ASH AS
                                p_dump_id number default null,
                                p_metric_id number default null,
                                p_metricgroup_id number default null,
-                               p_aggr_func varchar2 default null);
+                               p_aggr_func varchar2 default null,
+                               p_block_analyze boolean default false);
+                               
   procedure CLEANUP_CUBE_ASH;
 
 END AWRTOOLS_CUBE_ASH;
@@ -40,15 +42,15 @@ create or replace PACKAGE BODY AWRTOOLS_CUBE_ASH AS
                                p_dump_id number default null,
                                p_metric_id number default null,
                                p_metricgroup_id number default null,
-                               p_aggr_func varchar2 default null)
+                               p_aggr_func varchar2 default null,
+                               p_block_analyze boolean default false)
   is
     l_dbid number;
     l_min_snap number;
     l_max_snap number;
     l_int_size number;
-    
+
     l_sql_template varchar2(32765):=
---INSERT INTO cube_ash (sess_id, sample_time, wait_class, sql_id, event, event_id, module, action, sql_id1,sql_plan_hash_value, segment_id, smpls , g1, g2, g3, g4, g5, g6)
    q'[SELECT   /*+ driving_site(x) */ :P_SESS_ID, <GROUPBY_COL>
             ,NVL(WAIT_CLASS,'CPU'),nvl(sql_id,'<UNKNOWN SQL>'),nvl(event, 'CPU'),nvl(EVENT_ID,-1),MODULE,ACTION,SQL_ID,SQL_PLAN_HASH_VALUE,current_obj#
             ,COUNT(1)
@@ -72,7 +74,6 @@ create or replace PACKAGE BODY AWRTOOLS_CUBE_ASH AS
                             (sql_id, SQL_PLAN_HASH_VALUE),
                             (current_obj# )
                            )]';
-    l_sql varchar2(32765);
 
     l_sql_template_metrics varchar2(32765):=
 q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
@@ -85,6 +86,27 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       and   metric_id = :P_METRIC_ID
       and   group_id=:p_metricgroup_id
     group by <GROUPBY_COL>, metric_id]';
+
+    l_sql_block_template varchar2(32765):=
+   q'[insert into CUBE_BLOCK_ASH
+      select /*+ driving_site(x) */ 
+            :P_SESS_ID, session_id, session_serial#, inst_id, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id, cnt<MULT> from(
+      select  x1.*, sum(cnt)over() tot from (
+         select
+                 session_id, session_serial#, inst_id, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id, 
+                 count(1) cnt
+            from <SOURCE_TABLE> x
+           where <DBID>
+             AND <INSTANCE_NUMBER> = :P_INST_ID
+             AND <SNAP_FILTER>
+             AND SAMPLE_TIME BETWEEN :P_START_DT AND :P_END_DT
+             AND <FILTER>
+             and wait_class = 'Application'
+           group by session_id, session_serial#, inst_id, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id) x1)
+           where cnt/tot>0.001]';
+
+    l_sql varchar2(32765);
+
   begin
     awrtools_logging.log('Start load_data_cube');
 
@@ -296,6 +318,30 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       end;
     end if;
 
+    if p_block_analyze then
+      l_sql := replace(replace(replace(replace(replace(replace(l_sql_block_template,
+                                                          '<SOURCE_TABLE>',case
+                                                                             when p_source = 'V$VIEW' then case when p_dblink = '$LOCAL$' then 'gv$active_session_history'
+                                                                                                          else 'gv$active_session_history@'||p_dblink
+                                                                                                          end
+                                                                             when p_source = 'AWR' then case when p_dblink = '$LOCAL$' then 'dba_hist_active_sess_history'
+                                                                                                        else 'dba_hist_active_sess_history@'||p_dblink
+                                                                                                        end
+                                                                           end),
+                                                  '<DBID>',case when p_source = 'V$VIEW' then ':P_DBID is null' else 'DBID = :P_DBID' end),
+                                          '<INSTANCE_NUMBER>',case when p_source = 'V$VIEW' then 'INST_ID' else 'INSTANCE_NUMBER' end),
+                                  '<SNAP_FILTER>',case when p_source = 'AWR' then 'SNAP_ID BETWEEN :P_MIN_SNAP AND :P_MAX_SNAP' else ':P_MIN_SNAP is null and :P_MAX_SNAP is null' end),
+                          '<FILTER>',nvl(p_filter,'1=1')),'<MULT>',case when p_source = 'AWR' then '*10' else null end);  
+      begin
+        awrtools_logging.log('Start block loading');
+        --awrtools_logging.log(l_sql);
+        execute immediate l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt;
+        awrtools_logging.log('End block loading');
+      exception
+        when others then
+          raise_application_error(-20000,sqlerrm);
+      end;
+    end if;
     commit;
     awrtools_logging.log('End load_data_cube');
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash_timeline', cascade=>true);

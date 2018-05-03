@@ -193,6 +193,22 @@ value        number
 
 create index idx_cube_metrics on cube_metrics(sess_id);
 
+CREATE TABLE CUBE_BLOCK_ASH (
+	SESS_ID NUMBER references cube_ash_sess(sess_id) on delete cascade,
+	SESSION_ID NUMBER, 
+	SESSION_SERIAL# NUMBER, 
+	INST_ID NUMBER, 
+	SQL_ID VARCHAR2(13 BYTE), 
+	MODULE VARCHAR2(64 BYTE), 
+	ACTION VARCHAR2(64 BYTE), 
+	BLOCKING_SESSION NUMBER, 
+	BLOCKING_SESSION_SERIAL# NUMBER, 
+	BLOCKING_INST_ID NUMBER, 
+	CNT NUMBER
+   );
+
+create index IDX_CUBE_BLOCK_ASH on CUBE_BLOCK_ASH(sess_id);
+
 --Logging
 create table AWRTOOLS_LOG (
 ts timestamp default systimestamp,
