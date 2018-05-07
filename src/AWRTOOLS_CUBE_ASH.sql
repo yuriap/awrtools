@@ -4,7 +4,7 @@ create or replace PACKAGE AWRTOOLS_CUBE_ASH AS
                                p_source varchar2,
                                p_dblink varchar2,
                                p_agg varchar2,
-                               p_inst_id number,
+                               p_inst_id varchar2,
                                p_start_dt date,
                                p_end_dt date,
                                p_filter varchar2,
@@ -13,7 +13,7 @@ create or replace PACKAGE AWRTOOLS_CUBE_ASH AS
                                p_metricgroup_id number default null,
                                p_aggr_func varchar2 default null,
                                p_block_analyze boolean default false);
-                               
+
   procedure CLEANUP_CUBE_ASH;
 
 END AWRTOOLS_CUBE_ASH;
@@ -35,7 +35,7 @@ create or replace PACKAGE BODY AWRTOOLS_CUBE_ASH AS
                                p_source varchar2,
                                p_dblink varchar2,
                                p_agg varchar2,
-                               p_inst_id number,
+                               p_inst_id varchar2,
                                p_start_dt date,
                                p_end_dt date,
                                p_filter varchar2,
@@ -45,10 +45,12 @@ create or replace PACKAGE BODY AWRTOOLS_CUBE_ASH AS
                                p_aggr_func varchar2 default null,
                                p_block_analyze boolean default false)
   is
-    l_dbid number;
+    l_dbid     number;
     l_min_snap number;
     l_max_snap number;
     l_int_size number;
+    l_inst_id  number;
+    l_inst_list varchar2(32765);
 
     l_sql_template varchar2(32765):=
    q'[SELECT   /*+ driving_site(x) */ :P_SESS_ID, <GROUPBY_COL>
@@ -62,7 +64,7 @@ create or replace PACKAGE BODY AWRTOOLS_CUBE_ASH AS
             ,GROUPING_ID (current_obj#) g6
      FROM   <SOURCE_TABLE> x
     WHERE   <DBID>
-      AND   <INSTANCE_NUMBER> = :P_INST_ID
+      AND   <INSTANCE_NUMBER> in (<P_INST_ID>)
       AND   <SNAP_FILTER>
       AND   SAMPLE_TIME BETWEEN :P_START_DT AND :P_END_DT
       AND   <FILTER>
@@ -80,7 +82,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
    select   :P_SESS_ID, metric_id, <GROUPBY_COL>, <AGGFNC>(value)
      from   <SOURCE_TABLE>
     where   <DBID>
-      AND   <INSTANCE_NUMBER> = :P_INST_ID
+      AND   <INSTANCE_NUMBER> in (<P_INST_ID>)
       AND   <SNAP_FILTER>
       AND   end_time BETWEEN :P_START_DT AND :P_END_DT
       and   metric_id = :P_METRIC_ID
@@ -90,46 +92,58 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
     l_sql_block_template varchar2(32765):=
    q'[insert into CUBE_BLOCK_ASH
       select /*+ driving_site(x) */ 
-            :P_SESS_ID, session_id, session_serial#, inst_id, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id, cnt<MULT> from(
+            :P_SESS_ID, session_id, session_serial#, <INSTANCE_NUMBER>, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id, cnt<MULT> from(
       select  x1.*, sum(cnt)over() tot from (
          select
-                 session_id, session_serial#, inst_id, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id, 
+                 session_id, session_serial#, <INSTANCE_NUMBER>, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id, 
                  count(1) cnt
             from <SOURCE_TABLE> x
            where <DBID>
-             AND <INSTANCE_NUMBER> = :P_INST_ID
+             AND <INSTANCE_NUMBER> in (<P_INST_ID>)
              AND <SNAP_FILTER>
              AND SAMPLE_TIME BETWEEN :P_START_DT AND :P_END_DT
              AND <FILTER>
              and wait_class = 'Application'
-           group by session_id, session_serial#, inst_id, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id) x1)
+           group by session_id, session_serial#, <INSTANCE_NUMBER>, sql_id, module, action, blocking_session, blocking_session_serial#, blocking_inst_id) x1)
            where cnt/tot>0.001]';
 
     l_sql varchar2(32765);
-
+    l_crsr sys_refcursor;
   begin
     awrtools_logging.log('Start load_data_cube');
 
     insert into cube_ash_sess values (default, default) returning sess_id into p_sess_id;
 
     if p_dblink <> '$LOCAL$' then
+      if instr(p_inst_id,'-1')>0 then
+        open l_crsr for 'select inst_id from gv$instance@'||p_dblink||' order by 1';
+        loop
+          fetch l_crsr into l_inst_id;
+          exit when l_crsr%notfound;
+          l_inst_list:=l_inst_list||l_inst_id||',';
+        end loop;
+        close l_crsr;
+        l_inst_list:=rtrim(l_inst_list,',');
+      else
+        l_inst_list:=replace(replace(p_inst_id,':',','),';',',');
+      end if;
       if p_source = 'AWR' then
         execute immediate 'select dbid from v$database@'||p_dblink into l_dbid;
-        execute immediate 'select min(snap_id)
+        execute immediate replace('select min(snap_id)
             from dba_hist_snapshot@'||p_dblink||'
            where end_interval_time>=:P_START_DT
              and dbid=:P_DBID
-             and instance_number=:P_INST_ID' into l_min_snap using p_start_dt, l_dbid, p_inst_id;
-        execute immediate 'select min(snap_id)
+             and instance_number in (<P_INST_ID>)','<P_INST_ID>',l_inst_list) into l_min_snap using p_start_dt, l_dbid;
+        execute immediate replace('select min(snap_id)
             from dba_hist_snapshot@'||p_dblink||'
            where end_interval_time>=:P_END_DT
              and dbid=:P_DBID
-             and instance_number=:P_INST_ID' into l_max_snap using p_end_dt, l_dbid, p_inst_id;
+             and instance_number in (<P_INST_ID>)','<P_INST_ID>',l_inst_list) into l_max_snap using p_end_dt, l_dbid;
         if l_max_snap is null then
-          execute immediate 'select max(snap_id)
+          execute immediate replace('select max(snap_id)
               from dba_hist_snapshot@'||p_dblink||'
              where dbid=:P_DBID
-               and instance_number=:P_INST_ID' into l_max_snap using l_dbid, p_inst_id;
+               and instance_number in (<P_INST_ID>)','<P_INST_ID>',l_inst_list) into l_max_snap using l_dbid;
         end if;
       end if;
     else
@@ -142,7 +156,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
        where dump_id=p_dump_id and d.proj_id=p.proj_id;
     end if;
 
-    l_sql := replace(replace(replace(replace(replace(l_sql_template,
+    l_sql := replace(replace(replace(replace(replace(replace(l_sql_template,
                                                           '<SOURCE_TABLE>',case
                                                                              when p_source = 'V$VIEW' then case when p_dblink = '$LOCAL$' then 'gv$active_session_history'
                                                                                                           else 'gv$active_session_history@'||p_dblink
@@ -154,7 +168,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                                                   '<DBID>',case when p_source = 'V$VIEW' then ':P_DBID is null' else 'DBID = :P_DBID' end),
                                           '<INSTANCE_NUMBER>',case when p_source = 'V$VIEW' then 'INST_ID' else 'INSTANCE_NUMBER' end),
                                   '<SNAP_FILTER>',case when p_source = 'AWR' then 'SNAP_ID BETWEEN :P_MIN_SNAP AND :P_MAX_SNAP' else ':P_MIN_SNAP is null and :P_MAX_SNAP is null' end),
-                          '<FILTER>',nvl(p_filter,'1=1'));
+                          '<FILTER>',nvl(p_filter,'1=1')),'<P_INST_ID>',l_inst_list);
     case
       when p_agg = 'no_agg'  then
         l_sql := replace(l_sql,'<GROUPBY_COL>','sample_time');
@@ -167,18 +181,18 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       else
         null;
     end case;
-/*
+
     awrtools_logging.log(l_sql);
     awrtools_logging.log('p_sess_id:'||p_sess_id);
     awrtools_logging.log('l_dbid:'||l_dbid);
     awrtools_logging.log('p_inst_id:'||p_inst_id);
+    awrtools_logging.log('l_inst_list:'||l_inst_list);
     awrtools_logging.log('l_min_snap:'||l_min_snap);
     awrtools_logging.log('l_max_snap:'||l_max_snap);
     awrtools_logging.log('p_start_dt:'||p_start_dt);
     awrtools_logging.log('p_end_dt:'||p_end_dt);
-*/
+
     declare
-      l_crsr sys_refcursor;
       type ta_sess_id is table of cube_ash.sess_id%type; la_sess_id ta_sess_id;
       type ta_sample_time is table of cube_ash.sample_time%type; la_sample_time ta_sample_time;
       type ta_wait_class is table of cube_ash.wait_class%type; la_wait_class ta_wait_class;
@@ -199,8 +213,9 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       type ta_g6 is table of cube_ash.g6%type; la_g6 ta_g6;
     begin
       awrtools_logging.log('Start extracting cube');
+      awrtools_logging.log(l_sql);
       --execute immediate l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt;
-      open l_crsr for l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt;
+      open l_crsr for l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, p_start_dt, p_end_dt;
       fetch l_crsr bulk collect into la_sess_id, la_sample_time, la_wait_class, la_sql_id, la_event, la_event_id, 
                           la_module, la_action, la_sql_id1,la_sql_plan_hash_value, 
                           la_segment_id, la_smpls , la_g1, la_g2, la_g3, la_g4, la_g5, la_g6;
@@ -262,7 +277,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
     end if;
 
     if p_metric_id is not null then
-      l_sql := replace(replace(replace(replace(replace(l_sql_template_metrics,
+      l_sql := replace(replace(replace(replace(replace(replace(l_sql_template_metrics,
                                                             '<SOURCE_TABLE>',case
                                                                                when p_source = 'V$VIEW' then case when p_dblink = '$LOCAL$' then 'gv$sysmetric_history'
                                                                                                             else 'gv$sysmetric_history@'||p_dblink
@@ -274,7 +289,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                                                     '<DBID>',case when p_source = 'V$VIEW' then ':P_DBID is null' else 'DBID = :P_DBID' end),
                                             '<INSTANCE_NUMBER>',case when p_source = 'V$VIEW' then 'INST_ID' else 'INSTANCE_NUMBER' end),
                                     '<SNAP_FILTER>',case when p_source = 'AWR' then 'SNAP_ID BETWEEN :P_MIN_SNAP AND :P_MAX_SNAP' else ':P_MIN_SNAP is null and :P_MAX_SNAP is null' end),
-                            '<AGGFNC>',p_aggr_func);
+                            '<AGGFNC>',p_aggr_func),'<P_INST_ID>',l_inst_list);
       select interval_size into l_int_size from V$METRICGROUP where group_id = p_metricgroup_id;
       case
         when p_agg = 'no_agg'  then
@@ -310,16 +325,18 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
 */
       begin
         awrtools_logging.log('Start metrics loading');
-        execute immediate l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt, p_metric_id, p_metricgroup_id;
+        awrtools_logging.log(l_sql);
+        execute immediate l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, p_start_dt, p_end_dt, p_metric_id, p_metricgroup_id;
         awrtools_logging.log('End metrics loading');
       exception
         when others then
+          awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
           raise_application_error(-20000,sqlerrm);
       end;
     end if;
 
     if p_block_analyze then
-      l_sql := replace(replace(replace(replace(replace(replace(l_sql_block_template,
+      l_sql := replace(replace(replace(replace(replace(replace(replace(l_sql_block_template,
                                                           '<SOURCE_TABLE>',case
                                                                              when p_source = 'V$VIEW' then case when p_dblink = '$LOCAL$' then 'gv$active_session_history'
                                                                                                           else 'gv$active_session_history@'||p_dblink
@@ -331,14 +348,16 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                                                   '<DBID>',case when p_source = 'V$VIEW' then ':P_DBID is null' else 'DBID = :P_DBID' end),
                                           '<INSTANCE_NUMBER>',case when p_source = 'V$VIEW' then 'INST_ID' else 'INSTANCE_NUMBER' end),
                                   '<SNAP_FILTER>',case when p_source = 'AWR' then 'SNAP_ID BETWEEN :P_MIN_SNAP AND :P_MAX_SNAP' else ':P_MIN_SNAP is null and :P_MAX_SNAP is null' end),
-                          '<FILTER>',nvl(p_filter,'1=1')),'<MULT>',case when p_source = 'AWR' then '*10' else null end);  
+                          '<FILTER>',nvl(p_filter,'1=1')),
+                          '<MULT>',case when p_source = 'AWR' then '*10' else null end),'<P_INST_ID>',l_inst_list);  
       begin
         awrtools_logging.log('Start block loading');
-        --awrtools_logging.log(l_sql);
-        execute immediate l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt;
+        awrtools_logging.log(l_sql);
+        execute immediate l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, p_start_dt, p_end_dt;
         awrtools_logging.log('End block loading');
       exception
         when others then
+          awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
           raise_application_error(-20000,sqlerrm);
       end;
     end if;

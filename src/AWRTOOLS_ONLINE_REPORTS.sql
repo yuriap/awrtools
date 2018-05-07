@@ -7,6 +7,10 @@ create or replace PACKAGE AWRTOOLS_ONLINE_REPORTS AS
   --creating report content
   procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
   procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
+  
+  --creating report content asynchronously
+  procedure getplanh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number);
+  procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number);  
 
   --getting already created report content
   procedure getreport(p_id in number, p_report out t_output_lines);
@@ -20,7 +24,7 @@ create or replace PACKAGE BODY AWRTOOLS_ONLINE_REPORTS AS
   procedure CLEANUP_ONLINE_RPT
   is
   begin
-    delete from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - 1/24);
+    delete from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - 3/24);
     dbms_output.put_line('Deleted '||sql%rowcount||' report(s).');
     commit;
   exception
@@ -340,6 +344,17 @@ end;]';
     l_output t_output_lines;
     l_plsql_output clob;
     l_indx   number := 1;
+    
+    --longops
+    rindex    BINARY_INTEGER;
+    slno      BINARY_INTEGER;
+    totalwork number;
+    sofar     number;
+    obj       BINARY_INTEGER;
+    op_name   varchar2(100):='SQL V$ report: '||p_sql_id;
+    target_desc varchar2(100):='section';
+    units     varchar2(100):='sections'; 
+    
     procedure p(p_line varchar2) is
     begin
       l_report(l_indx):=p_line;
@@ -377,7 +392,15 @@ end;]';
     end;
   begin
     --p('SQL_ID='||p_sql_id||'; DB LINK='||p_dblink);
-
+    
+    --longops
+    rindex := dbms_application_info.set_session_longops_nohint;
+    sofar := 0;
+    totalwork := 14;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
+    
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Preparation');
+    
     p(HTF.header (1,'SQL Report for SQL_ID='||p_sql_id,cattributes=>'class="awr"'));
     p(HTF.BR);
     p(HTF.BR);
@@ -402,7 +425,7 @@ end;]';
 
 --  =============================================================================================================================================
     --SQL TEXT
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL TEXT');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'SQL TEXT');
     stim();
     l_script:=awrtools_api.getscript('PROC_GETGTXT');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL text',cname=>'sql_text',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -416,9 +439,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);    
 --  =============================================================================================================================================
     --Non shared
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Non shared');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Non shared');
     stim();
     l_script:=awrtools_api.getscript('PROC_NON_SHARED');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Non shared reason',cname=>'non_shared',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -432,9 +458,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);  
 --  =============================================================================================================================================
     --V$SQL statistics
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'V$SQL statistics');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'V$SQL statistics');
     stim();
     l_script:=awrtools_api.getscript('PROC_VSQL_STAT');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'V$SQL statistics',cname=>'v_sql_stat',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -464,9 +493,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units); 
 --  =============================================================================================================================================
     --Exadata statistics
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Exadata statistics');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Exadata statistics');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Exadata statistics',cname=>'exadata',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -490,9 +522,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);  
 --  =============================================================================================================================================
     --SQL Monitor report
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL Monitor report');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'SQL Monitor report');
     stim();
     l_script:=awrtools_api.getscript('PROC_SQLMON');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Monitor report (11g+)',cname=>'sql_mon',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -509,10 +544,13 @@ end;]';
     p(HTF.LISTITEM(cattributes=>'class="awr"',ctext=>HTF.ANCHOR (curl=>'#tblofcont',ctext=>'Back to top',cattributes=>'class="awr"')));
     p(HTF.BR);
     p(HTF.BR);
-    etim();
+    etim();    
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);    
 --  =============================================================================================================================================
     --SQL Workarea
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL Workarea');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'SQL Workarea');
     stim();
     l_script:=awrtools_api.getscript('PROC_SQLWORKAREA');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Workarea',cname=>'sql_workarea',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -527,9 +565,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);  
 --  =============================================================================================================================================
     --CBO environment
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'CBO environment');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'CBO environment');
     stim();
     l_script:=awrtools_api.getscript('PROC_OPTENV');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'CBO environment',cname=>'cbo_env',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -543,7 +584,9 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
-
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Execution plans
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Execution plans',cname=>'tblofcont_plans',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -558,7 +601,7 @@ end;]';
     p(HTF.BR);
 --  =============================================================================================================================================
     --Display cursor (last)
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (last)');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Display cursor (last)');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (last)',cname=>'dp_last',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -578,9 +621,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Display cursor (RAC)
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (RAC)');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Display cursor (RAC)');
     stim();
     l_script:=awrtools_api.getscript('PROC_RACPLAN');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (RAC)',cname=>'dp_rac',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -595,11 +641,14 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Display cursor (LAST ADVANCED)
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (LAST ADVANCED)');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Display cursor (LAST ADVANCED)');
     stim();
-    p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (LAST ADVANCED)',cname=>'dp_last_adv',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
+    p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'Display cursor (RAC)',ctext=>'Display cursor (LAST ADVANCED)',cname=>'dp_last_adv',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     l_script:=q'[select * from table(dbms_xplan.display_cursor('&SQLID', null, 'LAST ADVANCED'))]'||chr(10);
     prepare_script(l_script,p_sql_id);
@@ -615,9 +664,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Display cursor (ALL)
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (ALL)');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Display cursor (ALL)');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (ALL)',cname=>'dp_all',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -637,9 +689,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Display cursor (ADAPTIVE)
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'Display cursor (ADAPTIVE)');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Display cursor (ADAPTIVE)');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Display cursor (ADAPTIVE)',cname=>'dp_adaptive',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -672,9 +727,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --SQL Monitor report history
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'SQL Monitor report history');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'SQL Monitor report history');
     stim();
     l_script:=awrtools_api.getscript('PROC_SQLMON_HIST');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Monitor report history (12c+)',cname=>'sql_mon_hist',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
@@ -690,10 +748,12 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
     etim();
-
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P3
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlan', action_name => 'ASH Summary');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'ASH Summary');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'ASH Summary',cname=>'ash_p3',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -723,7 +783,12 @@ end;]';
     p(HTF.BR);
     p('End of report.');
     etim(true);
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL V$ report: '||p_sql_id, action_name => 'Finished');
+    
     save_report_for_download('sql_'||p_sql_id||'.html', l_report, p_id, p_parent_id);
   exception
     when others then
@@ -755,6 +820,16 @@ end;]';
     type t_num_array is table of number;
     l_dbid t_num_array;
 
+    --longops
+    rindex    BINARY_INTEGER;
+    slno      BINARY_INTEGER;
+    totalwork number;
+    sofar     number;
+    obj       BINARY_INTEGER;
+    op_name   varchar2(100):='SQL AWR report: '||p_sql_id;
+    target_desc varchar2(100):='section';
+    units     varchar2(100):='sections'; 
+    
     procedure p(p_line varchar2) is
     begin
       l_report(l_indx):=p_line;
@@ -791,7 +866,14 @@ end;]';
       end if;
     end;
   begin
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Preparation');
+  
+    --longops
+    rindex := dbms_application_info.set_session_longops_nohint;
+    sofar := 0;
+    totalwork := 13;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
+        
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'Preparation');
 
     execute immediate q'[select nvl(min(snap_id),1) , nvl(max(snap_id),1e6) from dba_hist_sqlstat@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[' and dbid in (select dbid from dba_hist_sqltext@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[')]'
       into l_start_snap, l_end_snap;
@@ -836,7 +918,7 @@ end;]';
 
 --  =============================================================================================================================================
     --SQL TEXT
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'SQL TEXT');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'SQL TEXT');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL text',cname=>'sql_text',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -852,9 +934,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --DB description
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'DB description');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'DB description');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'DB description',cname=>'db_desc',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -870,9 +954,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --SQL statistics
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'SQL statistics');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'SQL statistics');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL statistics',cname=>'sql_stat',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -907,9 +993,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Bind values
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Bind values');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'Bind values');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Bind values',cname=>'binds',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -925,9 +1013,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --AWR SQL execution plans
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR SQL execution plans');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'AWR SQL execution plans');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR SQL execution plans',cname=>'awrplans',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -958,9 +1048,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Comparsion
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Comparsion');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'Comparsion');
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR SQL plans comparison',cname=>'awrplanscomp',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
     p('Not implemented for remote database.');
@@ -1007,9 +1099,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --Explain plan
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Explain plan');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'Explain plan');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Explain plan',cname=>'epplan',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1067,6 +1161,8 @@ end;]';
     p(HTF.BR);
     rollback;
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'ASH',cname=>'ash',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1080,7 +1176,7 @@ end;]';
 
 --  =============================================================================================================================================
     --ASH PL/SQL
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'ASH PL/SQL');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'ASH PL/SQL');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'ASH PL/SQL',cname=>'ash_plsql',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1105,9 +1201,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --ASH summary
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'ASH summary');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'ASH summary');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'ASH summary',cname=>'ash_summ',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1138,9 +1236,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P1
-/*    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1');
+/*    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'AWR ASH (SQL Monitor) P1');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P1',cname=>'ash_p1',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1174,7 +1274,7 @@ end;]';
 
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P1.1
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P1');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'AWR ASH (SQL Monitor) P1');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P1',cname=>'ash_p1.1',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1205,9 +1305,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P2
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P2');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'AWR ASH (SQL Monitor) P2');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P2',cname=>'ash_p2',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1238,9 +1340,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --AWR ASH (SQL Monitor) P3
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'AWR ASH (SQL Monitor) P3');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'AWR ASH (SQL Monitor) P3');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'AWR ASH (SQL Monitor) P3',cname=>'ash_p3',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1269,9 +1373,11 @@ end;]';
     p(HTF.BR);
     p(HTF.BR);
 
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
 --  =============================================================================================================================================
     --SQL Monitor report history
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'SQL Monitor report history');
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'SQL Monitor report history');
     stim();
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'SQL Monitor report history (12c+)',cname=>'sql_mon_hist',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
@@ -1293,7 +1399,11 @@ end;]';
     etim(true);
     p(HTF.BR);
     p(HTF.BR);
-    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'GetPlanAWR', action_name => 'Finished');
+    
+    sofar := sofar + 1;
+    dbms_application_info.set_session_longops(rindex, slno, op_name, obj, 0, sofar, totalwork, target_desc, units);
+    
+    DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'Finished');
 --  =============================================================================================================================================
     save_report_for_download('awr_'||p_sql_id||'.html', l_report, p_id, p_parent_id);
   exception
@@ -1313,8 +1423,9 @@ end;]';
     l_off  number:=1;
     l_chunk_size number := 32767;
     l_size number;
+    l_fname AWRTOOLS_ONLINE_RPT.file_name%type;
   begin
-    select reportc into l_text from AWRTOOLS_ONLINE_RPT where id=p_id;
+    select reportc, file_name into l_text,l_fname from AWRTOOLS_ONLINE_RPT where id=p_id;
     l_size := nvl(dbms_lob.getlength(l_text),0);
     if l_size > 0 and l_size <= 3e6 then
       loop
@@ -1329,7 +1440,7 @@ end;]';
         exit when l_eof=0;
       end loop;
     elsif l_size > 5e6 then
-      p_report(1):='A report is too big. Only download option is available';
+      p_report(1):='A report <b>'||l_fname||'</b> is too big. Only download option is available';
     else
       p_report(1):='Empty report';
     end if;
@@ -1369,5 +1480,26 @@ end;]';
     close l_crsr;
   end;
 
+  --creating report content asynchronously
+  procedure getplanh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  is
+  begin
+    dbms_scheduler.create_job(job_name => 'getplanh',
+                              job_type => 'PLSQL_BLOCK',
+                              job_action => q'[begin AWRTOOLS_ONLINE_REPORTS.getplanh(p_sql_id=>']'||p_sql_id||q'[',p_dblink=>']'||p_dblink||q'[',p_id=>]'||p_id||q'[); end;]',
+                              start_date => systimestamp,
+                              enabled => true,
+                              AUTO_DROP => true);    
+  end;
+  procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  is
+  begin
+    dbms_scheduler.create_job(job_name => 'getplanawrh',
+                              job_type => 'PLSQL_BLOCK',
+                              job_action => q'[begin AWRTOOLS_ONLINE_REPORTS.getplanawrh(p_sql_id=>']'||p_sql_id||q'[',p_dblink=>']'||p_dblink||q'[',p_id=>]'||p_id||q'[); end;]',
+                              start_date => systimestamp,
+                              enabled => true,
+                              AUTO_DROP => true);   
+  end;  
 END AWRTOOLS_ONLINE_REPORTS;
 /

@@ -28,7 +28,8 @@ declare
       into l_names
       from user_tables
      where table_name like 'AWR%'
-        or table_name like 'REMOTE_ASH%'
+        or table_name like 'REMOTE\_ASH%' escape '\'
+		or table_name like 'CUBE\_%' escape '\'
      order by 1;
     for i in 1 .. l_names.count loop
       begin

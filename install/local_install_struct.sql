@@ -100,50 +100,7 @@ where x1.dbid<>(select dbid from v$database_rem)
 and x1.dbid=loc.dbid(+) and x1.snap_id between loc.min_snap_id(+) and loc.max_snap_id(+)
 order by x1.dbid,x1.snap_id;
 
---Online ASH Dashboard
-create table remote_ash_sess (
-sess_id number generated always as identity,
-sess_created timestamp default systimestamp,
-primary key (sess_id));
-
-create table remote_ash_timeline (
-sess_id      number references remote_ash_sess(sess_id) on delete cascade,
-sample_time  date);
-
-create table remote_ash (
-sess_id      number references remote_ash_sess(sess_id) on delete cascade,
-sample_time  date,
-wait_class   VARCHAR2(64),
-sql_id       VARCHAR2(13),
-event        VARCHAR2(64),
-event_id     number,
-module       VARCHAR2(64),
-action       VARCHAR2(64),
-SQL_PLAN_HASH_VALUE number,
-segment_id   number,
-sec          number);
-
-create index idx_remote_ash_timeline_1 on remote_ash_timeline(sess_id);
-create index idx_remote_ash_1 on remote_ash(sess_id);
-
-create table remote_ash_seg (
-sess_id      number references remote_ash_sess(sess_id) on delete cascade,
-segment_id   number,
-segment_name varchar2(260));
-
-create index idx_remote_ash_seg on remote_ash_seg(sess_id);
-
-create table remote_metrics (
-sess_id      number references remote_ash_sess(sess_id) on delete cascade,
-metric_id    number,
-end_time     date,
-value        number
-);
-
-create index idx_remote_metric on remote_metrics(sess_id);
-
 --Online ASH Dashboard V2
-
 create table cube_ash_sess (
 sess_id number generated always as identity,
 sess_created timestamp default systimestamp,
