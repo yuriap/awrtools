@@ -1,4 +1,4 @@
-spool local_upgrade_src_config.log
+spool .\logs\local_upgrade_src_config.log
 
 @version
 prompt Upgrade local scheme of AWR Tools
@@ -10,7 +10,7 @@ set echo off
 spool off
 
 
-spool local_upgrade_src.log
+spool .\logs\local_upgrade_src.log
 
 --Create source code objects
 conn &localscheme./&localscheme.@&localdb.

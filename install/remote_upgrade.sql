@@ -1,4 +1,4 @@
-spool local_upgrade_config.log
+spool .\logs\local_upgrade_config.log
 
 @version
 prompt Upgrade remote scheme of AWR Tools
@@ -9,7 +9,7 @@ set echo on
 set echo off
 spool off
 
-spool remote_upgrade.log
+spool .\logs\remote_upgrade.log
 
 set echo on
 @cleanup

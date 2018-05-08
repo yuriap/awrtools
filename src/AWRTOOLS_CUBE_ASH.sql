@@ -24,7 +24,7 @@ create or replace PACKAGE BODY AWRTOOLS_CUBE_ASH AS
   procedure CLEANUP_CUBE_ASH
   is
   begin
-    delete from cube_ash_sess where sess_created < (systimestamp - 1/24);
+    delete from cube_ash_sess where sess_created < (systimestamp - to_number(awrtools_api.getconf('CUBE_EXPIRE_TIME'))/24/60);
     dbms_output.put_line('Deleted '||sql%rowcount||' session(s).');
     commit;
   exception
@@ -110,7 +110,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
     l_sql varchar2(32765);
     l_crsr sys_refcursor;
   begin
-    awrtools_logging.log('Start load_data_cube');
+    awrtools_logging.log('Start load_data_cube','DEBUG');
 
     insert into cube_ash_sess values (default, default) returning sess_id into p_sess_id;
 
@@ -182,15 +182,15 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
         null;
     end case;
 
-    awrtools_logging.log(l_sql);
-    awrtools_logging.log('p_sess_id:'||p_sess_id);
-    awrtools_logging.log('l_dbid:'||l_dbid);
-    awrtools_logging.log('p_inst_id:'||p_inst_id);
-    awrtools_logging.log('l_inst_list:'||l_inst_list);
-    awrtools_logging.log('l_min_snap:'||l_min_snap);
-    awrtools_logging.log('l_max_snap:'||l_max_snap);
-    awrtools_logging.log('p_start_dt:'||p_start_dt);
-    awrtools_logging.log('p_end_dt:'||p_end_dt);
+    awrtools_logging.log(l_sql,'DEBUG');
+    awrtools_logging.log('p_sess_id:'||p_sess_id,'DEBUG');
+    awrtools_logging.log('l_dbid:'||l_dbid,'DEBUG');
+    awrtools_logging.log('p_inst_id:'||p_inst_id,'DEBUG');
+    awrtools_logging.log('l_inst_list:'||l_inst_list,'DEBUG');
+    awrtools_logging.log('l_min_snap:'||l_min_snap,'DEBUG');
+    awrtools_logging.log('l_max_snap:'||l_max_snap,'DEBUG');
+    awrtools_logging.log('p_start_dt:'||p_start_dt,'DEBUG');
+    awrtools_logging.log('p_end_dt:'||p_end_dt,'DEBUG');
 
     declare
       type ta_sess_id is table of cube_ash.sess_id%type; la_sess_id ta_sess_id;
@@ -212,15 +212,15 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       type ta_g5 is table of cube_ash.g5%type; la_g5 ta_g5;
       type ta_g6 is table of cube_ash.g6%type; la_g6 ta_g6;
     begin
-      awrtools_logging.log('Start extracting cube');
-      awrtools_logging.log(l_sql);
+      awrtools_logging.log('Start extracting cube','DEBUG');
+      awrtools_logging.log(l_sql,'DEBUG');
       --execute immediate l_sql using p_sess_id, l_dbid, p_inst_id, l_min_snap, l_max_snap, p_start_dt, p_end_dt;
       open l_crsr for l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, p_start_dt, p_end_dt;
       fetch l_crsr bulk collect into la_sess_id, la_sample_time, la_wait_class, la_sql_id, la_event, la_event_id, 
                           la_module, la_action, la_sql_id1,la_sql_plan_hash_value, 
                           la_segment_id, la_smpls , la_g1, la_g2, la_g3, la_g4, la_g5, la_g6;
       close l_crsr;
-      awrtools_logging.log('Start saving cube');
+      awrtools_logging.log('Start saving cube','DEBUG');
       forall i in la_sess_id.first..la_sess_id.last
         INSERT INTO cube_ash 
                  (sess_id, sample_time, wait_class, sql_id, event, event_id, 
@@ -235,12 +235,12 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
         raise_application_error(-20000,sqlerrm);
     end;
 
-    awrtools_logging.log('Start loading seg ids');
+    awrtools_logging.log('Start loading seg ids','DEBUG');
     insert into cube_ash_seg (sess_id,segment_id)
     select * from (select p_sess_id, SEGMENT_ID from cube_ash where sess_id=p_sess_id and g6=0 order by smpls desc) where rownum<21;
     if p_dblink != '$LOCAL$' then
       begin
-        awrtools_logging.log('Start loading seg names');
+        awrtools_logging.log('Start loading seg names','DEBUG');
         l_sql := q'[update cube_ash_seg set segment_name=(select object_type||': '||owner||'.'||object_name from dba_objects]'||
                             case when p_dblink != '$LOCAL$' then '@'||p_dblink else null end||
                             q'[ where object_id=SEGMENT_ID) where sess_id=]'||p_sess_id;
@@ -251,7 +251,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
           raise_application_error(-20000,sqlerrm);
       end;
     end if;
-    awrtools_logging.log('End loading cube');
+    awrtools_logging.log('End loading cube','DEBUG');
 
     --commit;
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash', cascade=>true);
@@ -311,23 +311,23 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
         else
           null;
       end case;
-/*
-    awrtools_logging.log(l_sql);
-    awrtools_logging.log('p_sess_id:'||p_sess_id);
-    awrtools_logging.log('l_dbid:'||l_dbid);
-    awrtools_logging.log('p_inst_id:'||p_inst_id);
-    awrtools_logging.log('l_min_snap:'||l_min_snap);
-    awrtools_logging.log('l_max_snap:'||l_max_snap);
-    awrtools_logging.log('p_start_dt:'||p_start_dt);
-    awrtools_logging.log('p_end_dt:'||p_end_dt);
-    awrtools_logging.log('p_metric_id:'||p_metric_id);
-    awrtools_logging.log('p_aggr_func:'||p_aggr_func);
-*/
+
+    awrtools_logging.log(l_sql,'DEBUG');
+    awrtools_logging.log('p_sess_id:'||p_sess_id,'DEBUG');
+    awrtools_logging.log('l_dbid:'||l_dbid,'DEBUG');
+    awrtools_logging.log('p_inst_id:'||p_inst_id,'DEBUG');
+    awrtools_logging.log('l_min_snap:'||l_min_snap,'DEBUG');
+    awrtools_logging.log('l_max_snap:'||l_max_snap,'DEBUG');
+    awrtools_logging.log('p_start_dt:'||p_start_dt,'DEBUG');
+    awrtools_logging.log('p_end_dt:'||p_end_dt,'DEBUG');
+    awrtools_logging.log('p_metric_id:'||p_metric_id,'DEBUG');
+    awrtools_logging.log('p_aggr_func:'||p_aggr_func,'DEBUG');
+
       begin
-        awrtools_logging.log('Start metrics loading');
-        awrtools_logging.log(l_sql);
+        awrtools_logging.log('Start metrics loading','DEBUG');
+        awrtools_logging.log(l_sql,'DEBUG');
         execute immediate l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, p_start_dt, p_end_dt, p_metric_id, p_metricgroup_id;
-        awrtools_logging.log('End metrics loading');
+        awrtools_logging.log('End metrics loading','DEBUG');
       exception
         when others then
           awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
@@ -351,10 +351,10 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                           '<FILTER>',nvl(p_filter,'1=1')),
                           '<MULT>',case when p_source = 'AWR' then '*10' else null end),'<P_INST_ID>',l_inst_list);  
       begin
-        awrtools_logging.log('Start block loading');
-        awrtools_logging.log(l_sql);
+        awrtools_logging.log('Start block loading','DEBUG');
+        awrtools_logging.log(l_sql,'DEBUG');
         execute immediate l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, p_start_dt, p_end_dt;
-        awrtools_logging.log('End block loading');
+        awrtools_logging.log('End block loading','DEBUG');
       exception
         when others then
           awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
@@ -362,7 +362,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       end;
     end if;
     commit;
-    awrtools_logging.log('End load_data_cube');
+    awrtools_logging.log('End load_data_cube','DEBUG');
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash_timeline', cascade=>true);
   end;
 

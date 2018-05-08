@@ -1,4 +1,4 @@
-spool install_config.log
+spool .\logs\install_config.log
 
 @version
 prompt Installation of AWR Tools
@@ -9,7 +9,7 @@ set echo on
 set echo off
 spool off
 
-spool install.log
+spool .\logs\install.log
 
 set echo on
 @local_sys_setup

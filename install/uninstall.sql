@@ -1,4 +1,4 @@
-spool uninstall_config.log
+spool .\logs\uninstall_config.log
 
 @version
 prompt Uninstall of AWR Tools
@@ -9,7 +9,7 @@ set echo on
 set echo off
 spool off
 
-spool uninstall.log
+spool .\logs\uninstall.log
 
 set echo on
 

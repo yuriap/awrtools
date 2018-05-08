@@ -14,7 +14,7 @@ create or replace package awrtools_api as
 
    procedure del_report(p_report_id awrcomp_reports.report_id%type);
 
-   function getconf(p_key varchar2) return varchar2;
+   function getconf(p_key varchar2) return varchar2 RESULT_CACHE;
    function getscript(p_script_id varchar2) return clob;
 
    procedure create_new_dump(p_proj_id AWRDUMPS.proj_id%type,

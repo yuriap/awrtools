@@ -6,11 +6,11 @@ create or replace PACKAGE AWRTOOLS_ONLINE_REPORTS AS
 
   --creating report content
   procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
-  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
+  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0);
   
   --creating report content asynchronously
   procedure getplanh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number);
-  procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number);  
+  procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0);  
 
   --getting already created report content
   procedure getreport(p_id in number, p_report out t_output_lines);
@@ -24,7 +24,7 @@ create or replace PACKAGE BODY AWRTOOLS_ONLINE_REPORTS AS
   procedure CLEANUP_ONLINE_RPT
   is
   begin
-    delete from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - 3/24);
+    delete from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - to_number(awrtools_api.getconf('ONLINE_RPT_EXPIRE_TIME'))/24/60);
     dbms_output.put_line('Deleted '||sql%rowcount||' report(s).');
     commit;
   exception
@@ -71,21 +71,29 @@ loop
 end loop;
 end;]'
 else q'[end;]' end;
+    l_time number := 0;
   begin
+    awrtools_logging.log(p_sql,'DEBUG');
     l_sql:=replace(l_sql,'<PLSQL_BLOCK>',p_sql);
     if length(l_sql) > 32767 then raise_application_error(-20000,'SQL <'||substr(l_sql,1,100)||'...> too long for remote table printing.');end if;
     l_sql2exec:=l_sql;
 --dbms_output.put_line(l_sql2exec);
+    l_time:=DBMS_UTILITY.GET_TIME;
     execute immediate 'begin :p_theCursor:=dbms_sql.open_cursor@'||p_dblink||'; end;' using out l_theCursor;
     execute immediate 'begin dbms_sql.parse@'||p_dblink||'(:p_theCursor, :p_stmt , :p_flg ); end;' using l_theCursor, l_sql2exec, dbms_sql.native;
     execute immediate 'begin :a:=dbms_sql.execute@'||p_dblink||'(:p_theCursor); end;' using out l_status, in l_theCursor;
     execute immediate 'begin dbms_sql.close_cursor@'||p_dblink||'(:p_theCursor); end;' using in out l_theCursor;
+    l_time:=DBMS_UTILITY.GET_TIME-l_time;
+    awrtools_logging.log('Executing: '||(l_time/100),'DEBUG');
+    l_time:=DBMS_UTILITY.GET_TIME;
     loop
       execute immediate 'begin DBMS_OUTPUT.GET_LINE@'||p_dblink||'(line => :p_line, status => :p_status); end;' using out l_line, out l_status;
       exit when l_status=1;
       --p_output:=p_output||l_line||chr(10);
       p_output:=p_output||utl_raw.cast_to_varchar2(UTL_COMPRESS.LZ_UNCOMPRESS(l_line));
     end loop;
+    l_time:=DBMS_UTILITY.GET_TIME-l_time;
+    awrtools_logging.log('Getting output: '||(l_time/100),'DEBUG');    
   exception
     when others then
        execute immediate 'begin :p_open:=dbms_sql.IS_OPEN@'||p_dblink||'(:p_theCursor); end;' using out l_open, in l_theCursor;
@@ -798,7 +806,7 @@ end;]';
       raise_application_error(-20000, sqlerrm);
   end;
 
-  procedure getplanawrh_i(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_parent_id number default null)
+  procedure getplanawrh_i(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_parent_id number default null, p_report_limit number default 0)
   is
     l_timing boolean := true;
     l_time number; l_tot_tim number:=0;
@@ -875,8 +883,19 @@ end;]';
         
     DBMS_APPLICATION_INFO.SET_MODULE ( module_name => 'SQL AWR report: '||p_sql_id, action_name => 'Preparation');
 
+    --awrtools_logging.log('limit: '||p_report_limit,'DEBUG');
     execute immediate q'[select nvl(min(snap_id),1) , nvl(max(snap_id),1e6) from dba_hist_sqlstat@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[' and dbid in (select dbid from dba_hist_sqltext@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[')]'
-      into l_start_snap, l_end_snap;
+        into l_start_snap, l_end_snap;
+    --awrtools_logging.log('calc1 snaps: '||l_start_snap||','||l_end_snap,'DEBUG');
+    
+    if p_report_limit = 0 /*unlimited*/ then
+      null;
+    elsif p_report_limit>0 then
+      execute immediate q'[select min(snap_id) from dba_hist_snapshot@]'||p_dblink||q'[ where end_interval_time>=(select end_interval_time-:p_report_limit from dba_hist_snapshot@]'||p_dblink||q'[ where snap_id = :p_end_snap )]' into l_start_snap using p_report_limit, l_end_snap;
+      --awrtools_logging.log('calc2 snaps: '||l_start_snap||','||l_end_snap,'DEBUG');      
+    else
+      raise_application_error(-20000,'Invalid value for p_report_limit: '||p_report_limit||'. Must be >=0.');
+    end if;
 
     execute immediate 'select unique dbid from dba_hist_sqltext@'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[' order by 1]'
       bulk collect into l_dbid;
@@ -1002,7 +1021,7 @@ end;]';
     p(HTF.header (3,cheader=>HTF.ANCHOR (curl=>'',ctext=>'Bind values',cname=>'binds',cattributes=>'class="awr"'),cattributes=>'class="awr"'));
     p(HTF.BR);
 
-    l_script:=q'[select snap_id snap, name, datatype_string,to_char(last_captured,'yyyy/mm/dd hh24:mi:ss') last_captured, value_string from dba_hist_sqlbind where sql_id=']'||p_sql_id||q'[' order by snap_id,position]'||chr(10);
+    l_script:=q'[select snap_id snap, name, datatype_string,to_char(last_captured,'yyyy/mm/dd hh24:mi:ss') last_captured, value_string from dba_hist_sqlbind where sql_id=']'||p_sql_id||q'[' and snap_id between ]'||l_start_snap||' and '||l_end_snap||q'[ order by snap_id,position]'||chr(10);
     l_output.delete;
     print_table_html_remotelly(p_query=>l_script,p_width=>1000,p_summary=>'Bind values',p_header=>25, p_dblink => p_dblink, p_output=> l_output);
     p1(l_output);
@@ -1446,19 +1465,19 @@ end;]';
     end if;
   end;
 
-  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0)
   is
     l_crsr sys_refcursor;
     l_sql_id varchar2(100);
     l_id number;
   begin
-    getplanawrh_i(p_sql_id,p_dblink,p_id);
-    open l_crsr for 'select sql_id from dba_hist_active_sess_history@'||p_dblink||q'[ where sql_id is not null and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>6]';
+    getplanawrh_i(p_sql_id,p_dblink,p_id, null, p_report_limit);
+    open l_crsr for 'select sql_id from dba_hist_active_sess_history@'||p_dblink||q'[ where sql_id<>']'||p_sql_id||q'[' and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>6]';
     loop
       fetch l_crsr into l_sql_id;
       exit when l_crsr%notfound;
       select sq_online_rpt.nextval into l_id from dual;
-      getplanawrh_i(l_sql_id,p_dblink,l_id, p_id);
+      getplanawrh_i(l_sql_id,p_dblink,l_id, p_id, p_report_limit);
     end loop;
     close l_crsr;
   end;
@@ -1470,7 +1489,7 @@ end;]';
     l_id number;
   begin
     getplanh_i(p_sql_id,p_dblink,p_id);
-    open l_crsr for 'select sql_id from gv$active_session_history@'||p_dblink||q'[ where sql_id is not null and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>60]';
+    open l_crsr for 'select sql_id from gv$active_session_history@'||p_dblink||q'[ where sql_id<>']'||p_sql_id||q'[' and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>60]';
     loop
       fetch l_crsr into l_sql_id;
       exit when l_crsr%notfound;
@@ -1491,12 +1510,12 @@ end;]';
                               enabled => true,
                               AUTO_DROP => true);    
   end;
-  procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number)
+  procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0)
   is
   begin
     dbms_scheduler.create_job(job_name => 'getplanawrh',
                               job_type => 'PLSQL_BLOCK',
-                              job_action => q'[begin AWRTOOLS_ONLINE_REPORTS.getplanawrh(p_sql_id=>']'||p_sql_id||q'[',p_dblink=>']'||p_dblink||q'[',p_id=>]'||p_id||q'[); end;]',
+                              job_action => q'[begin AWRTOOLS_ONLINE_REPORTS.getplanawrh(p_sql_id=>']'||p_sql_id||q'[',p_dblink=>']'||p_dblink||q'[',p_id=>]'||p_id||q'[,p_report_limit=>]'||p_report_limit||q'[); end;]',
                               start_date => systimestamp,
                               enabled => true,
                               AUTO_DROP => true);   

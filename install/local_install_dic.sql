@@ -4,6 +4,10 @@ insert into awrconfig values ('AWRSTGTBLSPS','&tblspc_name.','Default tablespace
 insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR staging user');
 insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
 insert into awrconfig values ('TOOLVERSION','&awrtoolversion.','AWR tool version');
+insert into awrconfig values ('CUBE_EXPIRE_TIME','120','Time of data expiration of ASH cube, minutes');
+insert into awrconfig values ('ONLINE_RPT_EXPIRE_TIME','240','Time of data expiration of online reports, minutes');
+insert into awrconfig values ('LOGS_EXPIRE_TIME','8','Time of logs expiration, days');
+insert into awrconfig values ('LOGGING_LEVEL','INFO','Possible values: INFO, DEBUG');
 
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('ELAPSED_TIME_DELTA','Sort by Elapsed Time','ela_tot');
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('DISK_READS_DELTA','Sort by Disk Reads','reads_tot');

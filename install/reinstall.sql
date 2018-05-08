@@ -1,8 +1,8 @@
-spool uninstall.log
+spool .\logs\uninstall.log
 @uninstall
 spool off
 
-spool install.log
+spool .\logs\install.log
 @install
 spool off
 set echo off

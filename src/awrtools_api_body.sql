@@ -65,7 +65,7 @@ create or replace package body awrtools_api as
     delete from awrcomp_reports where report_id=p_report_id;
   end;
 
-  function getconf(p_key varchar2) return varchar2
+  function getconf(p_key varchar2) return varchar2 RESULT_CACHE
   is
     l_res awrconfig.cvalue%type;
   begin
@@ -109,12 +109,12 @@ create or replace package body awrtools_api as
      DBMS_LOB.CREATETEMPORARY(l_filebody, false);
      DBMS_LOB.fileopen(l_bfile, DBMS_LOB.file_readonly);
      DBMS_LOB.LOADBLOBFROMFILE (
-       dest_lob    => l_filebody, 
-       src_bfile   => l_bfile, 
-       amount      => DBMS_LOB.LOBMAXSIZE, 
-       dest_offset => l_d_off, 
+       dest_lob    => l_filebody,
+       src_bfile   => l_bfile,
+       amount      => DBMS_LOB.LOBMAXSIZE,
+       dest_offset => l_d_off,
        src_offset  => l_s_off);
-   
+
      awrtools_api.create_new_dump(p_proj_id, p_filename, p_dump_description, l_filebody);
      DBMS_LOB.FILECLOSE (l_bfile);
    end;
