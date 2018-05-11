@@ -132,7 +132,26 @@ g5           number,
 g6           number,
 smpls        number);
 
-create index idx_cube_ash_1 on cube_ash(sess_id);
+create bitmap index idx_cube_ash_1 on cube_ash(sess_id);
+create bitmap index idx_cube_ash_2 on cube_ash(g1);
+create bitmap index idx_cube_ash_3 on cube_ash(g2);
+create bitmap index idx_cube_ash_4 on cube_ash(g3);
+create bitmap index idx_cube_ash_5 on cube_ash(g4);
+create bitmap index idx_cube_ash_6 on cube_ash(g5);
+create bitmap index idx_cube_ash_7 on cube_ash(g6);
+create bitmap index idx_cube_ash_8 on cube_ash(wait_class);
+
+create table cube_ash_unknown (
+sess_id      number references cube_ash_sess(sess_id) on delete cascade,
+session_type varchar2(10),
+program      VARCHAR2(48),
+client_id    VARCHAR2(64),
+machine      VARCHAR2(64),
+ecid         VARCHAR2(64),
+username     varchar2(128),
+smpls        number);
+
+create index idx_cube_ash_unkn_1 on cube_ash_unknown(sess_id);
 
 create table cube_ash_seg (
 sess_id      number references cube_ash_sess(sess_id) on delete cascade,
@@ -151,17 +170,17 @@ value        number
 create index idx_cube_metrics on cube_metrics(sess_id);
 
 CREATE TABLE CUBE_BLOCK_ASH (
-	SESS_ID NUMBER references cube_ash_sess(sess_id) on delete cascade,
-	SESSION_ID NUMBER, 
-	SESSION_SERIAL# NUMBER, 
-	INST_ID NUMBER, 
-	SQL_ID VARCHAR2(13 BYTE), 
-	MODULE VARCHAR2(64 BYTE), 
-	ACTION VARCHAR2(64 BYTE), 
+	SESS_ID          NUMBER references cube_ash_sess(sess_id) on delete cascade,
+	SESSION_ID       NUMBER, 
+	SESSION_SERIAL#  NUMBER, 
+	INST_ID          NUMBER, 
+	SQL_ID           VARCHAR2(13 BYTE), 
+	MODULE           VARCHAR2(64 BYTE), 
+	ACTION           VARCHAR2(64 BYTE), 
 	BLOCKING_SESSION NUMBER, 
 	BLOCKING_SESSION_SERIAL# NUMBER, 
 	BLOCKING_INST_ID NUMBER, 
-	CNT NUMBER
+	CNT              NUMBER
    );
 
 create index IDX_CUBE_BLOCK_ASH on CUBE_BLOCK_ASH(sess_id);
@@ -186,3 +205,6 @@ create table AWRTOOLS_ONLINE_RPT (
 create index idx_rpt_ts on AWRTOOLS_ONLINE_RPT(ts);
 create index idx_rpt_prnt on AWRTOOLS_ONLINE_RPT(parent_id);
 create sequence sq_online_rpt;
+
+--Load stats
+@load_stats
