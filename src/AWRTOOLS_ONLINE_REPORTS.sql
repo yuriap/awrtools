@@ -895,7 +895,7 @@ end;]';
     if p_report_limit = 0 /*unlimited*/ then
       null;
     elsif p_report_limit>0 then
-      execute immediate q'[select nvl(min(snap_id),1) from dba_hist_snapshot@]'||p_dblink||q'[ where end_interval_time>=(select end_interval_time-:p_report_limit from dba_hist_snapshot@]'||p_dblink||q'[ where snap_id = :p_end_snap )]' into l_start_snap using p_report_limit, l_end_snap;
+      execute immediate q'[select nvl(min(snap_id),1) from dba_hist_snapshot@]'||p_dblink||q'[ where end_interval_time>=(select min(end_interval_time)-:p_report_limit from dba_hist_snapshot@]'||p_dblink||q'[ where snap_id = :p_end_snap )]' into l_start_snap using p_report_limit, l_end_snap;
       awrtools_logging.log('calc2 snaps: '||l_start_snap||','||l_end_snap,'DEBUG');      
     else
       raise_application_error(-20000,'Invalid value for p_report_limit: '||p_report_limit||'. Must be >=0.');
