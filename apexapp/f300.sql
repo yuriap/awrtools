@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   12:35 Wednesday May 16, 2018
+--   Date and Time:   14:54 Wednesday May 16, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180516122851'
+,p_last_upd_yyyymmddhh24miss=>'20180516144203'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -19296,7 +19296,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180516120933'
+,p_last_upd_yyyymmddhh24miss=>'20180516144203'
 );
 wwv_flow_api.create_report_region(
  p_id=>wwv_flow_api.id(6229637604172608)
@@ -19524,7 +19524,7 @@ wwv_flow_api.create_report_region(
 'select ',
 '  t.id, t.parent_id,',
 '  case when :P66_RPT_ID = t.id then ''Current'' else null end rpt,',
-'  t.sql_id,r.file_name,substr(t.srcdb,1,instr(t.srcdb,''.'')-1)||''/''||case when t.srctab=''V$VIEW'' then ''V$'' else ''AWR'' end src,',
+'  t.sql_id,r.file_name,substr(t.srcdb,1,case when instr(t.srcdb,''.'')=0 then 100 else instr(t.srcdb,''.'')-1 end)||''/''||case when t.srctab=''V$VIEW'' then ''V$'' else ''AWR'' end src,',
 '  (select sql_id from AWRTOOLS_ONLINE_RPT_QUEUE p where p.id=t.parent_id) parent_report,',
 '  t.queued,',
 '  r.ts,r.file_mimetype,r.report,sys.dbms_lob.getlength(r.report) download,case when t.rpt_state<>''FAILED'' then to_char(round(dbms_lob.getlength(r.report)/1024)) else t.rpt_state end sz_kb,',

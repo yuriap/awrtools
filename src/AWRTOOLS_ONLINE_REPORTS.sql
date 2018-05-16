@@ -26,7 +26,7 @@ create or replace PACKAGE BODY AWRTOOLS_ONLINE_REPORTS AS
   procedure CLEANUP_ONLINE_RPT
   is
   begin
-    delete from AWRTOOLS_ONLINE_RPT_QUEUE where id in (select id from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - to_number(awrtools_api.getconf('ONLINE_RPT_EXPIRE_TIME'))/24/60));
+    delete from AWRTOOLS_ONLINE_RPT_QUEUE where queued < (systimestamp - to_number(awrtools_api.getconf('ONLINE_RPT_EXPIRE_TIME'))/24/60);
     delete from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - to_number(awrtools_api.getconf('ONLINE_RPT_EXPIRE_TIME'))/24/60);
     dbms_output.put_line('Deleted '||sql%rowcount||' report(s).');
     commit;
