@@ -225,7 +225,7 @@ srcdb varchar2(30),
 srctab varchar2(10),
 limit number,
 rpt_state varchar2(30),
-queued timestamp systimestamp);
+queued timestamp default systimestamp);
 
 create index idx_rpt_queue_pid on AWRTOOLS_ONLINE_RPT_QUEUE(parent_id);
 

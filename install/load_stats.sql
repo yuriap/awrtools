@@ -10,8 +10,12 @@ alter session set cursor_sharing=force;
 commit;
 alter session set cursor_sharing=exact;
 
+update AWRTOOL_STAT_BACKUP set 
+c5=case when c5 is not null then user else c5 end,
+c6=case when c6 is not null then user else c6 end;
+commit;
 begin
-  dbms_stats.import_schema_stats(ownname=>user, stattab => 'AWRTOOL_STAT_BACKUP', statid => 'EXPORT_CUBE_STAT');
+  dbms_stats.import_schema_stats(ownname=>user, stattab => 'AWRTOOL_STAT_BACKUP', statid => 'EXPORT_CUBE_STAT', force=>true);
 end;
 /
 
