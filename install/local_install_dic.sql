@@ -8,6 +8,8 @@ insert into awrconfig values ('CUBE_EXPIRE_TIME','120','Time of data expiration 
 insert into awrconfig values ('ONLINE_RPT_EXPIRE_TIME','240','Time of data expiration of online reports, minutes');
 insert into awrconfig values ('LOGS_EXPIRE_TIME','8','Time of logs expiration, days');
 insert into awrconfig values ('LOGGING_LEVEL','INFO','Possible values: INFO, DEBUG');
+insert into awrconfig values ('MONITOR_PAUSE','10','Seconds between cube refresh');
+insert into awrconfig values ('MONITOR_ITERATIONS','100','Number of refresh iteration of cube');
 
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('ELAPSED_TIME_DELTA','Sort by Elapsed Time','ela_tot');
 insert into awrcomp_d_sortordrs(dic_value,dic_display_value,dic_filename_pref) values('DISK_READS_DELTA','Sort by Disk Reads','reads_tot');

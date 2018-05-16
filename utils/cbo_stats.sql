@@ -12,6 +12,7 @@ begin
   gather_stats('CUBE_ASH_UNKNOWN');
   gather_stats('CUBE_BLOCK_ASH');
   gather_stats('CUBE_METRICS');
+  gather_stats('CUBE_DIC');
 end;
 /
 
@@ -34,6 +35,7 @@ begin
   exp_stats('CUBE_ASH_UNKNOWN');
   exp_stats('CUBE_BLOCK_ASH');
   exp_stats('CUBE_METRICS');
+  exp_stats('CUBE_DIC');
 end;
 /
 

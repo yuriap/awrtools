@@ -5,16 +5,18 @@ create or replace PACKAGE AWRTOOLS_ONLINE_REPORTS AS
   procedure CLEANUP_ONLINE_RPT;
 
   --creating report content
-  procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
-  procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0);
+  --procedure getplanh(p_sql_id varchar2, p_dblink varchar2, p_id in number);
+  --procedure getplanawrh(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0);
   
   --creating report content asynchronously
-  procedure getplanh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number);
-  procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0);  
+  --procedure getplanh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number);
+  --procedure getplanawrh_async(p_sql_id varchar2, p_dblink varchar2, p_id in number, p_report_limit number default 0);  
 
   --getting already created report content
   procedure getreport(p_id in number, p_report out t_output_lines);
-
+  
+  procedure create_report_async(p_sql_id varchar2, p_dblink varchar2, p_srctab varchar2, p_id out number, p_report_limit number);
+  procedure getplan_job;
 
 END AWRTOOLS_ONLINE_REPORTS;
 /
@@ -24,6 +26,7 @@ create or replace PACKAGE BODY AWRTOOLS_ONLINE_REPORTS AS
   procedure CLEANUP_ONLINE_RPT
   is
   begin
+    delete from AWRTOOLS_ONLINE_RPT_QUEUE where id in (select id from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - to_number(awrtools_api.getconf('ONLINE_RPT_EXPIRE_TIME'))/24/60));
     delete from AWRTOOLS_ONLINE_RPT where ts < (systimestamp - to_number(awrtools_api.getconf('ONLINE_RPT_EXPIRE_TIME'))/24/60);
     dbms_output.put_line('Deleted '||sql%rowcount||' report(s).');
     commit;
@@ -886,13 +889,14 @@ end;]';
     --awrtools_logging.log('limit: '||p_report_limit,'DEBUG');
     execute immediate q'[select nvl(min(snap_id),1) , nvl(max(snap_id),1e6) from dba_hist_sqlstat@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[' and dbid in (select dbid from dba_hist_sqltext@]'||p_dblink||q'[ where sql_id=']'||p_sql_id||q'[')]'
         into l_start_snap, l_end_snap;
-    --awrtools_logging.log('calc1 snaps: '||l_start_snap||','||l_end_snap,'DEBUG');
+    
+    awrtools_logging.log('calc1 snaps: '||l_start_snap||','||l_end_snap,'DEBUG');
     
     if p_report_limit = 0 /*unlimited*/ then
       null;
     elsif p_report_limit>0 then
-      execute immediate q'[select min(snap_id) from dba_hist_snapshot@]'||p_dblink||q'[ where end_interval_time>=(select end_interval_time-:p_report_limit from dba_hist_snapshot@]'||p_dblink||q'[ where snap_id = :p_end_snap )]' into l_start_snap using p_report_limit, l_end_snap;
-      --awrtools_logging.log('calc2 snaps: '||l_start_snap||','||l_end_snap,'DEBUG');      
+      execute immediate q'[select nvl(min(snap_id),1) from dba_hist_snapshot@]'||p_dblink||q'[ where end_interval_time>=(select end_interval_time-:p_report_limit from dba_hist_snapshot@]'||p_dblink||q'[ where snap_id = :p_end_snap )]' into l_start_snap using p_report_limit, l_end_snap;
+      awrtools_logging.log('calc2 snaps: '||l_start_snap||','||l_end_snap,'DEBUG');      
     else
       raise_application_error(-20000,'Invalid value for p_report_limit: '||p_report_limit||'. Must be >=0.');
     end if;
@@ -1520,5 +1524,75 @@ end;]';
                               enabled => true,
                               AUTO_DROP => true);   
   end;  
+
+  procedure getplan_job
+  is
+    l_is_rpt boolean;
+    l_togo boolean := false;
+  begin
+    loop
+      l_is_rpt:=false;
+      for i in (select * from (select * from awrtools_online_rpt_queue where rpt_state='NEW' order by queued) where rownum=1) loop
+        l_is_rpt:=true;
+        begin
+          update awrtools_online_rpt_queue set rpt_state='IN PROGRESS' where id=i.id and rpt_state='NEW';
+          if sql%rowcount=0 then continue; end if;
+          commit;        
+          if i.srctab='V$VIEW' then
+            AWRTOOLS_ONLINE_REPORTS.getplanh_i(p_sql_id=>i.sql_id,p_dblink=>i.srcdb,p_id=>i.id);
+          elsif i.srctab='AWR' then
+            AWRTOOLS_ONLINE_REPORTS.getplanawrh_i(p_sql_id=>i.sql_id,p_dblink=>i.srcdb,p_id=>i.id,p_report_limit=>i.limit);
+          end if;
+          update awrtools_online_rpt_queue set rpt_state='FINISHED' where id=i.id;
+          commit;          
+          exception 
+            when others then 
+              awrtools_logging.log('Report: '||i.id||chr(10)||sqlerrm);
+              update awrtools_online_rpt_queue set rpt_state='FAILED' where id=i.id;
+        end;
+      end loop;
+      if l_is_rpt and not l_togo then
+        dbms_lock.sleep(5);
+        l_togo:=true;
+        l_is_rpt:=true;
+      end if;
+      exit when not l_is_rpt;
+    end loop;
+  end;
+  
+  procedure create_report_async(p_sql_id varchar2, p_dblink varchar2, p_srctab varchar2, p_id out number, p_report_limit number)
+  is
+    l_job_name varchar2(30):='GETPLAN';
+    l_cnt number;
+    l_crsr sys_refcursor;
+    l_sql_id varchar2(100);
+  begin
+    INSERT INTO awrtools_online_rpt_queue (id,sql_id,srcdb,srctab,limit,rpt_state,queued) 
+    VALUES (sq_online_rpt.nextval,p_sql_id,p_dblink,p_srctab,p_report_limit,'NEW',default) returning id into p_id;
+    
+    if p_srctab='AWR' then
+      open l_crsr for 'select sql_id from dba_hist_active_sess_history@'||p_dblink||q'[ where sql_id<>']'||p_sql_id||q'[' and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>6]';
+    elsif p_srctab='V$VIEW' then
+      open l_crsr for 'select sql_id from gv$active_session_history@'||p_dblink||q'[ where sql_id<>']'||p_sql_id||q'[' and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>60]';
+    end if;
+    if l_crsr%isopen then
+      loop
+        fetch l_crsr into l_sql_id;
+        exit when l_crsr%notfound;
+        INSERT INTO awrtools_online_rpt_queue (id,sql_id,srcdb,srctab,limit,rpt_state, parent_id, queued) 
+        VALUES (sq_online_rpt.nextval,l_sql_id,p_dblink,p_srctab,p_report_limit,'NEW',p_id,default);    
+      end loop;
+    close l_crsr;
+    end if;
+    commit;
+    select count(1) into l_cnt from USER_SCHEDULER_RUNNING_JOBS where job_name=l_job_name;
+    if l_cnt=0 then    
+      dbms_scheduler.create_job(job_name => l_job_name,
+                                job_type => 'PLSQL_BLOCK',
+                                job_action => q'[begin AWRTOOLS_ONLINE_REPORTS.getplan_job; end;]',
+                                start_date => trunc(systimestamp,'hh'),
+                                enabled => true);
+    end if;
+  end;
 END AWRTOOLS_ONLINE_REPORTS;
 /

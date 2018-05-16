@@ -14,3 +14,5 @@ begin
   dbms_stats.import_schema_stats(ownname=>user, stattab => 'AWRTOOL_STAT_BACKUP', statid => 'EXPORT_CUBE_STAT');
 end;
 /
+
+@lock_cube_stats

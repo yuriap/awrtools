@@ -101,8 +101,10 @@ and x1.dbid=loc.dbid(+) and x1.snap_id between loc.min_snap_id(+) and loc.max_sn
 order by x1.dbid,x1.snap_id;
 
 --Online ASH Dashboard V2
+create sequence sq_cube;
+
 create table cube_ash_sess (
-sess_id number generated always as identity,
+sess_id number,
 sess_created timestamp default systimestamp,
 primary key (sess_id));
 
@@ -185,6 +187,15 @@ CREATE TABLE CUBE_BLOCK_ASH (
 
 create index IDX_CUBE_BLOCK_ASH on CUBE_BLOCK_ASH(sess_id);
 
+create table cube_dic (
+src_db varchar2(100),
+dic_type varchar2(10),
+name varchar2(256),
+id number,
+id1 number);
+
+create index cube_dic_ix1 on cube_dic(src_db,dic_type);
+
 --Logging
 create table AWRTOOLS_LOG (
 ts timestamp default systimestamp,
@@ -205,6 +216,18 @@ create table AWRTOOLS_ONLINE_RPT (
 create index idx_rpt_ts on AWRTOOLS_ONLINE_RPT(ts);
 create index idx_rpt_prnt on AWRTOOLS_ONLINE_RPT(parent_id);
 create sequence sq_online_rpt;
+
+create table AWRTOOLS_ONLINE_RPT_QUEUE (
+id number primary key,
+parent_id number references AWRTOOLS_ONLINE_RPT_QUEUE on delete cascade,
+sql_id varchar2(30),
+srcdb varchar2(30),
+srctab varchar2(10),
+limit number,
+rpt_state varchar2(30),
+queued timestamp systimestamp);
+
+create index idx_rpt_queue_pid on AWRTOOLS_ONLINE_RPT_QUEUE(parent_id);
 
 --Load stats
 @load_stats
