@@ -132,11 +132,14 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
            where cnt/tot>0.001]';
 
     l_sql_unknown_template varchar2(32765):=
-   q'[insert into cube_ash_unknown (sess_id,session_type,program,client_id,machine,ecid,username,smpls)
+   q'[insert into cube_ash_unknown (sess_id,unknown_type,session_type,program,client_id,machine,ecid,username,smpls)
       select /*+ driving_site(x) */ 
-            :P_SESS_ID, session_type, program, client_id, machine, ecid, coalesce((select username from <DBA_USERS> u where u.user_id=x2.user_id),to_char(x2.user_id)) username, cnt<MULT> from(
+            :P_SESS_ID, unknown_type,
+            session_type, program, client_id, machine, ecid, coalesce((select username from <DBA_USERS> u where u.user_id=x2.user_id),to_char(x2.user_id)) username, cnt from(
       select  x1.*, sum(cnt)over() tot from (
-         select
+         select  case when sql_id is null and module is null then 'SQL_ID and MODULE'
+                        when sql_id is null and module is not null then 'SQL_ID'
+                        when sql_id is not null and module is null then 'MODULE' end unknown_type,
                  session_type, program, client_id, machine, ecid, user_id, count(1) cnt
             from <SOURCE_TABLE> x
            where <DBID>
@@ -144,8 +147,11 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
              AND <SNAP_FILTER>
              AND SAMPLE_TIME BETWEEN :P_START_DT AND :P_END_DT
              AND <FILTER>
-             /*and sql_id is null*/ and module is null
-           group by session_type,program, client_id,machine,ecid,user_id) x1)x2
+             and (sql_id is null or (module is null and action is null))
+           group by case when sql_id is null and module is null then 'SQL_ID and MODULE'
+                        when sql_id is null and module is not null then 'SQL_ID'
+                        when sql_id is not null and module is null then 'MODULE' end,
+                    session_type,program, client_id,machine,ecid,user_id) x1)x2
            where cnt/tot>0.005]';
            
     l_sql varchar2(32765);

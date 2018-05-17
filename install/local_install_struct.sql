@@ -145,6 +145,7 @@ create bitmap index idx_cube_ash_8 on cube_ash(wait_class);
 
 create table cube_ash_unknown (
 sess_id      number references cube_ash_sess(sess_id) on delete cascade,
+unknown_type varchar2(100),
 session_type varchar2(10),
 program      VARCHAR2(48),
 client_id    VARCHAR2(64),
