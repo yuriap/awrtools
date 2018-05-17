@@ -313,26 +313,26 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
         raise_application_error(-20000,sqlerrm);
     end;
 
-    awrtools_logging.log('Start loading seg ids','DEBUG');
-    if p_monitor then
-      delete from cube_ash_seg where sess_id=p_sess_id;
+    if not p_monitor then
+      awrtools_logging.log('Start loading seg ids','DEBUG');
+      --delete from cube_ash_seg where sess_id=p_sess_id;
+      insert into cube_ash_seg (sess_id,segment_id)
+      select * from (select p_sess_id, SEGMENT_ID from cube_ash where sess_id=p_sess_id and g6=0 order by smpls desc) where rownum<21;
+      if p_dblink != '$LOCAL$' then
+        begin
+          awrtools_logging.log('Start loading seg names','DEBUG');
+          l_sql := q'[update cube_ash_seg set segment_name=(select object_type||': '||owner||'.'||object_name from dba_objects]'||
+                              case when p_dblink != '$LOCAL$' then '@'||p_dblink else null end||
+                              q'[ where object_id=SEGMENT_ID) where sess_id=]'||p_sess_id;
+          execute immediate l_sql;
+        exception
+          when others then
+            awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
+            raise_application_error(-20000,sqlerrm);
+        end;
+      end if;
+      awrtools_logging.log('End loading cube','DEBUG');
     end if;    
-    insert into cube_ash_seg (sess_id,segment_id)
-    select * from (select p_sess_id, SEGMENT_ID from cube_ash where sess_id=p_sess_id and g6=0 order by smpls desc) where rownum<21;
-    if p_dblink != '$LOCAL$' then
-      begin
-        awrtools_logging.log('Start loading seg names','DEBUG');
-        l_sql := q'[update cube_ash_seg set segment_name=(select object_type||': '||owner||'.'||object_name from dba_objects]'||
-                            case when p_dblink != '$LOCAL$' then '@'||p_dblink else null end||
-                            q'[ where object_id=SEGMENT_ID) where sess_id=]'||p_sess_id;
-        execute immediate l_sql;
-      exception
-        when others then
-          awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
-          raise_application_error(-20000,sqlerrm);
-      end;
-    end if;
-    awrtools_logging.log('End loading cube','DEBUG');
 
     --commit;
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash', cascade=>true);
@@ -431,9 +431,9 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       begin
         awrtools_logging.log('Start block loading','DEBUG');
         awrtools_logging.log(l_sql,'DEBUG');
-        if p_monitor then
-          delete from CUBE_BLOCK_ASH where sess_id=p_sess_id;
-        end if;           
+--        if p_monitor then
+--          delete from CUBE_BLOCK_ASH where sess_id=p_sess_id;
+--        end if;           
         execute immediate l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, l_start_dt, l_end_dt;
         awrtools_logging.log('End block loading','DEBUG');
       exception
@@ -462,9 +462,9 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       begin
         awrtools_logging.log('Start unknown loading','DEBUG');
         awrtools_logging.log(l_sql,'DEBUG');
-        if p_monitor then
-          delete from cube_ash_unknown where sess_id=p_sess_id;
-        end if;           
+--        if p_monitor then
+--          delete from cube_ash_unknown where sess_id=p_sess_id;
+--        end if;           
         execute immediate l_sql using p_sess_id, l_dbid, /*p_inst_id,*/ l_min_snap, l_max_snap, l_start_dt, l_end_dt;
         awrtools_logging.log('End unknown loading','DEBUG');
       exception

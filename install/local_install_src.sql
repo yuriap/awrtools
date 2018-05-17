@@ -28,4 +28,7 @@ show errors
 @../src/AWRTOOLS_CUBE_ASH
 show errors
 
+@../src/AWRTOOLS_CACHE
+show errors
+
 set define on

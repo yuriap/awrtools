@@ -197,6 +197,13 @@ id1 number);
 
 create index cube_dic_ix1 on cube_dic(src_db,dic_type);
 
+create table cube_qry_cache (
+src_db varchar2(256),
+sql_id varchar2(256),
+sql_text clob,
+ts timestamp default systimestamp,
+primary key (src_db,sql_id));
+
 --Logging
 create table AWRTOOLS_LOG (
 ts timestamp default systimestamp,

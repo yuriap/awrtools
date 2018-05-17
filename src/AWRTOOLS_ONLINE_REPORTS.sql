@@ -1529,6 +1529,8 @@ end;]';
   is
     l_is_rpt boolean;
     l_togo boolean := false;
+    l_crsr sys_refcursor;
+    l_sql_id varchar2(100);    
   begin
     loop
       l_is_rpt:=false;
@@ -1537,7 +1539,24 @@ end;]';
         begin
           update awrtools_online_rpt_queue set rpt_state='IN PROGRESS' where id=i.id and rpt_state='NEW';
           if sql%rowcount=0 then continue; end if;
+
+          if i.srctab='AWR' then
+            open l_crsr for 'select sql_id from dba_hist_active_sess_history@'||i.srcdb||q'[ where sql_id<>']'||i.sql_id||q'[' and top_level_sql_id=']'||i.sql_id||q'[' group by sql_id having count(1)>6]';
+          elsif i.srctab='V$VIEW' then
+            open l_crsr for 'select sql_id from gv$active_session_history@'||i.srcdb||q'[ where sql_id<>']'||i.sql_id||q'[' and top_level_sql_id=']'||i.sql_id||q'[' group by sql_id having count(1)>60]';
+          end if;
+          if l_crsr%isopen then
+            loop
+              fetch l_crsr into l_sql_id;
+              exit when l_crsr%notfound;
+              INSERT INTO awrtools_online_rpt_queue (id,sql_id,srcdb,srctab,limit,rpt_state, parent_id, queued) 
+              VALUES (sq_online_rpt.nextval,l_sql_id,i.srcdb,i.srctab,i.limit,'NEW',i.id,default);    
+            end loop;
+            close l_crsr;
+          end if;
+   
           commit;        
+   
           if i.srctab='V$VIEW' then
             AWRTOOLS_ONLINE_REPORTS.getplanh_i(p_sql_id=>i.sql_id,p_dblink=>i.srcdb,p_id=>i.id);
           elsif i.srctab='AWR' then
@@ -1545,10 +1564,12 @@ end;]';
           end if;
           update awrtools_online_rpt_queue set rpt_state='FINISHED' where id=i.id;
           commit;          
-          exception 
-            when others then 
-              awrtools_logging.log('Report: '||i.id||chr(10)||sqlerrm);
-              update awrtools_online_rpt_queue set rpt_state='FAILED' where id=i.id;
+        exception 
+          when others then 
+            awrtools_logging.log('Report: '||i.id||chr(10)||sqlerrm);
+            awrtools_logging.log(DBMS_UTILITY.FORMAT_ERROR_STACK);
+            awrtools_logging.log(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);            
+            update awrtools_online_rpt_queue set rpt_state='FAILED' where id=i.id;
         end;
       end loop;
       if l_is_rpt and not l_togo then
@@ -1558,32 +1579,21 @@ end;]';
       end if;
       exit when not l_is_rpt;
     end loop;
+  exception
+    when others then
+      awrtools_logging.log(sqlerrm);
+      awrtools_logging.log(DBMS_UTILITY.FORMAT_ERROR_STACK);
+      awrtools_logging.log(DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
+      raise_application_error(-20000, sqlerrm);
   end;
   
   procedure create_report_async(p_sql_id varchar2, p_dblink varchar2, p_srctab varchar2, p_id out number, p_report_limit number)
   is
     l_job_name varchar2(30):='GETPLAN';
     l_cnt number;
-    l_crsr sys_refcursor;
-    l_sql_id varchar2(100);
   begin
     INSERT INTO awrtools_online_rpt_queue (id,sql_id,srcdb,srctab,limit,rpt_state,queued) 
     VALUES (sq_online_rpt.nextval,p_sql_id,p_dblink,p_srctab,p_report_limit,'NEW',default) returning id into p_id;
-    
-    if p_srctab='AWR' then
-      open l_crsr for 'select sql_id from dba_hist_active_sess_history@'||p_dblink||q'[ where sql_id<>']'||p_sql_id||q'[' and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>6]';
-    elsif p_srctab='V$VIEW' then
-      open l_crsr for 'select sql_id from gv$active_session_history@'||p_dblink||q'[ where sql_id<>']'||p_sql_id||q'[' and top_level_sql_id=']'||p_sql_id||q'[' group by sql_id having count(1)>60]';
-    end if;
-    if l_crsr%isopen then
-      loop
-        fetch l_crsr into l_sql_id;
-        exit when l_crsr%notfound;
-        INSERT INTO awrtools_online_rpt_queue (id,sql_id,srcdb,srctab,limit,rpt_state, parent_id, queued) 
-        VALUES (sq_online_rpt.nextval,l_sql_id,p_dblink,p_srctab,p_report_limit,'NEW',p_id,default);    
-      end loop;
-    close l_crsr;
-    end if;
     commit;
     select count(1) into l_cnt from USER_SCHEDULER_RUNNING_JOBS where job_name=l_job_name;
     if l_cnt=0 then    
