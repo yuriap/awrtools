@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   16:56 Thursday May 17, 2018
+--   Date and Time:   15:22 Tuesday May 22, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180517153539'
+,p_last_upd_yyyymmddhh24miss=>'20180522113441'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -13274,7 +13274,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180517153538'
+,p_last_upd_yyyymmddhh24miss=>'20180522113441'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(53700136665471359)
@@ -13556,9 +13556,9 @@ wwv_flow_api.create_page_process(
 'begin',
 '  if :P18_SOURCEDB = ''$LOCAL$'' /*and :P18_SOURCETAB = ''AWR''*/ then',
 '    case',
-'      when :P18_SOURCE_PAGE in (63,65) then ',
+'      when :P18_SOURCE_PAGE in (65) then ',
 '        begin',
-'          :p18_dump_id:=:p63_dump_idl;',
+'          :p18_dump_id:=:p65_dump_idl;',
 '        end;',
 '      when :P18_SOURCE_PAGE=17 then ',
 '        begin',
@@ -16575,7 +16575,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180517135622'
+,p_last_upd_yyyymmddhh24miss=>'20180522112905'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -19094,7 +19094,9 @@ wwv_flow_api.create_page_item(
 ,p_prompt=>'Show blocked sessions'
 ,p_display_as=>'NATIVE_YES_NO'
 ,p_begin_on_new_line=>'N'
-,p_grid_column=>7
+,p_colspan=>3
+,p_grid_column=>9
+,p_grid_label_column_span=>1
 ,p_display_when=>':P65_SHOWL=''Y'''
 ,p_display_when_type=>'PLSQL_EXPRESSION'
 ,p_field_template=>wwv_flow_api.id(103155263230629584)
@@ -19336,6 +19338,7 @@ wwv_flow_api.create_page_item(
 ,p_name=>'P65_METRIC_ID'
 ,p_item_sequence=>85
 ,p_item_plug_id=>wwv_flow_api.id(171541273047303164)
+,p_item_default=>'2144'
 ,p_prompt=>'Metric'
 ,p_display_as=>'NATIVE_POPUP_LOV'
 ,p_lov=>'select name, id from cube_dic where src_db=:P65_SOURCEDB and dic_type=''METRICLST'' and id1=:P65_METRIC_GROUP order by 1;'
@@ -19618,6 +19621,7 @@ wwv_flow_api.create_page_item(
 ,p_name=>'P65_METRIC_IDL'
 ,p_item_sequence=>75
 ,p_item_plug_id=>wwv_flow_api.id(172023211632555123)
+,p_item_default=>'2144'
 ,p_prompt=>'Metric'
 ,p_display_as=>'NATIVE_POPUP_LOV'
 ,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
@@ -19649,7 +19653,8 @@ wwv_flow_api.create_page_item(
 ,p_lov=>'.'||wwv_flow_api.id(7131218053167294)||'.'
 ,p_cHeight=>1
 ,p_begin_on_new_line=>'N'
-,p_grid_column=>8
+,p_colspan=>3
+,p_grid_column=>9
 ,p_grid_label_column_span=>1
 ,p_field_template=>wwv_flow_api.id(103155263230629584)
 ,p_item_template_options=>'#DEFAULT#'
@@ -19867,7 +19872,7 @@ wwv_flow_api.create_page_process(
 '    :P65_MONITOR:=''N'';',
 '  end if;  ',
 '  ',
-'  if :P65_SOURCEDB_PREV<>:P65_SOURCEDB or :P65_SOURCETAB_PREV<>:P65_SOURCETAB then',
+'  if (:P65_SOURCEDB_PREV<>:P65_SOURCEDB or :P65_SOURCETAB_PREV<>:P65_SOURCETAB) and :P65_SOURCEDB<>''$LOCAL$'' then',
 '    AWRTOOLS_CUBE_ASH.load_dic (P_DB_LINK => :P65_SOURCEDB, P_SRC_TAB => :P65_SOURCETAB);',
 '  end if;  ',
 '',

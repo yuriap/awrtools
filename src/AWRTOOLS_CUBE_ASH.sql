@@ -225,6 +225,18 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
         into l_dbid, l_min_snap, l_max_snap
         FROM awrdumps d, AWRTOOLPROJECT p
        where dump_id=p_dump_id and d.proj_id=p.proj_id;
+      if instr(p_inst_id,'-1')>0 then
+        open l_crsr for 'select unique inst_id from DBA_HIST_DATABASE_INSTANCE where dbid=:dbid and snap_id between :id1 and :id2 order by 1' using l_dbid, l_min_snap, l_max_snap;
+        loop
+          fetch l_crsr into l_inst_id;
+          exit when l_crsr%notfound;
+          l_inst_list:=l_inst_list||l_inst_id||',';
+        end loop;
+        close l_crsr;
+        l_inst_list:=rtrim(l_inst_list,',');
+      else
+        l_inst_list:=replace(replace(p_inst_id,':',','),';',',');
+      end if;       
     end if;
 
     awrtools_logging.log('p_sess_id:'||p_sess_id,'DEBUG');

@@ -1447,10 +1447,11 @@ end;]';
     l_chunk_size number := 32767;
     l_size number;
     l_fname AWRTOOLS_ONLINE_RPT.file_name%type;
+    l_report_size number := 3e6;
   begin
     select reportc, file_name into l_text,l_fname from AWRTOOLS_ONLINE_RPT where id=p_id;
     l_size := nvl(dbms_lob.getlength(l_text),0);
-    if l_size > 0 and l_size <= 3e6 then
+    if l_size > 0 and l_size <= l_report_size then
       loop
         l_eof:=instr(l_text,chr(10),l_off);
         if l_eof=0 then
@@ -1462,7 +1463,7 @@ end;]';
         l_iter:=l_iter+1;
         exit when l_eof=0;
       end loop;
-    elsif l_size > 5e6 then
+    elsif l_size > l_report_size then
       p_report(1):='A report <b>'||l_fname||'</b> is too big. Only download option is available';
     else
       p_report(1):='Empty report';
