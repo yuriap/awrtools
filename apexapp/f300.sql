@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   15:22 Tuesday May 22, 2018
+--   Date and Time:   18:50 Tuesday May 22, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180522113441'
+,p_last_upd_yyyymmddhh24miss=>'20180522184450'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16575,7 +16575,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180522112905'
+,p_last_upd_yyyymmddhh24miss=>'20180522184450'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -19978,7 +19978,7 @@ wwv_flow_api.create_page_process(
 '          p_block_analyze => instr(:P65_SHOWLIST,''A'')>0);    ',
 '        if :P65_SHOW_FLT_SEPARATEL = ''Y'' then ',
 '          AWRTOOLS_CUBE_ASH.load_cube_ash',
-'           (p_sess_id  => :P65_SESS_ID,',
+'           (p_sess_id  => :P65_SESS_ID_SELECTED,',
 '            p_source   => :P65_SOURCETAB,',
 '            p_dblink   => :P65_SOURCEDB,',
 '            p_agg      => :P65_AGGL, ',
@@ -19990,7 +19990,8 @@ wwv_flow_api.create_page_process(
 '            p_metric_id => case when instr(:P65_SHOWLIST,''B'')>0 then :P65_METRIC_IDL else null end,',
 '            p_metricgroup_id => :P65_METRIC_GROUPL,',
 '            p_aggr_func => :P65_AGGR_FUNCL,',
-'            p_block_analyze => instr(:P65_SHOWLIST,''A'')>0);     ',
+'            p_block_analyze => instr(:P65_SHOWLIST,''A'')>0,',
+'            p_unknown_analyze => instr(:P65_SHOWLIST,''J'')>0);        ',
 '        end if;          ',
 '      else',
 '        raise_application_error(-20000,''Feature is not implemented.'');',
@@ -20047,7 +20048,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180516144203'
+,p_last_upd_yyyymmddhh24miss=>'20180522173358'
 );
 wwv_flow_api.create_report_region(
  p_id=>wwv_flow_api.id(6229637604172608)
@@ -20729,6 +20730,8 @@ wwv_flow_api.create_page_button(
 ,p_button_is_hot=>'Y'
 ,p_button_image_alt=>'Create report'
 ,p_button_position=>'BODY'
+,p_button_condition=>':P66_SOURCEDB<>''$LOCAL$'''
+,p_button_condition_type=>'PLSQL_EXPRESSION'
 ,p_icon_css_classes=>'fa-database-arrow-down'
 ,p_grid_new_row=>'N'
 ,p_grid_column=>9
@@ -20794,8 +20797,8 @@ wwv_flow_api.create_page_item(
 ,p_field_template=>wwv_flow_api.id(103155263230629584)
 ,p_item_template_options=>'#DEFAULT#'
 ,p_lov_display_extra=>'NO'
-,p_attribute_01=>'NONE'
-,p_attribute_02=>'N'
+,p_attribute_01=>'SUBMIT'
+,p_attribute_03=>'Y'
 );
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(6393264347139111)
