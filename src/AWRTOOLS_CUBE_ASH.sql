@@ -560,7 +560,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
           when others then awrtools_logging.log('Stopping job '||l_job_name||' error: '||chr(10)||sqlerrm);
         end;
       end if;    
-      if l_cnt=0 then   
+      --if l_cnt=0 then   
         insert into cube_ash_sess (sess_id, sess_created) values (sq_cube.nextval, default) returning sess_id into p_sess_id;
         l_job_body:=
 q'[begin AWRTOOLS_CUBE_ASH.load_cube_ash_mon(
@@ -586,7 +586,7 @@ q'[p_aggr_func=>']'||p_aggr_func||q'[',
                                   start_date => systimestamp,
                                   enabled => true,
                                   AUTO_DROP => true);
-      end if;
+      --end if;
     else
       if l_cnt>0 then
         begin

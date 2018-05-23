@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   18:50 Tuesday May 22, 2018
+--   Date and Time:   15:00 Wednesday May 23, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180522184450'
+,p_last_upd_yyyymmddhh24miss=>'20180523141943'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16575,7 +16575,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180522184450'
+,p_last_upd_yyyymmddhh24miss=>'20180523141943'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -16708,6 +16708,54 @@ wwv_flow_api.create_jet_chart_series(
 ,p_items_label_column_name=>'END_TIME'
 ,p_color=>'#007AFF'
 ,p_line_style=>'solid'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939458126271013)
+,p_chart_id=>wwv_flow_api.id(8759916722265726)
+,p_seq=>20
+,p_name=>'PCT95'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'with m_pct as (select PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY value ASC) val from cube_metrics where sess_id = :P65_SESS_ID)',
+'select TO_CHAR(end_time,''YYYY/MM/DD HH24:MI:SS'') end_time,round(m_pct.val, 3) val, ',
+'      ''95% percentile'' series_name',
+'  from cube_metrics o, m_pct',
+' where sess_id = :P65_SESS_ID',
+' order by end_time;'))
+,p_series_name_column_name=>'SERIES_NAME'
+,p_items_value_column_name=>'VAL'
+,p_items_label_column_name=>'END_TIME'
+,p_color=>'#255CE6'
+,p_line_style=>'dotted'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939554987271014)
+,p_chart_id=>wwv_flow_api.id(8759916722265726)
+,p_seq=>30
+,p_name=>'AVG'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'with m_pct as (select avg(value) val from cube_metrics where sess_id = :P65_SESS_ID)',
+'select TO_CHAR(end_time,''YYYY/MM/DD HH24:MI:SS'') end_time,round(m_pct.val, 3) val, ',
+'      ''Average'' series_name',
+'  from cube_metrics o, m_pct',
+' where sess_id = :P65_SESS_ID',
+' order by end_time;'))
+,p_series_name_column_name=>'SERIES_NAME'
+,p_items_value_column_name=>'VAL'
+,p_items_label_column_name=>'END_TIME'
+,p_color=>'#6CCDFA'
+,p_line_style=>'dashed'
 ,p_line_type=>'auto'
 ,p_marker_rendered=>'auto'
 ,p_marker_shape=>'auto'
@@ -17197,7 +17245,6 @@ wwv_flow_api.create_page_plug(
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>84
 ,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_num_rows=>15
@@ -17253,8 +17300,9 @@ wwv_flow_api.create_page_plug(
 ,p_region_template_options=>'#DEFAULT#:t-Region--removeHeader:t-Region--scrollBody'
 ,p_escape_on_http_output=>'Y'
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
-,p_plug_display_sequence=>114
+,p_plug_display_sequence=>70
 ,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_num_rows=>15
@@ -17369,6 +17417,9 @@ wwv_flow_api.create_jet_chart_series(
 ,p_link_target=>'f?p=&APP_ID.:65:&SESSION.::&DEBUG.:RP:P65_FILTER_REMASH,P65_FILTER_REMASHL:&FLT.,&FLT.'
 ,p_link_target_type=>'REDIRECT_PAGE'
 );
+end;
+/
+begin
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(64340039173679706)
 ,p_plug_name=>'Source'
@@ -17445,9 +17496,6 @@ wwv_flow_api.create_report_region(
 ,p_sort_null=>'L'
 ,p_plug_query_strip_html=>'N'
 );
-end;
-/
-begin
 wwv_flow_api.create_report_columns(
  p_id=>wwv_flow_api.id(2037481657805104)
 ,p_query_column_id=>1
@@ -18158,6 +18206,54 @@ wwv_flow_api.create_jet_chart_series(
 ,p_assigned_to_y2=>'off'
 ,p_items_label_rendered=>false
 );
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939250772271011)
+,p_chart_id=>wwv_flow_api.id(6314517070801461)
+,p_seq=>20
+,p_name=>'PCT95'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'with m_pct as (select PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY value ASC) val from cube_metrics where sess_id = :P65_SESS_ID)',
+'select TO_CHAR(end_time,''YYYY/MM/DD HH24:MI:SS'') end_time,round(m_pct.val, 3) val, ',
+'      ''95% percentile'' series_name',
+'  from cube_metrics o, m_pct',
+' where sess_id = :P65_SESS_ID',
+' order by end_time;'))
+,p_series_name_column_name=>'SERIES_NAME'
+,p_items_value_column_name=>'VAL'
+,p_items_label_column_name=>'END_TIME'
+,p_color=>'#255CE6'
+,p_line_style=>'dotted'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939380965271012)
+,p_chart_id=>wwv_flow_api.id(6314517070801461)
+,p_seq=>30
+,p_name=>'AVG'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'with m_pct as (select avg(value) val from cube_metrics where sess_id = :P65_SESS_ID)',
+'select TO_CHAR(end_time,''YYYY/MM/DD HH24:MI:SS'') end_time,round(m_pct.val, 3) val, ',
+'      ''Average'' series_name',
+'  from cube_metrics o, m_pct',
+' where sess_id = :P65_SESS_ID',
+' order by end_time;'))
+,p_series_name_column_name=>'SERIES_NAME'
+,p_items_value_column_name=>'VAL'
+,p_items_label_column_name=>'END_TIME'
+,p_color=>'#6CCDFA'
+,p_line_style=>'dashed'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+);
 wwv_flow_api.create_jet_chart_axis(
  p_id=>wwv_flow_api.id(6315061133801462)
 ,p_chart_id=>wwv_flow_api.id(6314517070801461)
@@ -18224,6 +18320,9 @@ wwv_flow_api.create_jet_chart(
 ,p_legend_rendered=>'on'
 ,p_legend_position=>'top'
 );
+end;
+/
+begin
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(6313611559801460)
 ,p_chart_id=>wwv_flow_api.id(6311909580801458)
@@ -18242,6 +18341,54 @@ wwv_flow_api.create_jet_chart_series(
 ,p_items_label_column_name=>'END_TIME'
 ,p_color=>'#007AFF'
 ,p_line_style=>'solid'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939053609271009)
+,p_chart_id=>wwv_flow_api.id(6311909580801458)
+,p_seq=>20
+,p_name=>'Pct95'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'with m_pct as (select PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY value ASC) val from cube_metrics where sess_id = :P65_SESS_ID)',
+'select TO_CHAR(end_time,''YYYY/MM/DD HH24:MI:SS'') end_time,round(m_pct.val, 3) val, ',
+'      ''95% percentile'' series_name',
+'  from cube_metrics o, m_pct',
+' where sess_id = :P65_SESS_ID',
+' order by end_time;'))
+,p_series_name_column_name=>'SERIES_NAME'
+,p_items_value_column_name=>'VAL'
+,p_items_label_column_name=>'END_TIME'
+,p_color=>'#255CE6'
+,p_line_style=>'dotted'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939132400271010)
+,p_chart_id=>wwv_flow_api.id(6311909580801458)
+,p_seq=>30
+,p_name=>'AVG'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'with m_pct as (select avg(value) val from cube_metrics where sess_id = :P65_SESS_ID)',
+'select TO_CHAR(end_time,''YYYY/MM/DD HH24:MI:SS'') end_time,round(m_pct.val, 3) val, ',
+'      ''Average'' series_name',
+'  from cube_metrics o, m_pct',
+' where sess_id = :P65_SESS_ID',
+' order by end_time;'))
+,p_series_name_column_name=>'SERIES_NAME'
+,p_items_value_column_name=>'VAL'
+,p_items_label_column_name=>'END_TIME'
+,p_color=>'#6CCDFA'
+,p_line_style=>'dashed'
 ,p_line_type=>'auto'
 ,p_marker_rendered=>'auto'
 ,p_marker_shape=>'auto'
@@ -18354,9 +18501,6 @@ wwv_flow_api.create_page_plug(
 ,p_plug_display_condition_type=>'PLSQL_EXPRESSION'
 ,p_plug_display_when_condition=>'instr(:P65_SHOWLIST,''H'')>0'
 );
-end;
-/
-begin
 wwv_flow_api.create_jet_chart(
  p_id=>wwv_flow_api.id(6294484129801401)
 ,p_region_id=>wwv_flow_api.id(64339538867679701)
@@ -18533,8 +18677,7 @@ wwv_flow_api.create_page_plug(
 ,p_plug_query_row_template=>1
 ,p_plug_query_num_rows=>15
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
-,p_plug_display_condition_type=>'PLSQL_EXPRESSION'
-,p_plug_display_when_condition=>'instr(:P65_SHOWLIST,''E'')>0'
+,p_plug_display_condition_type=>'NEVER'
 );
 wwv_flow_api.create_jet_chart(
  p_id=>wwv_flow_api.id(6298610623801425)
@@ -18585,8 +18728,9 @@ wwv_flow_api.create_page_plug(
 ,p_region_template_options=>'#DEFAULT#:t-Region--removeHeader:t-Region--scrollBody'
 ,p_escape_on_http_output=>'Y'
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
-,p_plug_display_sequence=>104
+,p_plug_display_sequence=>56
 ,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_row_template=>1
@@ -19041,6 +19185,9 @@ wwv_flow_api.create_page_plug(
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'HTML'
 );
+end;
+/
+begin
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(172023211632555123)
 ,p_plug_name=>'Input Parameters (local)'
@@ -19235,9 +19382,6 @@ wwv_flow_api.create_page_item(
 ,p_attribute_05=>'N'
 ,p_attribute_07=>'NONE'
 );
-end;
-/
-begin
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(6318365346801478)
 ,p_name=>'P65_END_DT'
