@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   15:00 Wednesday May 23, 2018
+--   Date and Time:   10:29 Friday May 25, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180523141943'
+,p_last_upd_yyyymmddhh24miss=>'20180525102854'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16575,7 +16575,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180523141943'
+,p_last_upd_yyyymmddhh24miss=>'20180525102854'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -17152,6 +17152,33 @@ wwv_flow_api.create_jet_chart_series(
 'SELECT 1 FROM cube_ash',
 ' WHERE   wait_class = ''System I/O'' and sess_id = :P65_SESS_ID and g1=0;'))
 );
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939820154271017)
+,p_chart_id=>wwv_flow_api.id(8760479427265731)
+,p_seq=>130
+,p_name=>'Cluster'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, smpls sec ',
+'          from cube_ash where wait_class = ''Cluster'' and sess_id = :P65_SESS_ID and g1=0) h, ',
+'       cube_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P65_SESS_ID',
+' ORDER BY sample_time; '))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#F7FF00'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM cube_ash',
+' WHERE   wait_class = ''Cluster'' and sess_id = :P65_SESS_ID and g1=0;'))
+);
 wwv_flow_api.create_jet_chart_axis(
  p_id=>wwv_flow_api.id(8761876005265745)
 ,p_chart_id=>wwv_flow_api.id(8760479427265731)
@@ -17393,6 +17420,9 @@ wwv_flow_api.create_jet_chart(
 ,p_pie_selection_effect=>'highlight'
 ,p_automatic_refresh_interval=>10
 );
+end;
+/
+begin
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(8938838466271007)
 ,p_chart_id=>wwv_flow_api.id(8938776522271006)
@@ -17417,9 +17447,6 @@ wwv_flow_api.create_jet_chart_series(
 ,p_link_target=>'f?p=&APP_ID.:65:&SESSION.::&DEBUG.:RP:P65_FILTER_REMASH,P65_FILTER_REMASHL:&FLT.,&FLT.'
 ,p_link_target_type=>'REDIRECT_PAGE'
 );
-end;
-/
-begin
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(64340039173679706)
 ,p_plug_name=>'Source'
@@ -18115,6 +18142,33 @@ wwv_flow_api.create_jet_chart_series(
 'SELECT 1 FROM cube_ash',
 ' WHERE   wait_class = ''System I/O'' and sess_id = :P65_SESS_ID_SELECTED and g1=0;'))
 );
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939743131271016)
+,p_chart_id=>wwv_flow_api.id(6233090645172642)
+,p_seq=>130
+,p_name=>'Cluster'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, smpls sec ',
+'          from cube_ash where wait_class = ''Cluster'' and sess_id = :P65_SESS_ID and g1=0) h, ',
+'       cube_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P65_SESS_ID',
+' ORDER BY sample_time; '))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#F7FF00'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM cube_ash',
+' WHERE   wait_class = ''Cluster'' and sess_id = :P65_SESS_ID and g1=0;'))
+);
 wwv_flow_api.create_jet_chart_axis(
  p_id=>wwv_flow_api.id(6981537328290005)
 ,p_chart_id=>wwv_flow_api.id(6233090645172642)
@@ -18254,6 +18308,9 @@ wwv_flow_api.create_jet_chart_series(
 ,p_assigned_to_y2=>'off'
 ,p_items_label_rendered=>false
 );
+end;
+/
+begin
 wwv_flow_api.create_jet_chart_axis(
  p_id=>wwv_flow_api.id(6315061133801462)
 ,p_chart_id=>wwv_flow_api.id(6314517070801461)
@@ -18320,9 +18377,6 @@ wwv_flow_api.create_jet_chart(
 ,p_legend_rendered=>'on'
 ,p_legend_position=>'top'
 );
-end;
-/
-begin
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(6313611559801460)
 ,p_chart_id=>wwv_flow_api.id(6311909580801458)
@@ -19118,6 +19172,9 @@ wwv_flow_api.create_jet_chart_series(
 'SELECT 1 FROM cube_ash',
 ' WHERE   wait_class = ''Scheduler'' and sess_id = :P65_SESS_ID and g1=0;'))
 );
+end;
+/
+begin
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(6309610343801453)
 ,p_chart_id=>wwv_flow_api.id(6301435197801434)
@@ -19144,6 +19201,33 @@ wwv_flow_api.create_jet_chart_series(
 ,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'SELECT 1 FROM cube_ash',
 ' WHERE   wait_class = ''System I/O'' and sess_id = :P65_SESS_ID and g1=0;'))
+);
+wwv_flow_api.create_jet_chart_series(
+ p_id=>wwv_flow_api.id(8939603929271015)
+,p_chart_id=>wwv_flow_api.id(6301435197801434)
+,p_seq=>130
+,p_name=>'Cluster'
+,p_data_source_type=>'SQL_QUERY'
+,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
+'  from (select sample_time, smpls sec ',
+'          from cube_ash where wait_class = ''Cluster'' and sess_id = :P65_SESS_ID and g1=0) h, ',
+'       cube_ash_timeline d ',
+' where d.sample_time=h.sample_time(+) and sess_id = :P65_SESS_ID',
+' ORDER BY sample_time; '))
+,p_items_value_column_name=>'SEC'
+,p_group_name_column_name=>'SAMPLE_TIME'
+,p_items_label_column_name=>'SAMPLE_TIME'
+,p_color=>'#F7FF00'
+,p_line_type=>'auto'
+,p_marker_rendered=>'auto'
+,p_marker_shape=>'auto'
+,p_assigned_to_y2=>'off'
+,p_items_label_rendered=>false
+,p_display_when_cond_type=>'EXISTS'
+,p_display_when_condition=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'SELECT 1 FROM cube_ash',
+' WHERE   wait_class = ''Cluster'' and sess_id = :P65_SESS_ID and g1=0;'))
 );
 wwv_flow_api.create_jet_chart_axis(
  p_id=>wwv_flow_api.id(6301899734801435)
@@ -19185,9 +19269,6 @@ wwv_flow_api.create_page_plug(
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'HTML'
 );
-end;
-/
-begin
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(172023211632555123)
 ,p_plug_name=>'Input Parameters (local)'
@@ -20095,6 +20176,9 @@ wwv_flow_api.create_page_process(
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when_button_id=>wwv_flow_api.id(6317194423801468)
 );
+end;
+/
+begin
 wwv_flow_api.create_page_process(
  p_id=>wwv_flow_api.id(6331210449801569)
 ,p_process_sequence=>20
@@ -20146,6 +20230,7 @@ wwv_flow_api.create_page_process(
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
 ,p_process_when_button_id=>wwv_flow_api.id(6321449836801482)
 );
+null;
 end;
 /
 prompt --application/pages/page_00066
