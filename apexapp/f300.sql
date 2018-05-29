@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   10:29 Friday May 25, 2018
+--   Date and Time:   17:35 Tuesday May 29, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -41,7 +41,7 @@ prompt APPLICATION 300 - AWR Tools
 --     Computations:             8
 --     Validations:              5
 --     Processes:               31
---     Regions:                 76
+--     Regions:                 79
 --     Buttons:                 24
 --   Shared Components:
 --     Logic:
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180525102854'
+,p_last_upd_yyyymmddhh24miss=>'20180529173359'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -773,8 +773,8 @@ wwv_flow_api.create_menu_option(
 wwv_flow_api.create_menu_option(
  p_id=>wwv_flow_api.id(103168202505629718)
 ,p_parent_id=>0
-,p_short_name=>'Home'
-,p_link=>'f?p=&APP_ID.:1:&APP_SESSION.::&DEBUG.'
+,p_short_name=>'AWR Tools. Version &AWRTOOLSVER.'
+,p_link=>'f?p=&APP_ID.:1:&SESSION.::&DEBUG.:::'
 ,p_page_id=>1
 );
 wwv_flow_api.create_menu_option(
@@ -9924,54 +9924,93 @@ wwv_flow_api.create_page(
 ,p_user_interface_id=>wwv_flow_api.id(103166515871629647)
 ,p_name=>'AWR Tools Home'
 ,p_page_mode=>'NORMAL'
-,p_step_title=>'AWR Tools Home'
+,p_step_title=>'AWR Tools &AWRTOOLSVER.'
 ,p_step_sub_title=>'Home'
 ,p_step_sub_title_type=>'TEXT_WITH_SUBSTITUTIONS'
 ,p_first_item=>'NO_FIRST_ITEM'
 ,p_autocomplete_on_off=>'OFF'
 ,p_group_id=>wwv_flow_api.id(6674103119983434)
 ,p_page_template_options=>'#DEFAULT#'
-,p_dialog_chained=>'Y'
 ,p_overwrite_navigation_list=>'N'
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180504103306'
+,p_last_upd_yyyymmddhh24miss=>'20180529173359'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(8939982852271018)
+,p_plug_name=>'Online Analytics'
+,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_plug_template=>wwv_flow_api.id(103132934377629534)
+,p_plug_display_sequence=>20
+,p_include_in_reg_disp_sel_yn=>'Y'
+,p_plug_display_point=>'BODY'
+,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'Online Analytic Tool allows visualizing of ASH data from some remote database accessible through dblink (<a href="f?p=&APP_ID.:65:&APP_SESSION. " class="awr">ASH Dashboard</a>) as well as from local AWR repository of dumps loaded above.<br><br>',
+'',
+'Data from both V$ACTIVE_SESSION_HISTORY and DBA_HIST_ACTIVE_SESS_HISTORY is available for the remote database analysis.<br> ',
+'DBA_HIST_ACTIVE_SESS_HISTORY data can be analyzed from locally loaded dumps.<br><br>',
+'',
+'<a href="f?p=&APP_ID.:66:&APP_SESSION. " class="awr">SQL runtime statistics</a> report shows data for a given SQL_ID from shared pool or AWR of a remote database.<br><br>',
+'',
+'Go to links below for more details:'))
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
+,p_attribute_01=>'N'
+,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(8940105233271020)
+,p_plug_name=>'GoTo'
+,p_parent_plug_id=>wwv_flow_api.id(8939982852271018)
+,p_region_template_options=>'#DEFAULT#:t-Region--removeHeader:t-Region--noUI:t-Region--scrollBody'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(103132934377629534)
+,p_plug_display_sequence=>40
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_list_id=>wwv_flow_api.id(57137740028052991)
+,p_plug_source_type=>'NATIVE_LIST'
+,p_list_template_id=>wwv_flow_api.id(103153033862629580)
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(103147854288222167)
-,p_plug_name=>'Getting started'
+,p_plug_name=>'AWR Data Warehouse'
 ,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>10
 ,p_include_in_reg_disp_sel_yn=>'Y'
 ,p_plug_display_point=>'BODY'
 ,p_plug_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'Web AWR Tools. Ver &AWRTOOLSVER.<br>',
+'AWR Data Warehouse allows to store and analyze AWR dumps from different databases in a single place.<br><br>',
+'Dumps can be organized into <a href="f?p=&APP_ID.:10:&SESSION.">projects</a> and be stored as a file and be loaded into local AWR repository for analysis using standard AWR reports and custom ones.<br><br>',
+'A special case of analysis is supported for a situation when the FLASHBACK DATABASE feature is in use for returning a database to the same starting point between tests.<br>',
+'Dumps from two test-runs which have overlapping snapshot ranges can be loaded simultaneously and analyzed by custom "AWR query plan compare report".',
 '<br>',
-'AWR dump warehouse with web-based UI.<br>',
 '<br>',
-'The main aims are:<br>',
-'1) to have some user-friendly interface to manipulate AWR dumps (load, store, comment, unload).<br>',
-'2) to create customized reports from raw AWR data using user-friendly interface, Currently, there are two custom reports "SQL queries compare report (HTML)" and "AWR SQL Report (HTML)" and all standard AWR reports.<br>',
-'3) to share scripts with command-line AWR Tools. Exact the same main scripts are used for both tools.<br>',
-'4) to be able to analyze AWR dumps which contain overlapping snapshot ranges (relevant to a situation when FLASHBACK DATABASE is in use for testing different scenarios).<br>',
-'5) Added Online Analytic Tool - allows to analyze ASH data from local AWR warehouse as well as from remote one through dblink, V$ASH is also in use.<br>',
+'Go to <a href="f?p=&APP_ID.:10:&SESSION.">Projects</a> page for more details.',
 '<br>',
-'Use-cases:<br>',
-'1. Create a project.<br>',
-'2. Load two or more raw AWR dumps.<br>',
-'3. Load dumps into AWR repository, if snapshot ranges are overlapping, load the second dump into the second (remote) database.<br>',
-'4. Create reports (the are stored automatically).<br>',
-'5. Compress dump: Delete a dump file from database storage. AWR data is available for analysis.<br>',
-'6. Unload AWR range: unload AWR data from AWR repository for a dump. AWR data can be loaded in the future if the dump file is still in the database. <br>',
-'',
 '<br>',
-'To start <a href="f?p=&APP_ID.:10:&SESSION.">go to Projects page</a>.'))
+'See also Storage reports:'))
 ,p_plug_query_row_template=>1
 ,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 ,p_attribute_01=>'N'
 ,p_attribute_02=>'HTML'
+);
+wwv_flow_api.create_page_plug(
+ p_id=>wwv_flow_api.id(8940247350271021)
+,p_plug_name=>'Storage reports'
+,p_parent_plug_id=>wwv_flow_api.id(103147854288222167)
+,p_region_template_options=>'#DEFAULT#:t-Region--removeHeader:t-Region--noUI:t-Region--scrollBody'
+,p_component_template_options=>'#DEFAULT#'
+,p_plug_template=>wwv_flow_api.id(103132934377629534)
+,p_plug_display_sequence=>30
+,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_display_point=>'BODY'
+,p_list_id=>wwv_flow_api.id(101885254021100257)
+,p_plug_source_type=>'NATIVE_LIST'
+,p_list_template_id=>wwv_flow_api.id(103153033862629580)
+,p_plug_query_options=>'DERIVED_REPORT_COLUMNS'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(103168303190629724)
