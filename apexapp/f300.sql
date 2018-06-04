@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   19:00 Friday June 1, 2018
+--   Date and Time:   16:43 Monday June 4, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -37,7 +37,7 @@ prompt APPLICATION 300 - AWR Tools
 
 -- Application Statistics:
 --   Pages:                     20
---     Items:                  104
+--     Items:                  105
 --     Computations:             8
 --     Validations:              5
 --     Processes:               31
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180601190020'
+,p_last_upd_yyyymmddhh24miss=>'20180604163846'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16614,7 +16614,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180601190020'
+,p_last_upd_yyyymmddhh24miss=>'20180604163846'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -17661,7 +17661,7 @@ wwv_flow_api.create_page_plug(
 ,p_region_template_options=>'#DEFAULT#:t-Region--removeHeader:t-Region--scrollBody'
 ,p_escape_on_http_output=>'Y'
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
-,p_plug_display_sequence=>54
+,p_plug_display_sequence=>26
 ,p_include_in_reg_disp_sel_yn=>'N'
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
@@ -17673,22 +17673,22 @@ wwv_flow_api.create_page_plug(
 wwv_flow_api.create_jet_chart(
  p_id=>wwv_flow_api.id(6231331453172625)
 ,p_region_id=>wwv_flow_api.id(6231268458172624)
-,p_chart_type=>'pie'
+,p_chart_type=>'bar'
+,p_height=>'30'
 ,p_animation_on_display=>'none'
 ,p_animation_on_data_change=>'none'
+,p_orientation=>'horizontal'
 ,p_data_cursor=>'auto'
 ,p_data_cursor_behavior=>'auto'
-,p_hide_and_show_behavior=>'none'
 ,p_hover_behavior=>'none'
-,p_value_format_scaling=>'auto'
+,p_stack=>'on'
+,p_zoom_and_scroll=>'off'
 ,p_tooltip_rendered=>'Y'
 ,p_show_series_name=>true
+,p_show_group_name=>false
 ,p_show_value=>true
-,p_legend_rendered=>'on'
-,p_legend_title=>'Event class summary'
-,p_legend_position=>'auto'
-,p_pie_other_threshold=>0
-,p_pie_selection_effect=>'highlight'
+,p_show_label=>true
+,p_legend_rendered=>'off'
 );
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(6231404905172626)
@@ -17697,17 +17697,75 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Event class summary'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'select wait_class, sec, wait_class wait_class1 from',
+'select wait_class||'' ''||round(100*sec/sum(sec)over(),2)||''%'' wait_class, sec, wait_class wait_class1, ''Event class'' ser, ',
+'case',
+'  when wait_class=''CPU'' then ''#00FF00'' ',
+'  when wait_class=''User I/O'' then ''#0000FF'' ',
+'  when wait_class=''Administrative'' then ''#FFCC00'' ',
+'  when wait_class=''Application'' then ''#FF2EF8'' ',
+'  when wait_class=''Commit'' then ''#FF9500'' ',
+'  when wait_class=''Concurrency'' then ''#34AADC'' ',
+'  when wait_class=''Configuration'' then ''#5856D6'' ',
+'  when wait_class=''Idle'' then ''#C7C7CC'' ',
+'  when wait_class=''Network'' then ''#8E8E93'' ',
+'  when wait_class=''Other'' then ''#007AFF'' ',
+'  when wait_class=''Scheduler'' then ''#86D94E''',
+'  when wait_class=''System I/O'' then ''#FF0000''',
+'  when wait_class=''Cluster'' then ''#F7FF00''',
+'end colors ',
+'from',
 '(select wait_class, sum(smpls) sec ',
 '  from cube_ash where sess_id = :P65_SESS_ID and g1=0',
 'group by wait_class) x',
 'order by 2 desc;'))
+,p_series_name_column_name=>'WAIT_CLASS'
 ,p_items_value_column_name=>'SEC'
-,p_items_label_column_name=>'WAIT_CLASS'
+,p_items_label_column_name=>'SER'
+,p_color=>'&COLORS.'
+,p_assigned_to_y2=>'off'
 ,p_items_label_rendered=>true
 ,p_items_label_position=>'auto'
 ,p_link_target=>'f?p=&APP_ID.:65:&SESSION.::&DEBUG.:RP:P65_FILTER_REMASH,P65_FILTER_REMASHL:wait_class = ''&WAIT_CLASS1.'',wait_class = ''&WAIT_CLASS1.'''
 ,p_link_target_type=>'REDIRECT_PAGE'
+);
+wwv_flow_api.create_jet_chart_axis(
+ p_id=>wwv_flow_api.id(8941098118271029)
+,p_chart_id=>wwv_flow_api.id(6231331453172625)
+,p_axis=>'x'
+,p_is_rendered=>'on'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_major_tick_rendered=>'auto'
+,p_minor_tick_rendered=>'off'
+,p_tick_label_rendered=>'off'
+);
+wwv_flow_api.create_jet_chart_axis(
+ p_id=>wwv_flow_api.id(8941151450271030)
+,p_chart_id=>wwv_flow_api.id(6231331453172625)
+,p_axis=>'y'
+,p_is_rendered=>'on'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_position=>'auto'
+,p_major_tick_rendered=>'on'
+,p_minor_tick_rendered=>'on'
+,p_tick_label_rendered=>'off'
+);
+wwv_flow_api.create_jet_chart_axis(
+ p_id=>wwv_flow_api.id(8941216918271031)
+,p_chart_id=>wwv_flow_api.id(6231331453172625)
+,p_axis=>'y2'
+,p_is_rendered=>'off'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_position=>'auto'
+,p_major_tick_rendered=>'on'
+,p_minor_tick_rendered=>'off'
+,p_tick_label_rendered=>'on'
+,p_split_dual_y=>'auto'
 );
 wwv_flow_api.create_report_region(
  p_id=>wwv_flow_api.id(6231959593172631)
@@ -17825,7 +17883,7 @@ wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6232939662172641)
 ,p_plug_name=>'Wait event classes by ASH (selected)'
 ,p_parent_plug_id=>wwv_flow_api.id(119916628973513243)
-,p_region_template_options=>'#DEFAULT#:t-Region--scrollBody'
+,p_region_template_options=>'#DEFAULT#:t-Region--removeHeader:t-Region--scrollBody'
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>44
 ,p_include_in_reg_disp_sel_yn=>'N'
@@ -17840,7 +17898,7 @@ wwv_flow_api.create_jet_chart(
  p_id=>wwv_flow_api.id(6233090645172642)
 ,p_region_id=>wwv_flow_api.id(6232939662172641)
 ,p_chart_type=>'area'
-,p_height=>'500'
+,p_height=>'430'
 ,p_animation_on_display=>'auto'
 ,p_animation_on_data_change=>'auto'
 ,p_orientation=>'vertical'
@@ -18219,16 +18277,16 @@ wwv_flow_api.create_jet_chart_series(
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from ',
-'  (select h1.sample_time,h2.sec - h1.sec sec',
+'  (select h2.sample_time,nvl(h2.sec,0) - nvl(h1.sec,0) sec',
 '     from (select sample_time, sum(smpls) sec ',
 '             from cube_ash where sess_id = :P65_SESS_ID_SELECTED and g1=0',
 '            group by sample_time) h1, ',
 '          (select sample_time, sum(smpls) sec ',
 '             from cube_ash where sess_id = :P65_SESS_ID and g1=0',
 '            group by sample_time) h2',
-'    where h1.sample_time=h2.sample_time) h,',
+'    where h1.sample_time(+)=h2.sample_time) h,',
 '       cube_ash_timeline d ',
-' where d.sample_time=h.sample_time(+) and sess_id = :P65_SESS_ID_SELECTED',
+' where d.sample_time=h.sample_time(+) and sess_id = :P65_SESS_ID',
 ' ORDER BY sample_time; '))
 ,p_items_value_column_name=>'SEC'
 ,p_group_name_column_name=>'SAMPLE_TIME'
@@ -18270,7 +18328,7 @@ wwv_flow_api.create_jet_chart_axis(
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(8940458955271023)
-,p_plug_name=>'Event class summary (selected)'
+,p_plug_name=>'Summary'
 ,p_parent_plug_id=>wwv_flow_api.id(119916628973513243)
 ,p_region_template_options=>'#DEFAULT#:t-Region--removeHeader:t-Region--scrollBody'
 ,p_escape_on_http_output=>'Y'
@@ -18284,25 +18342,28 @@ wwv_flow_api.create_page_plug(
 ,p_plug_display_condition_type=>'PLSQL_EXPRESSION'
 ,p_plug_display_when_condition=>'instr(:P65_SHOWLIST,''C'')>0 and ((:P65_SOURCEDB<>''$LOCAL$'' and :P65_SHOW_FLT_SEPARATE=''Y'') or (:P65_SOURCEDB=''$LOCAL$'' and :P65_SHOW_FLT_SEPARATEL=''Y''))'
 );
+end;
+/
+begin
 wwv_flow_api.create_jet_chart(
  p_id=>wwv_flow_api.id(8940523320271024)
 ,p_region_id=>wwv_flow_api.id(8940458955271023)
-,p_chart_type=>'pie'
+,p_chart_type=>'bar'
+,p_height=>'30'
 ,p_animation_on_display=>'none'
 ,p_animation_on_data_change=>'none'
+,p_orientation=>'horizontal'
 ,p_data_cursor=>'auto'
 ,p_data_cursor_behavior=>'auto'
-,p_hide_and_show_behavior=>'none'
 ,p_hover_behavior=>'none'
-,p_value_format_scaling=>'auto'
+,p_stack=>'on'
+,p_zoom_and_scroll=>'off'
 ,p_tooltip_rendered=>'Y'
 ,p_show_series_name=>true
+,p_show_group_name=>false
 ,p_show_value=>true
-,p_legend_rendered=>'on'
-,p_legend_title=>'Event class summary (selected)'
-,p_legend_position=>'auto'
-,p_pie_other_threshold=>0
-,p_pie_selection_effect=>'highlight'
+,p_show_label=>true
+,p_legend_rendered=>'off'
 );
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(8940689972271025)
@@ -18311,33 +18372,74 @@ wwv_flow_api.create_jet_chart_series(
 ,p_name=>'Event class summary (selected)'
 ,p_data_source_type=>'SQL_QUERY'
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
-'select wait_class, sec, wait_class wait_class1 ',
+'select wait_class||'' ''||round(100*sec/sum(sec)over(),2)||''%'' wait_class, sec, wait_class wait_class1, ''Event class'' ser, ',
+'case',
+'  when wait_class=''CPU'' then ''#00FF00'' ',
+'  when wait_class=''User I/O'' then ''#0000FF'' ',
+'  when wait_class=''Administrative'' then ''#FFCC00'' ',
+'  when wait_class=''Application'' then ''#FF2EF8'' ',
+'  when wait_class=''Commit'' then ''#FF9500'' ',
+'  when wait_class=''Concurrency'' then ''#34AADC'' ',
+'  when wait_class=''Configuration'' then ''#5856D6'' ',
+'  when wait_class=''Idle'' then ''#C7C7CC'' ',
+'  when wait_class=''Network'' then ''#8E8E93'' ',
+'  when wait_class=''Other'' then ''#007AFF'' ',
+'  when wait_class=''Scheduler'' then ''#86D94E''',
+'  when wait_class=''System I/O'' then ''#FF0000''',
+'  when wait_class=''Cluster'' then ''#F7FF00''',
+'  when wait_class=''Remainder'' then ''#8A8A8A''',
+'end colors ',
 'from (select wait_class, sum(smpls) sec ',
 '        from cube_ash where sess_id = :P65_SESS_ID_SELECTED and g1=0',
 '       group by wait_class',
 '       union all',
 '      select ''Remainder'' wait_class, sum(sec) sec from',
-'        (select h1.sample_time,h2.sec - h1.sec sec',
+'        (select nvl(h2.sec,0) - nvl(h1.sec,0) sec',
 '           from (select sample_time, sum(smpls) sec ',
 '                   from cube_ash where sess_id = :P65_SESS_ID_SELECTED and g1=0',
 '                  group by sample_time) h1, ',
 '                (select sample_time, sum(smpls) sec ',
 '                   from cube_ash where sess_id = :P65_SESS_ID and g1=0',
 '                  group by sample_time) h2',
-'          where h1.sample_time=h2.sample_time',
+'          where h1.sample_time(+)=h2.sample_time',
 '        ) h',
 '    )',
 'order by 2 desc;'))
+,p_series_name_column_name=>'WAIT_CLASS'
 ,p_items_value_column_name=>'SEC'
-,p_items_label_column_name=>'WAIT_CLASS'
+,p_items_label_column_name=>'SER'
+,p_color=>'&COLORS.'
+,p_assigned_to_y2=>'off'
 ,p_items_label_rendered=>true
 ,p_items_label_position=>'auto'
 ,p_link_target=>'f?p=&APP_ID.:65:&SESSION.::&DEBUG.:RP:P65_FILTER_REMASH,P65_FILTER_REMASHL:wait_class = ''&WAIT_CLASS1.'',wait_class = ''&WAIT_CLASS1.'''
 ,p_link_target_type=>'REDIRECT_PAGE'
 );
-end;
-/
-begin
+wwv_flow_api.create_jet_chart_axis(
+ p_id=>wwv_flow_api.id(8940815489271027)
+,p_chart_id=>wwv_flow_api.id(8940523320271024)
+,p_axis=>'x'
+,p_is_rendered=>'on'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_major_tick_rendered=>'on'
+,p_minor_tick_rendered=>'off'
+,p_tick_label_rendered=>'off'
+);
+wwv_flow_api.create_jet_chart_axis(
+ p_id=>wwv_flow_api.id(8940964494271028)
+,p_chart_id=>wwv_flow_api.id(8940523320271024)
+,p_axis=>'y'
+,p_is_rendered=>'on'
+,p_format_scaling=>'auto'
+,p_scaling=>'linear'
+,p_baseline_scaling=>'zero'
+,p_position=>'auto'
+,p_major_tick_rendered=>'on'
+,p_minor_tick_rendered=>'off'
+,p_tick_label_rendered=>'off'
+);
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(11514576906534359)
 ,p_plug_name=>'System metric (remote)'
@@ -18623,7 +18725,6 @@ wwv_flow_api.create_page_plug(
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>124
 ,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_row_template=>1
@@ -18685,6 +18786,7 @@ wwv_flow_api.create_page_plug(
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>114
 ,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_row_template=>1
@@ -18744,6 +18846,7 @@ wwv_flow_api.create_page_plug(
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>84
 ,p_include_in_reg_disp_sel_yn=>'N'
+,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_row_template=>1
@@ -18801,7 +18904,6 @@ wwv_flow_api.create_page_plug(
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>104
 ,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_row_template=>1
@@ -18923,7 +19025,6 @@ wwv_flow_api.create_page_plug(
 ,p_plug_template=>wwv_flow_api.id(103132934377629534)
 ,p_plug_display_sequence=>74
 ,p_include_in_reg_disp_sel_yn=>'N'
-,p_plug_new_grid_row=>false
 ,p_plug_display_point=>'BODY'
 ,p_plug_source_type=>'NATIVE_JET_CHART'
 ,p_plug_query_row_template=>1
@@ -18996,7 +19097,7 @@ wwv_flow_api.create_jet_chart(
  p_id=>wwv_flow_api.id(6301435197801434)
 ,p_region_id=>wwv_flow_api.id(174865680076203309)
 ,p_chart_type=>'area'
-,p_height=>'450'
+,p_height=>'430'
 ,p_animation_on_display=>'auto'
 ,p_animation_on_data_change=>'auto'
 ,p_orientation=>'vertical'
@@ -19123,6 +19224,9 @@ wwv_flow_api.create_jet_chart_series(
 'SELECT 1 FROM cube_ash',
 ' WHERE   wait_class = ''Application'' and sess_id = :P65_SESS_ID and g1=0;'))
 );
+end;
+/
+begin
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(6305477192801447)
 ,p_chart_id=>wwv_flow_api.id(6301435197801434)
@@ -19231,9 +19335,6 @@ wwv_flow_api.create_jet_chart_series(
 'SELECT 1 FROM cube_ash',
 ' WHERE   wait_class = ''Idle'' and sess_id = :P65_SESS_ID and g1=0;'))
 );
-end;
-/
-begin
 wwv_flow_api.create_jet_chart_series(
  p_id=>wwv_flow_api.id(6307898134801450)
 ,p_chart_id=>wwv_flow_api.id(6301435197801434)
@@ -19476,7 +19577,7 @@ wwv_flow_api.create_page_item(
 ,p_name=>'P65_MINUTES'
 ,p_item_sequence=>25
 ,p_item_plug_id=>wwv_flow_api.id(171541273047303164)
-,p_prompt=>'Minutes'
+,p_prompt=>'Minutes back from now'
 ,p_display_as=>'NATIVE_NUMBER_FIELD'
 ,p_cSize=>30
 ,p_begin_on_new_line=>'N'
@@ -20093,10 +20194,21 @@ wwv_flow_api.create_page_item(
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'APPLICATION'
 );
+end;
+/
+begin
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(6982453746290014)
 ,p_name=>'P65_SOURCETAB_PREV'
 ,p_item_sequence=>10
+,p_item_plug_id=>wwv_flow_api.id(64340039173679706)
+,p_display_as=>'NATIVE_HIDDEN'
+,p_attribute_01=>'Y'
+);
+wwv_flow_api.create_page_item(
+ p_id=>wwv_flow_api.id(8940706156271026)
+,p_name=>'P65_BLOCKER'
+,p_item_sequence=>40
 ,p_item_plug_id=>wwv_flow_api.id(64340039173679706)
 ,p_display_as=>'NATIVE_HIDDEN'
 ,p_attribute_01=>'Y'
@@ -20120,6 +20232,7 @@ wwv_flow_api.create_page_computation(
 '    end if;',
 '    return q''[nvl(event,''CPU'')='']''||l_event||q''['']'';',
 '  elsif :P65_BLOCKER = ''Y'' then',
+'    :P65_BLOCKER := ''N'';',
 '    return ''(session_id,session_serial#,''||case when :P65_SOURCETAB=''AWR'' then ''instance_number'' when :P65_SOURCETAB=''V$VIEW'' then ''inst_id'' end||'') in (select ''||replace(:P65_FILTER_REMASH,'';'','','')||'' from dual)''; ',
 '  else',
 '    return :P65_FILTER_REMASH;',
@@ -20146,6 +20259,7 @@ wwv_flow_api.create_page_computation(
 '    end if;',
 '    return q''[nvl(event,''CPU'')='']''||l_event||q''['']'';',
 '  elsif :P65_BLOCKER = ''Y'' then',
+'    :P65_BLOCKER := ''N'';',
 '    return ''(session_id,session_serial#,''||case when :P65_SOURCETAB=''AWR'' then ''instance_number'' when :P65_SOURCETAB=''V$VIEW'' then ''inst_id'' end||'') in (select ''||replace(:P65_FILTER_REMASHL,'';'','','')||'' from dual)''; ',
 '  else',
 '    return :P65_FILTER_REMASHL;',
@@ -20217,9 +20331,6 @@ wwv_flow_api.create_page_process(
 ,p_process_when_type=>'VAL_OF_ITEM_IN_COND_EQ_COND2'
 ,p_process_when2=>'$LOCAL$'
 );
-end;
-/
-begin
 wwv_flow_api.create_page_process(
  p_id=>wwv_flow_api.id(6331678907801570)
 ,p_process_sequence=>20
