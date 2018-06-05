@@ -190,10 +190,11 @@ create index IDX_CUBE_BLOCK_ASH on CUBE_BLOCK_ASH(sess_id);
 
 create table cube_dic (
 src_db varchar2(100),
-dic_type varchar2(10),
+dic_type varchar2(32),
 name varchar2(256),
 id number,
-id1 number);
+id1 number,
+created date default sysdate);
 
 create index cube_dic_ix1 on cube_dic(src_db,dic_type);
 

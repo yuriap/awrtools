@@ -321,7 +321,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                   la_segment_id(i), la_smpls(i), la_g1(i), la_g2(i), la_g3(i), la_g4(i), la_g5(i), la_g6(i));
     exception
       when others then
-        awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
+        awrtools_logging.log('Error SQL: '||chr(10)||l_sql||chr(10)||sqlerrm);
         raise_application_error(-20000,sqlerrm);
     end;
 
@@ -339,7 +339,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
           execute immediate l_sql;
         exception
           when others then
-            awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
+            awrtools_logging.log('Error SQL: '||chr(10)||l_sql||chr(10)||sqlerrm);
             raise_application_error(-20000,sqlerrm);
         end;
       end if;
@@ -420,7 +420,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
         awrtools_logging.log('End metrics loading','DEBUG');
       exception
         when others then
-          awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
+          awrtools_logging.log('Error SQL: '||chr(10)||l_sql||chr(10)||sqlerrm);
           raise_application_error(-20000,sqlerrm);
       end;
     end if;
@@ -450,7 +450,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
         awrtools_logging.log('End block loading','DEBUG');
       exception
         when others then
-          awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
+          awrtools_logging.log('Error SQL: '||chr(10)||l_sql||chr(10)||sqlerrm);
           raise_application_error(-20000,sqlerrm);
       end;
     end if;
@@ -482,7 +482,7 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       exception
         when others then
           awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
-          raise_application_error(-20000,sqlerrm);
+          raise_application_error(-20000,sqlerrm||chr(10)||sqlerrm);
       end;
     end if;
     
@@ -615,27 +615,49 @@ q'[p_aggr_func=>']'||p_aggr_func||q'[',
 
    procedure load_dic(p_db_link varchar2, p_src_tab varchar2)
    is
+     l_cnt number;
+     dicRACNODES varchar2(32):='RACNODELST';
+     dicMETRICLSTV$ varchar2(32):='METRICLSTV$';
+     dicMETRICLSTAWR varchar2(32):='METRICLSTAWR';
    begin
-     delete from cube_dic where src_db=p_db_link;
-     execute immediate 
+     select count(1) into l_cnt from cube_dic where dic_type=dicRACNODES and src_db=p_db_link and created>(sysdate-to_number(awrtools_api.getconf('CUBEDIC_EXPIRE_TIME_RACNDS')));
+     if l_cnt=0 then
+       awrtools_logging.log('Reloading dictionary: '||dicRACNODES||':'||p_db_link);
+       delete from cube_dic where src_db=p_db_link and dic_type=dicRACNODES;
+       execute immediate 
 q'[insert into cube_dic (src_db, dic_type, name, id)
 select :p_db_link, :p_dic_type, instance_name||' (Node'||inst_id||')', inst_id from gv$instance@]'||p_db_link||q'[
 union all
-select :p_db_link, :p_dic_type, 'Cluster wide', -1 from dual]' using p_db_link, 'RACNODELST', p_db_link, 'RACNODELST';
+select :p_db_link, :p_dic_type, 'Cluster wide', -1 from dual]' using p_db_link, dicRACNODES, p_db_link, dicRACNODES;
      --dbms_output.put_line
+     end if;
 
-     execute immediate 
+     if p_src_tab='V$VIEW' then
+       select count(1) into l_cnt from cube_dic where dic_type=dicMETRICLSTV$ and src_db=p_db_link and created>(sysdate-to_number(awrtools_api.getconf('CUBEDIC_EXPIRE_TIME_MTRC')));
+       if l_cnt=0 then
+         awrtools_logging.log('Reloading dictionary: '||dicMETRICLSTV$||':'||p_db_link);
+         delete from cube_dic where src_db=p_db_link and dic_type=dicMETRICLSTV$;
+         execute immediate 
 q'[insert into cube_dic (src_db, dic_type, name, id, id1)
-select :p_db_link, :p_dic_type, name, id, group_id from
-(select metric_name||' ('||metric_unit||')' name,metric_id id, group_id from V$METRICNAME
-where :P65_SOURCETAB='V$VIEW'
-and metric_id in (select unique metric_id from gv$sysmetric_history@]'||p_db_link||q'[)
-union all
-select metric_name||' ('||metric_unit||')' name,metric_id id, group_id from DBA_HIST_METRIC_NAME 
+select :p_db_link, :metrnm, metric_name||' ('||metric_unit||')' name, metric_id id, group_id from V$METRICNAME
+where metric_id in (select unique metric_id from gv$sysmetric_history@]'||p_db_link||q'[)
+]' using  p_db_link, dicMETRICLSTV$;
+       end if;
+     end if;
+     
+     if p_src_tab='AWR' then     
+       select count(1) into l_cnt from cube_dic where dic_type=dicMETRICLSTAWR and src_db=p_db_link and created>(sysdate-to_number(awrtools_api.getconf('CUBEDIC_EXPIRE_TIME_MTRC')));
+       if l_cnt=0 then
+         awrtools_logging.log('Reloading dictionary: '||dicMETRICLSTAWR||':'||p_db_link);
+         delete from cube_dic where src_db=p_db_link and dic_type=dicMETRICLSTAWR;
+         execute immediate 
+q'[insert into cube_dic (src_db, dic_type, name, id, id1)
+select :p_db_link, :metrnm, metric_name||' ('||metric_unit||')' name,metric_id id, group_id from DBA_HIST_METRIC_NAME 
 where dbid = (select dbid from v$database)
-and :P65_SOURCETAB='AWR'
 and metric_id in (select unique metric_id from dba_hist_sysmetric_history@]'||p_db_link||q'[ where dbid = (select dbid from v$database@]'||p_db_link||q'[))
-)]' using  p_db_link, 'METRICLST', p_src_tab, p_src_tab;
+]' using  p_db_link, dicMETRICLSTAWR;
+       end if;
+     end if;
      commit;
    end;
    

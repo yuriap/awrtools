@@ -5,6 +5,8 @@ insert into awrconfig values ('AWRSTGTMP','TEMP','Temporary tablespace for AWR s
 insert into awrconfig values ('DBLINK','&DBLINK.','DB link name for remote AWR repository');
 insert into awrconfig values ('TOOLVERSION','&awrtoolversion.','AWR tool version');
 insert into awrconfig values ('CUBE_EXPIRE_TIME','120','Time of data expiration of ASH cube, minutes');
+insert into awrconfig values ('CUBEDIC_EXPIRE_TIME_MTRC','90','Time of METRICS dictionary expiration, days');
+insert into awrconfig values ('CUBEDIC_EXPIRE_TIME_RACNDS','8','Time of RAC nodes dictionary expiration, days');
 insert into awrconfig values ('ONLINE_RPT_EXPIRE_TIME','240','Time of data expiration of online reports, minutes');
 insert into awrconfig values ('LOGS_EXPIRE_TIME','8','Time of logs expiration, days');
 insert into awrconfig values ('LOGGING_LEVEL','INFO','Possible values: INFO, DEBUG');

@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   16:43 Monday June 4, 2018
+--   Date and Time:   16:30 Tuesday June 5, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180604163846'
+,p_last_upd_yyyymmddhh24miss=>'20180605162941'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16614,7 +16614,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180604163846'
+,p_last_upd_yyyymmddhh24miss=>'20180605162940'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -17703,13 +17703,13 @@ wwv_flow_api.create_jet_chart_series(
 '  when wait_class=''User I/O'' then ''#0000FF'' ',
 '  when wait_class=''Administrative'' then ''#FFCC00'' ',
 '  when wait_class=''Application'' then ''#FF2EF8'' ',
-'  when wait_class=''Commit'' then ''#FF9500'' ',
+'  when wait_class=''Commit'' then ''#FF8400'' ',
 '  when wait_class=''Concurrency'' then ''#34AADC'' ',
 '  when wait_class=''Configuration'' then ''#5856D6'' ',
 '  when wait_class=''Idle'' then ''#C7C7CC'' ',
 '  when wait_class=''Network'' then ''#8E8E93'' ',
 '  when wait_class=''Other'' then ''#007AFF'' ',
-'  when wait_class=''Scheduler'' then ''#86D94E''',
+'  when wait_class=''Scheduler'' then ''#68B82E''',
 '  when wait_class=''System I/O'' then ''#FF0000''',
 '  when wait_class=''Cluster'' then ''#F7FF00''',
 'end colors ',
@@ -18041,7 +18041,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_items_value_column_name=>'SEC'
 ,p_group_name_column_name=>'SAMPLE_TIME'
 ,p_items_label_column_name=>'SAMPLE_TIME'
-,p_color=>'#FF9500'
+,p_color=>'#FF8400'
 ,p_line_type=>'auto'
 ,p_marker_rendered=>'auto'
 ,p_marker_shape=>'auto'
@@ -18203,7 +18203,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_items_value_column_name=>'SEC'
 ,p_group_name_column_name=>'SAMPLE_TIME'
 ,p_items_label_column_name=>'SAMPLE_TIME'
-,p_color=>'#86D94E'
+,p_color=>'#68B82E'
 ,p_line_type=>'auto'
 ,p_marker_rendered=>'auto'
 ,p_marker_shape=>'auto'
@@ -18250,9 +18250,9 @@ wwv_flow_api.create_jet_chart_series(
 ,p_data_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'select TO_CHAR(d.sample_time,''YYYY/MM/DD HH24:MI:SS'') sample_time, nvl(h.sec,0) sec ',
 '  from (select sample_time, smpls sec ',
-'          from cube_ash where wait_class = ''Cluster'' and sess_id = :P65_SESS_ID and g1=0) h, ',
+'          from cube_ash where wait_class = ''Cluster'' and sess_id = :P65_SESS_ID_SELECTED and g1=0) h, ',
 '       cube_ash_timeline d ',
-' where d.sample_time=h.sample_time(+) and sess_id = :P65_SESS_ID',
+' where d.sample_time=h.sample_time(+) and sess_id = :P65_SESS_ID_SELECTED',
 ' ORDER BY sample_time; '))
 ,p_items_value_column_name=>'SEC'
 ,p_group_name_column_name=>'SAMPLE_TIME'
@@ -18378,13 +18378,13 @@ wwv_flow_api.create_jet_chart_series(
 '  when wait_class=''User I/O'' then ''#0000FF'' ',
 '  when wait_class=''Administrative'' then ''#FFCC00'' ',
 '  when wait_class=''Application'' then ''#FF2EF8'' ',
-'  when wait_class=''Commit'' then ''#FF9500'' ',
+'  when wait_class=''Commit'' then ''#FF8400'' ',
 '  when wait_class=''Concurrency'' then ''#34AADC'' ',
 '  when wait_class=''Configuration'' then ''#5856D6'' ',
 '  when wait_class=''Idle'' then ''#C7C7CC'' ',
 '  when wait_class=''Network'' then ''#8E8E93'' ',
 '  when wait_class=''Other'' then ''#007AFF'' ',
-'  when wait_class=''Scheduler'' then ''#86D94E''',
+'  when wait_class=''Scheduler'' then ''#68B82E''',
 '  when wait_class=''System I/O'' then ''#FF0000''',
 '  when wait_class=''Cluster'' then ''#F7FF00''',
 '  when wait_class=''Remainder'' then ''#8A8A8A''',
@@ -19243,7 +19243,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_items_value_column_name=>'SEC'
 ,p_group_name_column_name=>'SAMPLE_TIME'
 ,p_items_label_column_name=>'SAMPLE_TIME'
-,p_color=>'#FF9500'
+,p_color=>'#FF8400'
 ,p_line_type=>'auto'
 ,p_marker_rendered=>'auto'
 ,p_marker_shape=>'auto'
@@ -19405,7 +19405,7 @@ wwv_flow_api.create_jet_chart_series(
 ,p_items_value_column_name=>'SEC'
 ,p_group_name_column_name=>'SAMPLE_TIME'
 ,p_items_label_column_name=>'SAMPLE_TIME'
-,p_color=>'#86D94E'
+,p_color=>'#68B82E'
 ,p_line_type=>'auto'
 ,p_marker_rendered=>'auto'
 ,p_marker_shape=>'auto'
@@ -19807,7 +19807,12 @@ wwv_flow_api.create_page_item(
 ,p_item_default=>'2144'
 ,p_prompt=>'Metric'
 ,p_display_as=>'NATIVE_POPUP_LOV'
-,p_lov=>'select name, id from cube_dic where src_db=:P65_SOURCEDB and dic_type=''METRICLST'' and id1=:P65_METRIC_GROUP order by 1;'
+,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'select name, id ',
+'  from cube_dic ',
+' where src_db=:P65_SOURCEDB ',
+'   and dic_type=case when :P65_SOURCETAB=''AWR'' then ''METRICLSTAWR'' when :P65_SOURCETAB=''V$VIEW'' then ''METRICLSTV$'' else null end ',
+'   and id1=:P65_METRIC_GROUP order by 1;'))
 ,p_lov_cascade_parent_items=>'P65_METRIC_GROUP'
 ,p_ajax_optimize_refresh=>'Y'
 ,p_cSize=>30
@@ -20176,6 +20181,9 @@ wwv_flow_api.create_page_item(
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'APPLICATION'
 );
+end;
+/
+begin
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(6982104373290011)
 ,p_name=>'P65_MONITOR'
@@ -20194,9 +20202,6 @@ wwv_flow_api.create_page_item(
 ,p_item_template_options=>'#DEFAULT#'
 ,p_attribute_01=>'APPLICATION'
 );
-end;
-/
-begin
 wwv_flow_api.create_page_item(
  p_id=>wwv_flow_api.id(6982453746290014)
 ,p_name=>'P65_SOURCETAB_PREV'
@@ -20351,7 +20356,7 @@ wwv_flow_api.create_page_process(
 '    :P65_MONITOR:=''N'';',
 '  end if;  ',
 '  ',
-'  if (:P65_SOURCEDB_PREV<>:P65_SOURCEDB or :P65_SOURCETAB_PREV<>:P65_SOURCETAB) and :P65_SOURCEDB<>''$LOCAL$'' then',
+'  if (nvl(:P65_SOURCEDB_PREV,''~^'')<>nvl(:P65_SOURCEDB,''~^'') or nvl(:P65_SOURCETAB_PREV,''~^'')<>nvl(:P65_SOURCETAB,''~^'')) and nvl(:P65_SOURCEDB,''~^'')<>''$LOCAL$'' then',
 '    AWRTOOLS_CUBE_ASH.load_dic (P_DB_LINK => :P65_SOURCEDB, P_SRC_TAB => :P65_SOURCETAB);',
 '  end if;  ',
 '',
