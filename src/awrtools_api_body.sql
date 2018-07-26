@@ -83,6 +83,20 @@ create or replace package body awrtools_api as
     when no_data_found then raise_application_error(-20000,'Script "'||p_script_id||'" not found.');
   end;
 
+  procedure create_new_dump_i(p_proj_id AWRDUMPS.proj_id%type,
+                              p_filename AWRDUMPS.filename%type,
+                              p_dump_description AWRDUMPS.dump_description%type,
+                              p_filebody AWRDUMPS_FILES.filebody%type,
+                              p_dump_id out AWRDUMPS.dump_id%type)
+  is
+  begin
+    INSERT INTO awrdumps (proj_id, filename, dump_description) VALUES (p_proj_id, p_filename, p_dump_description)
+    returning dump_id into p_dump_id;
+    awrtools_contr.lcc_dump_exec_action(p_dump_id,awrtools_contr.c_dump_create);
+    INSERT INTO awrdumps_files (dump_id, filebody) VALUES (p_dump_id, p_filebody);
+    awrtools_contr.lcc_dump_exec_action(p_dump_id,awrtools_contr.c_dump_loadfile);
+  end;
+
   procedure create_new_dump(p_proj_id AWRDUMPS.proj_id%type,
                             p_filename AWRDUMPS.filename%type,
                             p_dump_description AWRDUMPS.dump_description%type,
@@ -90,21 +104,25 @@ create or replace package body awrtools_api as
   is
     l_dump_id number;
   begin
-    INSERT INTO awrdumps (proj_id, filename, dump_description) VALUES (p_proj_id, p_filename, p_dump_description)
-    returning dump_id into l_dump_id;
-    awrtools_contr.lcc_dump_exec_action(l_dump_id,awrtools_contr.c_dump_create);
-    INSERT INTO awrdumps_files (dump_id, filebody) VALUES (l_dump_id, p_filebody);
-    awrtools_contr.lcc_dump_exec_action(l_dump_id,awrtools_contr.c_dump_loadfile);
+    create_new_dump_i(p_proj_id,p_filename,p_dump_description,p_filebody,l_dump_id);
   end;
 
    procedure load_dump_from_file(p_proj_id AWRDUMPS.proj_id%type,
                                  p_filename AWRDUMPS.filename%type,
-                                 p_dump_description AWRDUMPS.dump_description%type)
+                                 p_dump_description AWRDUMPS.dump_description%type,
+                                 p_loading_date AWRDUMPS.loading_date%type default null,
+                                 p_dbid AWRDUMPS.dbid%type default null,
+                                 p_min_snap_id AWRDUMPS.min_snap_id%type default null,
+                                 p_max_snap_id AWRDUMPS.max_snap_id%type default null,
+                                 p_min_snap_dt AWRDUMPS.min_snap_dt%type default null,
+                                 p_max_snap_dt AWRDUMPS.max_snap_dt%type default null,
+                                 p_db_description AWRDUMPS.db_description%type default null)
    is
      l_filebody AWRDUMPS_FILES.filebody%type;
      l_d_off number := 1;
      l_s_off number := 1;
      l_bfile bfile := BFILENAME(awrtools_api.getconf('WORKDIR'), p_filename);
+     l_dump_id number;
    begin
      DBMS_LOB.CREATETEMPORARY(l_filebody, false);
      DBMS_LOB.fileopen(l_bfile, DBMS_LOB.file_readonly);
@@ -115,8 +133,18 @@ create or replace package body awrtools_api as
        dest_offset => l_d_off,
        src_offset  => l_s_off);
 
-     awrtools_api.create_new_dump(p_proj_id, p_filename, p_dump_description, l_filebody);
+     create_new_dump_i(p_proj_id,p_filename,p_dump_description,l_filebody,l_dump_id);
      DBMS_LOB.FILECLOSE (l_bfile);
+     
+     UPDATE awrdumps SET
+       loading_date = p_loading_date,
+       dbid = p_dbid,
+       min_snap_id = p_min_snap_id,
+       max_snap_id = p_max_snap_id,
+       min_snap_dt = p_min_snap_dt,
+       max_snap_dt = p_max_snap_dt,
+       db_description = p_db_description
+     WHERE dump_id =l_dump_id;
    end;
 
   procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2) is

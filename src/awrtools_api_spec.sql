@@ -26,6 +26,13 @@ create or replace package awrtools_api as
    procedure del_file(p_dump_id awrdumps.dump_id%type);
    procedure load_dump_from_file(p_proj_id AWRDUMPS.proj_id%type,
                                  p_filename AWRDUMPS.filename%type,
-                                 p_dump_description AWRDUMPS.dump_description%type);
+                                 p_dump_description AWRDUMPS.dump_description%type,
+                                 p_loading_date AWRDUMPS.loading_date%type default null,
+                                 p_dbid AWRDUMPS.dbid%type default null,
+                                 p_min_snap_id AWRDUMPS.min_snap_id%type default null,
+                                 p_max_snap_id AWRDUMPS.max_snap_id%type default null,
+                                 p_min_snap_dt AWRDUMPS.min_snap_dt%type default null,
+                                 p_max_snap_dt AWRDUMPS.max_snap_dt%type default null,
+                                 p_db_description AWRDUMPS.db_description%type default null);
 end awrtools_api;
 /

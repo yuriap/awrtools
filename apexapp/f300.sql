@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   16:30 Tuesday June 5, 2018
+--   Date and Time:   17:26 Wednesday June 6, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -122,7 +122,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180605162941'
+,p_last_upd_yyyymmddhh24miss=>'20180606163433'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16614,7 +16614,7 @@ wwv_flow_api.create_page(
 ,p_page_is_public_y_n=>'N'
 ,p_cache_mode=>'NOCACHE'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180605162940'
+,p_last_upd_yyyymmddhh24miss=>'20180606163433'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -17778,10 +17778,11 @@ wwv_flow_api.create_report_region(
 ,p_component_template_options=>'#DEFAULT#:t-Report--altRowsDefault:t-Report--rowHighlight'
 ,p_display_point=>'BODY'
 ,p_source=>wwv_flow_string.join(wwv_flow_t_varchar2(
+'with tot as (select sum(smpls) tot_sec from cube_ash where sess_id = :P65_SESS_ID and g1=0)',
 'SELECT',
-'    unknown_type, session_type, program, client_id, machine, ecid, username, smpls',
+'    unknown_type, session_type, program, client_id, machine, ecid, username, smpls, round(100*smpls/tot_sec,2) pct',
 'FROM',
-'    cube_ash_unknown',
+'    cube_ash_unknown, tot',
 'where sess_id = :P65_SESS_ID',
 'order by smpls desc'))
 ,p_source_type=>'NATIVE_SQL_REPORT'
@@ -17875,6 +17876,16 @@ wwv_flow_api.create_report_columns(
 ,p_column_alias=>'SMPLS'
 ,p_column_display_sequence=>8
 ,p_column_heading=>'Samples'
+,p_use_as_row_header=>'N'
+,p_derived_column=>'N'
+,p_include_in_export=>'Y'
+);
+wwv_flow_api.create_report_columns(
+ p_id=>wwv_flow_api.id(8941366625271032)
+,p_query_column_id=>9
+,p_column_alias=>'PCT'
+,p_column_display_sequence=>9
+,p_column_heading=>'% of total samples'
 ,p_use_as_row_header=>'N'
 ,p_derived_column=>'N'
 ,p_include_in_export=>'Y'
@@ -20374,11 +20385,15 @@ wwv_flow_api.create_page_process(
 ,p_process_name=>'GET_ASH_INTERVAL'
 ,p_process_sql_clob=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'begin ',
-'  if :P65_MINUTES is not null then',
+'  if :P65_MINUTES is not null and :P65_MINUTES > 0 then',
 '    select to_char(systimestamp-:P65_MINUTES/24/60,''YYYY/MON/DD HH24:MI:SS''), ',
 '           to_char(systimestamp,''YYYY/MON/DD HH24:MI:SS'')',
 '    into :P65_START_DT, :P65_END_DT',
 '    from dual@&P65_SOURCEDB.;',
+'  elsif :P65_MINUTES=-1 then',
+'    select to_char(max(st),''YYYY/MON/DD HH24:MI:SS''), to_char(systimestamp,''YYYY/MON/DD HH24:MI:SS'')',
+'      into :P65_START_DT, :P65_END_DT',
+'      from (select min(sample_time) st from gv$active_session_history@&P65_SOURCEDB. group by inst_id);',
 '  end if;',
 'end;'))
 ,p_error_display_location=>'INLINE_IN_NOTIFICATION'
