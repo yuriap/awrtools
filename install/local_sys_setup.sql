@@ -46,5 +46,7 @@ grant select on V_$METRICNAME to &localscheme.;
 
 grant execute on dbms_xplan to &localscheme.;
 
+grant select on AWR_PDB_SQL_PLAN to &localscheme.;
+grant select on AWR_PDB_SQLTEXT to &localscheme.;
 
 disc

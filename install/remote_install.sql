@@ -10,12 +10,26 @@ begin
 end;
 /
 show errors
+
+rem R12
 create or replace view remote_awr_plan as
 select plan_table_output 
 from table(dbms_xplan.display_awr(SYS_CONTEXT('rem_&remotescheme._ctx', 'sql_id'), 
                                   SYS_CONTEXT('rem_&remotescheme._ctx', 'plan_hash'), 
                                   SYS_CONTEXT('rem_&remotescheme._ctx', 'dbid'), 'ADVANCED -ALIAS'));
 show errors
+
+rem R18 single tenant
+create or replace view remote_awr_plan as
+select plan_table_output 
+from table(dbms_xplan.display_workload_repository(sql_id          => SYS_CONTEXT('rem_&remotescheme._ctx', 'sql_id'), 
+                                                  plan_hash_value => SYS_CONTEXT('rem_&remotescheme._ctx', 'plan_hash'), 
+                                                  dbid            => SYS_CONTEXT('rem_&remotescheme._ctx', 'dbid'), 
+												  con_dbid        => SYS_CONTEXT('rem_&remotescheme._ctx', 'dbid'), 
+												  format          => 'ADVANCED -ALIAS')
+												  );
+show errors
+
 
 create table awrdumps (
   dbid number,

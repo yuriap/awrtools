@@ -23,4 +23,11 @@ grant select on dba_hist_sysmetric_history to &remotescheme.;
 grant select on DBA_HIST_SNAPSHOT to &remotescheme.;
 grant execute on dbms_lock to &remotescheme.;
 
+grant select on DBA_HIST_SQL_PLAN to &remotescheme.;
+grant select on DBA_HIST_SQLTEXT to &remotescheme.;
+grant select on AWR_ROOT_SQL_PLAN to &remotescheme.;
+grant select on AWR_PDB_SQL_PLAN to &remotescheme.;
+grant select on AWR_ROOT_SQLTEXT to &remotescheme.;
+grant select on AWR_PDB_SQLTEXT to &remotescheme.;
+
 disc
