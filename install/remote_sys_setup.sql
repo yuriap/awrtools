@@ -1,7 +1,7 @@
 conn sys/&remotesys.@&remotedb. as sysdba
 
 create or replace directory &dirname. as '&dirpath.';
-create tablespace &tblspc_name. datafile size 100m autoextend on next 100m maxsize 10000m;
+create bigfile tablespace &tblspc_name. datafile size 100m autoextend on next 100m maxsize 1000m;
 
 create user &remotescheme. identified by &remotescheme.
 default tablespace &tblspc_name.

@@ -1,7 +1,13 @@
 conn sys/&localsys.@&localdb. as sysdba
 
 create or replace directory &dirname. as '&dirpath.';
-create tablespace &tblspc_name. datafile size 100m autoextend on next 100m maxsize 10000m;
+create bigfile tablespace &tblspc_name. datafile size 100m autoextend on next 100m maxsize 50000m;
+
+--unreasonable error in 18.3 multitenant, cdb_properties WHERE property_name = 'MAX_PDB_STORAGE' is set to UNLIMITED
+--create tablespace awrtool30tbs datafile size 100m autoextend on next 100m maxsize 50000m
+--*
+--ERROR at line 1:
+--ORA-03206: maximum file size of (6400000) blocks in AUTOEXTEND clause is out of range 
 
 create user &localscheme. identified by &localscheme.
 default tablespace &tblspc_name.
