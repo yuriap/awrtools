@@ -20,6 +20,7 @@ create or replace package awrtools_api as
    procedure create_new_dump(p_proj_id AWRDUMPS.proj_id%type,
                              p_filename AWRDUMPS.filename%type,
                              p_dump_description AWRDUMPS.dump_description%type,
+                             p_dump_name AWRDUMPS.dump_name%type,
                              p_filebody AWRDUMPS_FILES.filebody%type);
    procedure load_dump_into_repo(p_dump_id awrdumps.dump_id%type, p_dest varchar2);
    procedure unload_dump(p_dump_id awrdumps.dump_id%type);
@@ -33,6 +34,7 @@ create or replace package awrtools_api as
                                  p_max_snap_id AWRDUMPS.max_snap_id%type default null,
                                  p_min_snap_dt AWRDUMPS.min_snap_dt%type default null,
                                  p_max_snap_dt AWRDUMPS.max_snap_dt%type default null,
-                                 p_db_description AWRDUMPS.db_description%type default null);
+                                 p_db_description AWRDUMPS.db_description%type default null,
+                                 p_dump_name AWRDUMPS.dump_name%type default null);
 end awrtools_api;
 /

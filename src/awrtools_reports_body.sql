@@ -126,7 +126,8 @@ create or replace package body awrtools_reports as
       l_report_content clob;
       l_file_prefix AWRCOMP_D_REPORT_TYPES.dic_filename_pref%type;
       l_report_params_displ AWRCOMP_REPORTS.report_params_displ%type;
-
+      l_dn1 awrdumps.dump_name%type;
+      l_dn2 awrdumps.dump_name%type;
     begin
 
       execute immediate q'[alter session set nls_numeric_characters=', ']';
@@ -145,19 +146,19 @@ create or replace package body awrtools_reports as
             l_sort AWRCOMP_D_SORTORDRS.DIC_VALUE%type;
           begin
             l_scr := awrtools_api.getscript('GETCOMPREPORT');
-            select dbid, min_snap_id, max_snap_id into l_dbid, l_ss, l_es from awrdumps where dump_id=to_number(get_param(p_report_id,'DB1'));
+            select dbid, min_snap_id, max_snap_id, dump_name into l_dbid, l_ss, l_es, l_dn1 from awrdumps where dump_id=to_number(get_param(p_report_id,'DB1'));
             l_scr := replace(l_scr,'~dbid1.',to_char(l_dbid));
             l_scr := replace(l_scr,'~start_snap1.',to_char(l_ss));
             l_scr := replace(l_scr,'~end_snap1.',to_char(l_es));
 
             l_report_params_displ:='DB1: '||to_char(l_dbid)||'; snaps: '||to_char(l_ss)||'-'||to_char(l_es)||'; ';
 
-            select dbid, min_snap_id, max_snap_id, is_remote into l_dbid, l_ss, l_es, l_is_remote from awrdumps where dump_id=to_number(get_param(p_report_id,'DB2'));
+            select dbid, min_snap_id, max_snap_id, is_remote, dump_name into l_dbid, l_ss, l_es, l_is_remote, l_dn2 from awrdumps where dump_id=to_number(get_param(p_report_id,'DB2'));
             l_scr := replace(l_scr,'~dbid2.',to_char(l_dbid));
             l_scr := replace(l_scr,'~start_snap2.',to_char(l_ss));
             l_scr := replace(l_scr,'~end_snap2.',to_char(l_es));
 
-            l_report_params_displ:=l_report_params_displ||'DB2: '||to_char(l_dbid)||'; snaps: '||to_char(l_ss)||'-'||to_char(l_es)||'; ';
+            l_report_params_displ:=l_dn1||' - '||l_dn2||'; '||l_report_params_displ||'DB2: '||to_char(l_dbid)||'; snaps: '||to_char(l_ss)||'-'||to_char(l_es)||'; ';
 
             if l_is_remote='YES' then
               l_scr := replace(l_scr,'~dblnk.','@'||awrtools_api.getconf('DBLINK'));

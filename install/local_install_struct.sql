@@ -50,7 +50,8 @@ create table awrdumps (
     max_snap_dt timestamp(3),
     is_remote varchar2(10) default 'NO' NOT NULL check (is_remote in ('YES','NO')),
     db_description varchar2(1000),
-    dump_description varchar2(4000)
+    dump_description varchar2(4000),
+	dump_name varchar2(100)
 );
 
 create index awrdumps_proj on awrdumps(proj_id);
