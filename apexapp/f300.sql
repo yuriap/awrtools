@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   12:23 Monday September 17, 2018
+--   Date and Time:   12:44 Monday September 17, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -120,7 +120,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180917120437'
+,p_last_upd_yyyymmddhh24miss=>'20180917123246'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -10663,7 +10663,7 @@ wwv_flow_api.create_page(
 ,p_page_template_options=>'#DEFAULT#'
 ,p_protection_level=>'C'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180917113650'
+,p_last_upd_yyyymmddhh24miss=>'20180917123246'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(5224936558733137)
@@ -11334,6 +11334,7 @@ wwv_flow_api.create_page_item(
 ,p_name=>'P11_DUMP_NAME'
 ,p_item_sequence=>15
 ,p_item_plug_id=>wwv_flow_api.id(103400123796169967)
+,p_use_cache_before_default=>'NO'
 ,p_prompt=>'Dump Name'
 ,p_display_as=>'NATIVE_TEXT_FIELD'
 ,p_cSize=>30
@@ -11350,6 +11351,7 @@ wwv_flow_api.create_page_item(
 ,p_name=>'P11_AWRDUMPFILE'
 ,p_item_sequence=>10
 ,p_item_plug_id=>wwv_flow_api.id(103400123796169967)
+,p_use_cache_before_default=>'NO'
 ,p_prompt=>'AWR Dump'
 ,p_display_as=>'NATIVE_FILE'
 ,p_cSize=>30
@@ -11585,11 +11587,11 @@ wwv_flow_api.create_page_process(
 '					',
 '	  if l_select_count = 1 then',
 '  		for i in (select id, filename, blob_content',
-'			           from apex_application_temp_files ',
-'                where name = :P11_AWRDUMPFILE) ',
-'      loop',
-'        awrtools_api.create_new_dump(:P11_PROJ_ID, i.filename,:P11_DUMP_DESCR, :P11_DUMP_NAME,i.blob_content);',
-'			end loop; ',
+'		            from apex_application_temp_files ',
+'                   where name = :P11_AWRDUMPFILE) ',
+'        loop',
+'          awrtools_api.create_new_dump(:P11_PROJ_ID, i.filename,:P11_DUMP_DESCR, :P11_DUMP_NAME,i.blob_content);',
+'		end loop; ',
 '  	end if;',
 '  else',
 '    raise_application_error(-20000,''File name is empty'');',

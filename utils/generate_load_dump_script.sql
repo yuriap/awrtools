@@ -36,15 +36,16 @@ l_dump_scr varchar2(32765) := q'[declare
 begin
   awrtools_api.load_dump_from_file(p_proj_id=>:p_proj_id, 
                                    p_filename=>l_filename, 
-								   p_dump_description=>l_dump_description,
+                                   p_dump_description=>l_dump_description,
                                    p_loading_date=>to_date('<DUMP_DATE>','YYYYMMDDHH24MISS'),
                                    p_dbid=><DBID>,
                                    p_min_snap_id=><MINSN>,
                                    p_max_snap_id=><MAXSN>,
                                    p_min_snap_dt=><MINDT>,
                                    p_max_snap_dt=><MAXDT>,
-                                   p_db_description=>'<DBDESCR>'
-								 );
+                                   p_db_description=>'<DBDESCR>',
+                                   p_dump_name=>'<DMPNAME>'
+                                 );
   commit;
   dbms_output.put_line('Dump "'||l_filename||'" has been loaded into PROJ_ID='||:p_proj_id);
 end;
@@ -62,27 +63,29 @@ begin
    p(l_header_scr);
    for i in (SELECT PROJ_ID, PROJ_NAME, PROJ_DESCRIPTION,PROJ_DATE FROM AWRTOOLPROJECT order by PROJ_ID) loop
      p(replace(replace(replace(l_proj_scr,'<Project name>',i.PROJ_NAME),'<Project description>',i.PROJ_DESCRIPTION),'<PROJ_DATE>',to_char(i.PROJ_DATE,'YYYYMMDDHH24MISS')));
-	 p('--');
-     for j in (SELECT PROJ_ID, FILENAME, DUMP_DESCRIPTION,loading_date,dbid,min_snap_id,max_snap_id,min_snap_dt,max_snap_dt,db_description FROM AWRDUMPS where PROJ_ID=i.PROJ_ID order by dump_id) loop
-	   p('-- #'||l_cnt);l_cnt:=l_cnt+1;
+     p('--');
+     for j in (SELECT PROJ_ID, FILENAME, DUMP_DESCRIPTION,loading_date,dbid,min_snap_id,max_snap_id,min_snap_dt,max_snap_dt,db_description, dump_name FROM AWRDUMPS where PROJ_ID=i.PROJ_ID order by dump_id) loop
+       p('-- #'||l_cnt);l_cnt:=l_cnt+1;
        p(replace(
-	     replace(
-		 replace(
-		 replace(
-		 replace(
-		 replace(
-		 replace(
-		 replace(
-	     replace(l_dump_scr,'<dump_file_name>',j.FILENAME),
-		                    '<Dump description>',j.DUMP_DESCRIPTION),
-							'<DUMP_DATE>',to_char(j.loading_date,'YYYYMMDDHH24MISS')),
-							'<DBID>',nvl(to_char(j.dbid),'null')),
-							'<MINSN>',nvl(to_char(j.min_snap_id),'null')),
-							'<MAXSN>',nvl(to_char(j.max_snap_id),'null')),
-							'<MINDT>',case when j.min_snap_dt is null then 'null' else q'[to_timestamp(']'||to_char(j.min_snap_dt,'YYYYMMDDHH24MISS.FF3')||q'[','YYYYMMDDHH24MISS.FF3')]' end),
-							'<MAXDT>',case when j.max_snap_dt is null then 'null' else q'[to_timestamp(']'||to_char(j.max_snap_dt,'YYYYMMDDHH24MISS.FF3')||q'[','YYYYMMDDHH24MISS.FF3')]' end),
-							'<DBDESCR>',j.db_description)
-		);
+         replace(
+         replace(
+         replace(
+         replace(
+         replace(
+         replace(
+         replace(
+         replace(
+         replace(l_dump_scr,'<dump_file_name>',j.FILENAME),
+                            '<Dump description>',j.DUMP_DESCRIPTION),
+                            '<DUMP_DATE>',to_char(j.loading_date,'YYYYMMDDHH24MISS')),
+                            '<DBID>',nvl(to_char(j.dbid),'null')),
+                            '<MINSN>',nvl(to_char(j.min_snap_id),'null')),
+                            '<MAXSN>',nvl(to_char(j.max_snap_id),'null')),
+                            '<MINDT>',case when j.min_snap_dt is null then 'null' else q'[to_timestamp(']'||to_char(j.min_snap_dt,'YYYYMMDDHH24MISS.FF3')||q'[','YYYYMMDDHH24MISS.FF3')]' end),
+                            '<MAXDT>',case when j.max_snap_dt is null then 'null' else q'[to_timestamp(']'||to_char(j.max_snap_dt,'YYYYMMDDHH24MISS.FF3')||q'[','YYYYMMDDHH24MISS.FF3')]' end),
+                            '<DBDESCR>',j.db_description),
+                            '<DMPNAME>',j.dump_name)
+        );
      end loop;
    end loop;
    p(l_footer_scr);
