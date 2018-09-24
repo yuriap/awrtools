@@ -174,6 +174,12 @@ create or replace package body awrtools_reports as
             l_scr := replace(l_scr,'~sortlimit.',get_param(p_report_id,'LIMIT'));
             l_scr := replace(l_scr,'~embeded.','FALSE');
 
+            if l_dn1 is not null then
+              l_scr := replace(l_scr,q'[l_text:=l_text||'DB1:'||chr(10);]',q'[l_text:=l_text||'DB1: ]'||l_dn1||q'['||chr(10);]');
+            end if;
+            if l_dn2 is not null then
+              l_scr := replace(l_scr,q'[l_text:=l_text||'DB2:'||chr(10);]',q'[l_text:=l_text||'DB2: ]'||l_dn2||q'['||chr(10);]');
+            end if;            
             l_report_params_displ:=l_report_params_displ||'SORT: '||l_sort||'; ';
             l_report_params_displ:=l_report_params_displ||'FILTER: '||get_param(p_report_id,'FILTER')||'; ';
             l_report_params_displ:=l_report_params_displ||'LIMIT: '||get_param(p_report_id,'LIMIT');

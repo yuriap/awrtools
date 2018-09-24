@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   12:44 Monday September 17, 2018
+--   Date and Time:   10:04 Wednesday September 19, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -120,7 +120,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180917123246'
+,p_last_upd_yyyymmddhh24miss=>'20180918135620'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16699,7 +16699,7 @@ wwv_flow_api.create_page(
 ,p_group_id=>wwv_flow_api.id(6674631255986651)
 ,p_page_template_options=>'#DEFAULT#'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20180606163433'
+,p_last_upd_yyyymmddhh24miss=>'20180918135619'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -20335,7 +20335,7 @@ wwv_flow_api.create_page_item(
 ,p_display_as=>'NATIVE_SELECT_LIST'
 ,p_lov=>wwv_flow_string.join(wwv_flow_t_varchar2(
 'SELECT ',
-'    ''DBID: ''||DBID||',
+'    dump_name||'' - DBID: ''||DBID||',
 '    '', ''||MIN_SNAP_ID||''-''||MAX_SNAP_ID||',
 '    '', ''||to_char(MIN_SNAP_DT,''yyyy-mon-dd hh24:mi:ss'')||''-''||to_char(MAX_SNAP_DT,''yyyy-mon-dd hh24:mi:ss'')||',
 '    '', ''||DB_DESCRIPTION||''; REMOTE:''||is_remote',
