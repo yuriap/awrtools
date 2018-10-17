@@ -146,7 +146,8 @@ create or replace package body awrtools_api as
        max_snap_id = p_max_snap_id,
        min_snap_dt = p_min_snap_dt,
        max_snap_dt = p_max_snap_dt,
-       db_description = p_db_description
+       db_description = p_db_description,
+       dump_name = p_dump_name
      WHERE dump_id =l_dump_id;
    end;
 
