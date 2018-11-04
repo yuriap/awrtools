@@ -103,6 +103,13 @@ q'^
 ^';
   delete from awrcomp_scripts where script_id='PROC_SQLMON_HIST';
   insert into awrcomp_scripts (script_id,script_content) values ('PROC_SQLMON_HIST',l_script);
+  
+  l_script := 
+q'^
+@../scripts/__getplanawrh_sect.sql
+^';
+  delete from awrcomp_scripts where script_id='PROC_AWR_SECT';
+  insert into awrcomp_scripts (script_id,script_content) values ('PROC_SQLMON_HIST',l_script);
 end;
 /
 
