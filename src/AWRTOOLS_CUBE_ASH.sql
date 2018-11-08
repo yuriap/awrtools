@@ -14,8 +14,9 @@ create or replace PACKAGE AWRTOOLS_CUBE_ASH AS
                                p_aggr_func varchar2 default null,
                                p_block_analyze boolean default false,
                                p_unknown_analyze boolean default false,
-                               p_monitor boolean default false);
-                               
+                               p_monitor boolean default false,
+                               p_topsess boolean default false);
+
   procedure load_cube_ash_mon (p_sess_id number,
                                p_source varchar2,
                                p_dblink varchar2,
@@ -30,7 +31,8 @@ create or replace PACKAGE AWRTOOLS_CUBE_ASH AS
                                p_aggr_func varchar2 default null,
                                p_block_analyze boolean default false,
                                p_unknown_analyze boolean default false,
-                               p_monitor boolean default false);                               
+                               p_monitor boolean default false,
+                               p_topsess boolean default false);
 
   procedure CLEANUP_CUBE_ASH;
   procedure load_dic(p_db_link varchar2, p_src_tab varchar2);
@@ -64,7 +66,8 @@ create or replace PACKAGE BODY AWRTOOLS_CUBE_ASH AS
                                p_aggr_func varchar2 default null,
                                p_block_analyze boolean default false,
                                p_unknown_analyze boolean default false,
-                               p_monitor boolean default false)
+                               p_monitor boolean default false,
+                               p_topsess boolean default false)
   is
     l_dbid     number;
     l_min_snap number;
@@ -153,6 +156,22 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                         when sql_id is not null and module is null then 'MODULE' end,
                     session_type,program, client_id,machine,ecid,user_id) x1)x2
            where cnt/tot>0.005]';
+
+    l_sql_topsess_template varchar2(32765):=
+    q'[INSERT INTO cube_top_sess (sess_id,session_id,session_serial#,inst_id,module,action,program,client_id,machine,ecid,username,smpls)
+      select /*+ driving_site(x) */
+                :P_SESS_ID, session_id, session_serial#, <INSTANCE_NUMBER>, module, action, program,client_id,machine,ecid,user_id, cnt<MULT> from(
+          select
+                 session_id, session_serial#, <INSTANCE_NUMBER>, module, action,program,client_id,machine,ecid,user_id,
+                 count(1) cnt
+            from <SOURCE_TABLE> x
+           where <DBID>
+             AND <INSTANCE_NUMBER> in (<P_INST_ID>)
+             AND <SNAP_FILTER>
+             AND SAMPLE_TIME BETWEEN :P_START_DT AND :P_END_DT
+             AND <FILTER>
+           group by session_id, session_serial#, <INSTANCE_NUMBER>, module, action,program,client_id,machine,ecid,user_id)]';
+
 
     l_sql varchar2(32765);
     l_crsr sys_refcursor;
@@ -486,6 +505,34 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
       end;
     end if;
 
+    if p_topsess then
+      l_sql := replace(replace(replace(replace(replace(replace(replace(replace(l_sql_topsess_template,
+                                                          '<SOURCE_TABLE>',case
+                                                                             when p_source = 'V$VIEW' then case when p_dblink = '$LOCAL$' then 'gv$active_session_history'
+                                                                                                          else 'gv$active_session_history@'||p_dblink
+                                                                                                          end
+                                                                             when p_source = 'AWR' then case when p_dblink = '$LOCAL$' then 'dba_hist_active_sess_history'
+                                                                                                        else 'dba_hist_active_sess_history@'||p_dblink
+                                                                                                        end
+                                                                           end),
+                                                  '<DBID>',case when p_source = 'V$VIEW' then ':P_DBID is null' else 'DBID = :P_DBID' end),
+                                          '<INSTANCE_NUMBER>',case when p_source = 'V$VIEW' then 'INST_ID' else 'INSTANCE_NUMBER' end),
+                                  '<SNAP_FILTER>',case when p_source = 'AWR' then 'SNAP_ID BETWEEN :P_MIN_SNAP AND :P_MAX_SNAP' else ':P_MIN_SNAP is null and :P_MAX_SNAP is null' end),
+                          '<FILTER>',nvl(p_filter,'1=1')),
+                          '<MULT>',case when p_source = 'AWR' then '*10' else null end),'<P_INST_ID>',l_inst_list),
+                          '<DBA_USERS>',case when p_dblink = '$LOCAL$' then 'dba_users' else 'dba_users@'||p_dblink end);
+      begin
+        awrtools_logging.log('Start top sess loading','DEBUG');
+        awrtools_logging.log(l_sql,'DEBUG');
+        execute immediate l_sql using p_sess_id, l_dbid, l_min_snap, l_max_snap, l_start_dt, l_end_dt;
+        awrtools_logging.log('End unknown loading','DEBUG');
+      exception
+        when others then
+          awrtools_logging.log('Error SQL: '||chr(10)||l_sql);
+          raise_application_error(-20000,sqlerrm||chr(10)||sqlerrm);
+      end;
+    end if;
+    
     commit;
     awrtools_logging.log('End load_data_cube','DEBUG');
     --dbms_stats.gather_table_stats(ownname=> sys_context('USERENV','CURRENT_USER'), tabname=>'remote_ash_timeline', cascade=>true);
@@ -505,27 +552,29 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                                p_aggr_func varchar2 default null,
                                p_block_analyze boolean default false,
                                p_unknown_analyze boolean default false,
-                               p_monitor boolean default false)
+                               p_monitor boolean default false,
+                               p_topsess boolean default false)
   is
     l_sess_id number := p_sess_id;
   begin
     for i in 1..to_number(awrtools_api.getconf('MONITOR_ITERATIONS')) loop
       awrtools_logging.log('Start load Cube from job: '||i,'DEBUG');
-      load_cube_ash_i   (p_sess_id => l_sess_id,
-                         p_source => p_source,
-                         p_dblink => p_dblink,
-                         p_agg => p_agg,
-                         p_inst_id => p_inst_id,
-                         p_start_dt => p_start_dt,
-                         p_end_dt => p_end_dt,
-                         p_filter => p_filter,
-                         p_dump_id => p_dump_id,
-                         p_metric_id => p_metric_id,
-                         p_metricgroup_id => p_metricgroup_id,
-                         p_aggr_func => p_aggr_func,
-                         p_block_analyze => p_block_analyze,
-                         p_unknown_analyze => p_unknown_analyze,
-                         p_monitor => p_monitor);
+      load_cube_ash_i   (p_sess_id =>         load_cube_ash_mon.l_sess_id,
+                         p_source =>          load_cube_ash_mon.p_source,
+                         p_dblink =>          load_cube_ash_mon.p_dblink,
+                         p_agg =>             load_cube_ash_mon.p_agg,
+                         p_inst_id =>         load_cube_ash_mon.p_inst_id,
+                         p_start_dt =>        load_cube_ash_mon.p_start_dt,
+                         p_end_dt =>          load_cube_ash_mon.p_end_dt,
+                         p_filter =>          load_cube_ash_mon.p_filter,
+                         p_dump_id =>         load_cube_ash_mon.p_dump_id,
+                         p_metric_id =>       load_cube_ash_mon.p_metric_id,
+                         p_metricgroup_id =>  load_cube_ash_mon.p_metricgroup_id,
+                         p_aggr_func =>       load_cube_ash_mon.p_aggr_func,
+                         p_block_analyze =>   load_cube_ash_mon.p_block_analyze,
+                         p_unknown_analyze => load_cube_ash_mon.p_unknown_analyze,
+                         p_monitor =>         load_cube_ash_mon.p_monitor,
+                         p_topsess =>         load_cube_ash_mon.p_topsess);
       dbms_lock.sleep(to_number(awrtools_api.getconf('MONITOR_PAUSE')));
     end loop;
   end;
@@ -544,7 +593,8 @@ q'[insert into cube_metrics (sess_id, metric_id, end_time, value)
                                p_aggr_func varchar2 default null,
                                p_block_analyze boolean default false,
                                p_unknown_analyze boolean default false,
-                               p_monitor boolean default false)
+                               p_monitor boolean default false,
+                               p_topsess boolean default false)
   is
     l_cnt number;
     l_job_name varchar2(30):='ASHMONITOR';
@@ -578,6 +628,7 @@ q'[begin AWRTOOLS_CUBE_ASH.load_cube_ash_mon(
 q'[p_aggr_func=>']'||p_aggr_func||q'[',
    p_block_analyze=>]'||case when p_block_analyze then 'TRUE' else 'FALSE' end||q'[,
    p_unknown_analyze=>]'||case when p_unknown_analyze then 'TRUE' else 'FALSE' end||q'[,
+   p_topsess=>]'||case when p_topsess then 'TRUE' else 'FALSE' end||q'[,
    p_monitor=>]'||case when p_monitor then 'TRUE' else 'FALSE' end||q'[); end;]';
         awrtools_logging.log(l_job_body,'DEBUG');
         dbms_scheduler.create_job(job_name => l_job_name,
@@ -609,7 +660,8 @@ q'[p_aggr_func=>']'||p_aggr_func||q'[',
                          p_aggr_func => p_aggr_func,
                          p_block_analyze => p_block_analyze,
                          p_unknown_analyze => p_unknown_analyze,
-                         p_monitor => p_monitor);
+                         p_monitor => p_monitor,
+                         p_topsess => p_topsess);
     end if;
   end;
 

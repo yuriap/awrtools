@@ -189,6 +189,22 @@ CREATE TABLE CUBE_BLOCK_ASH (
 
 create index IDX_CUBE_BLOCK_ASH on CUBE_BLOCK_ASH(sess_id);
 
+create table cube_top_sess (
+sess_id          number references cube_ash_sess(sess_id) on delete cascade,
+session_id       number, 
+session_serial#  number, 
+inst_id          number, 
+module           varchar2(64 byte), 
+action           varchar2(64 byte), 	
+program          varchar2(48),
+client_id        varchar2(64),
+machine          varchar2(64),
+ecid             varchar2(64),
+username         varchar2(128),
+smpls            number);
+
+create index idx_cube_top_sess_ss on cube_top_sess(sess_id);
+
 create table cube_dic (
 src_db varchar2(100),
 dic_type varchar2(32),
