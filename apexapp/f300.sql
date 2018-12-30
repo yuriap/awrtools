@@ -27,7 +27,7 @@ prompt APPLICATION 300 - AWR Tools
 -- Application Export:
 --   Application:     300
 --   Name:            AWR Tools
---   Date and Time:   22:10 Thursday November 8, 2018
+--   Date and Time:   02:23 Friday November 9, 2018
 --   Exported By:     AWRTOOLS30ADM
 --   Flashback:       0
 --   Export Type:     Application Export
@@ -120,7 +120,7 @@ wwv_flow_api.create_flow(
 ,p_substitution_string_01=>'AWRTOOLSVER'
 ,p_substitution_value_01=>'3.2.0'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20181108215941'
+,p_last_upd_yyyymmddhh24miss=>'20181109022207'
 ,p_file_prefix => nvl(wwv_flow_application_install.get_static_app_file_prefix,'')
 ,p_ui_type_name => null
 );
@@ -16699,7 +16699,7 @@ wwv_flow_api.create_page(
 ,p_group_id=>wwv_flow_api.id(6674631255986651)
 ,p_page_template_options=>'#DEFAULT#'
 ,p_last_updated_by=>'AWRTOOLS30ADM'
-,p_last_upd_yyyymmddhh24miss=>'20181108214050'
+,p_last_upd_yyyymmddhh24miss=>'20181109022207'
 );
 wwv_flow_api.create_page_plug(
  p_id=>wwv_flow_api.id(6229544593172607)
@@ -18760,13 +18760,14 @@ wwv_flow_api.create_jet_chart_series(
 'select * from (',
 'select',
 '    session_id||'';''||session_serial#||'';''||inst_id sid,',
+'    substr(',
 '    case when module=''; '' then null else ''MOD: ''||module||''; '' end ||',
 '    case when action=''; '' then null else ''ACT: ''||action||''; '' end ||',
 '    case when program=''; '' then null else ''PRG: ''||program||''; '' end ||',
 '    case when client_id=''; '' then null else ''CLI: ''||client_id||''; '' end ||',
 '    case when machine is null then null else ''MACH: ''||machine||''; '' end ||',
 '    case when ecid=''; '' then null else ''ECID: ''||ecid||''; '' end ||',
-'    case when username is null then null else ''UID: ''||username||''; '' end',
+'    case when username is null then null else ''UID: ''||username||''; '' end,1,250)',
 '    identity$,',
 '    smpls sec',
 'from (',

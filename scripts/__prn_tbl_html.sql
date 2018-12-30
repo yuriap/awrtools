@@ -94,5 +94,5 @@ exception
   when others then   
     if DBMS_SQL.IS_OPEN(l_theCursor) then dbms_sql.close_cursor(l_theCursor);end if;
     p(p_query);
-    raise_application_error(-20000, 'print_table_html'||chr(10)||sqlerrm||chr(10));
+    raise_application_error(-20000, 'print_table_html'||chr(10)||sqlerrm||chr(10)||DBMS_UTILITY.FORMAT_ERROR_BACKTRACE);
 end;
